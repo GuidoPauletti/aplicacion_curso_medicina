@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "curso_medicina"
+version = "0.1"
+authors = [
+    { name = "Guido Pauletti" }
+]
+description = "Sistema de Gestión de Cursos de Medicina"
+requires-python = ">=3.8"
+dependencies = [
+    "customtkinter",
+    "mysql-connector-python",
+]
