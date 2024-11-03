@@ -1,11 +1,11 @@
-def insert_alumno(connection, nombre, apellido, telefono):
+def insert_alumno(connection, nombre, apellido, dni, email, telefono, dir_calle, dir_numero):
     try:
         cursor = connection.cursor()
         sql_insert_query = """
-        INSERT INTO alumno (nombre, apellido, telefono) 
-        VALUES (%s, %s, %s)
+        INSERT INTO alumno (nombre, apellido, dni, email, telefono, dir_calle, dir_numero) 
+        VALUES (%s, %s, %s, %s, %s, %s, %s)
         """
-        cursor.execute(sql_insert_query, (nombre, apellido, telefono))
+        cursor.execute(sql_insert_query, (nombre, apellido, dni, email, telefono, dir_calle, dir_numero))
         connection.commit()
         return cursor.lastrowid
     except Exception as e:
