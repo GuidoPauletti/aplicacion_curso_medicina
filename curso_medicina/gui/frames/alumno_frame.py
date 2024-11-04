@@ -1,4 +1,4 @@
-from curso_medicina.database.operations.alumno_operations import insert_alumno
+from curso_medicina.database.operations.alumno_operations import insert_alumno, insert_alumno_materia
 from curso_medicina.gui.utils.validators import validate_alumno_input
 
 from tkinter import messagebox
@@ -30,52 +30,7 @@ class AlumnoFrame(ctk.CTkScrollableFrame):
         self.entry_apellido.pack(pady=5)
 
         # Materias
-        self.label_materias = ctk.CTkLabel(self, text="Materias:")
-        self.label_materias.pack(pady=5)
-        
-        ## Frame horizontal para los checkboxes
-        self.checkbox_frame_u = ctk.CTkFrame(self, fg_color="transparent")
-        self.checkbox_frame_u.pack(pady=5)
-
-        self.checkbox_frame_l = ctk.CTkFrame(self, fg_color="transparent")
-        self.checkbox_frame_l.pack(pady=5)
-
-        ## Checkboxes para materias
-        self.var_anatomia = ctk.BooleanVar()
-        self.var_fisiologia = ctk.BooleanVar()
-        self.var_bioquimica = ctk.BooleanVar()
-        self.var_inmunologia = ctk.BooleanVar()
-        self.var_microbiologia = ctk.BooleanVar()
-        self.var_farmacologia = ctk.BooleanVar()
-        self.var_patologia = ctk.BooleanVar()
-        
-        self.checkbox_anatomia = ctk.CTkCheckBox(self.checkbox_frame_u, text="Anatomía", 
-                                          variable=self.var_anatomia)
-        self.checkbox_anatomia.pack(side="left", padx=10)
-        
-        self.checkbox_fisiologia = ctk.CTkCheckBox(self.checkbox_frame_u, text="Fisiología", 
-                                            variable=self.var_fisiologia)
-        self.checkbox_fisiologia.pack(side="left", padx=10)
-        
-        self.checkbox_bioquimica = ctk.CTkCheckBox(self.checkbox_frame_u, text="Bioquimica", 
-                                             variable=self.var_bioquimica)
-        self.checkbox_bioquimica.pack(side="left", padx=10)
-
-        self.checkbox_inmunologia = ctk.CTkCheckBox(self.checkbox_frame_l, text="Inmunologia", 
-                                             variable=self.var_inmunologia)
-        self.checkbox_inmunologia.pack(side="left", padx=10)
-
-        self.checkbox_microbiologia = ctk.CTkCheckBox(self.checkbox_frame_l, text="Microbiologia", 
-                                             variable=self.var_microbiologia)
-        self.checkbox_microbiologia.pack(side="left", padx=10)
-
-        self.checkbox_farmacologia = ctk.CTkCheckBox(self.checkbox_frame_l, text="Farmacologia", 
-                                             variable=self.var_farmacologia)
-        self.checkbox_farmacologia.pack(side="left", padx=10)
-
-        self.checkbox_patologia = ctk.CTkCheckBox(self.checkbox_frame_l, text="Patologia", 
-                                             variable=self.var_patologia)
-        self.checkbox_patologia.pack(side="left", padx=10)
+        self.create_checkboxes_materias()
 
         # DNI
         self.label_dni = ctk.CTkLabel(self, text="DNI:")
@@ -106,6 +61,59 @@ class AlumnoFrame(ctk.CTkScrollableFrame):
         self.label_dir_numero.pack(pady=5)
         self.entry_dir_numero = ctk.CTkEntry(self, width=300)
         self.entry_dir_numero.pack(pady=5)
+
+
+    def create_checkboxes_materias(self):
+        """
+        Crea los checkboxes de materias en el frame proporcionado.
+        """
+        self.label_materias = ctk.CTkLabel(self, text="Materias:")
+        self.label_materias.pack(pady=5)
+
+        # Frame horizontal para los checkboxes
+        self.checkbox_frame_u = ctk.CTkFrame(self, fg_color="transparent")
+        self.checkbox_frame_u.pack(pady=5)
+        self.checkbox_frame_l = ctk.CTkFrame(self, fg_color="transparent")
+        self.checkbox_frame_l.pack(pady=5)
+
+        # Valores para verificar si la materia está seleccionada
+        self.var_anatomia = ctk.BooleanVar()
+        self.var_fisiologia = ctk.BooleanVar()
+        self.var_bioquimica = ctk.BooleanVar()
+        self.var_inmunologia = ctk.BooleanVar()
+        self.var_microbiologia = ctk.BooleanVar()
+        self.var_farmacologia = ctk.BooleanVar()
+        self.var_patologia = ctk.BooleanVar()
+
+        materias = self.get_materias_cbx_config()
+
+        for i, materia in enumerate(materias):
+            checkbox = ctk.CTkCheckBox(
+                self.checkbox_frame_u if i < len(materias)//2 else self.checkbox_frame_l,
+                text=materia["text"],
+                variable=materia["var"]
+            )
+            checkbox.pack(side="left", padx=10)
+
+
+    def get_materias_cbx_config(self) -> list:
+        return [
+            {"text": "Anatomía", "var": self.var_anatomia, "id": 1},
+            {"text": "Fisiología", "var": self.var_fisiologia, "id": 2},
+            {"text": "Bioquímica", "var": self.var_bioquimica, "id": 3},
+            {"text": "Inmunología", "var": self.var_inmunologia, "id": 4},
+            {"text": "Microbiología", "var": self.var_microbiologia, "id": 5},
+            {"text": "Farmacología", "var": self.var_farmacologia, "id": 6},
+            {"text": "Patología", "var": self.var_patologia, "id": 7}
+        ]
+    
+    def get_materias_seleccionadas(self) -> list:
+        materias = self.get_materias_cbx_config()
+        materias_seleccionadas = []
+        for materia in materias:
+            if materia["var"].get():
+                materias_seleccionadas.append(materia["id"])
+        return materias_seleccionadas
     
     def create_save_button(self):
         self.btn_guardar = ctk.CTkButton(
@@ -134,9 +142,20 @@ class AlumnoFrame(ctk.CTkScrollableFrame):
                     "Éxito",
                     f"Alumno ID {alumno_id} guardado correctamente"
                 )
+                # Inscribimos el alumno a la materia
+                seleccion_materias = self.get_materias_seleccionadas()
+                self.save_alumno_materia(alumno_id, seleccion_materias)
                 self.clear_fields()
                 
+    def save_alumno_materia(self, alumno_id, seleccion_materias):
+        for materia_id in seleccion_materias:
+            insert_alumno_materia(self.conn, alumno_id, materia_id)
+
     def clear_fields(self):
         self.entry_nombre.delete(0, 'end')
         self.entry_apellido.delete(0, 'end')
+        self.entry_dni.delete(0, 'end')
+        self.entry_email.delete(0, 'end')
+        self.entry_dir_calle.delete(0, 'end')
+        self.entry_dir_numero.delete(0, 'end')
         self.entry_telefono.delete(0, 'end')
