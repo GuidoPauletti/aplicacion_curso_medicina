@@ -6,10 +6,11 @@ def validate_login_input(data: dict) -> bool:
     return all(data.get(field, '').strip() for field in required_fields)
 
 def validate_alumno_input(data):
-    if not data['nombre'] or not data['apellido']:
+    required_fields = ['nombre', 'apellido', 'dni', 'email', 'telefono','dir_calle', 'dir_numero']
+    if not all(data.get(field, '').strip() for field in required_fields):
         messagebox.showerror(
             "Error",
-            "Nombre y apellido son campos obligatorios"
+            "Todos los campos son obligatorios"
         )
         return False
     return True
