@@ -14,3 +14,13 @@ def validate_alumno_input(data):
         )
         return False
     return True
+
+def validate_gasto_input(data):
+    required_fields = ["monto", "divisa", "correspondencia"]
+    if not all(data.get(field, '').strip() for field in required_fields):
+        messagebox.showerror(
+            "Error",
+            "Los campos monto, divisa y cuenta son obligatorios"
+        )
+        return False
+    return True

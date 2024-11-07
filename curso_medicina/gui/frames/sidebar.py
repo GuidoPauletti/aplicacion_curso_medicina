@@ -32,5 +32,6 @@ class Sidebar(ctk.CTkFrame):
     def get_buttons_config(self) -> list:
         return [
             {"text": "Alta Alumno", "page": "alta_alumno"},
+            {"text": "Alta Gasto", "page": "alta_gasto"},
             {"text": "Ver Pagos", "page": "ver_pagos"}
         ]

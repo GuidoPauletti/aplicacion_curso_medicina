@@ -2,6 +2,7 @@ import customtkinter as ctk
 from curso_medicina.gui.frames.login_frame import LoginFrame, UserData
 from curso_medicina.gui.frames.sidebar import Sidebar
 from curso_medicina.gui.frames.alumno_frame import AlumnoFrame
+from curso_medicina.gui.frames.gasto_frame import GastoFrame
 from curso_medicina.gui.frames.ver_pagos_frame import PagosFrame
 
 class Aplicacion:
@@ -58,6 +59,7 @@ class Aplicacion:
         # Diccionario de frames disponibles
         frames = {
             "alta_alumno": lambda: AlumnoFrame(self.content_frame, self.conn),
+            "alta_gasto": lambda: GastoFrame(self.content_frame, self.conn, self.usuario_actual),
             "ver_pagos": lambda: PagosFrame(self.content_frame, self.conn)
         }
         
