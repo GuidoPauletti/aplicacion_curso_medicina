@@ -53,3 +53,18 @@ def editar_pago(connection, id, monto, cuota):
     except Exception as e:
         print(f"Error al editar el pago: {e}")
         return
+    
+def insert_pago(connection, id_alumno, id_materia, monto, divisa, efectivo, cuota, correspondencia, id_usuario):
+    try:
+        cursor = connection.cursor()
+        sql_insert_query = f"""
+        INSERT INTO pago (id_alumno, id_materia, monto, divisa, efectivo, cuota, correspondencia, fecha, id_usuario) 
+        VALUES ({id_alumno}, {id_materia}, {monto}, '{divisa}', '{efectivo}', {cuota}, '{correspondencia}', CURDATE(), {id_usuario})
+        """
+        cursor.execute(sql_insert_query)
+        connection.commit()
+        pago_id = cursor.lastrowid  # Obtener el ID del pago insertado
+        return pago_id
+    except Exception as e:
+        print(f"Error al insertar pago: {e}")
+        return None

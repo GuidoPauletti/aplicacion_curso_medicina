@@ -31,3 +31,35 @@ def insert_alumno_materia(connection, alumno_id, materia_id):
         return None
     finally:
         cursor.close()
+
+def get_alumnos(connection):
+    try:
+        cursor = connection.cursor()
+        sql_select_query = "SELECT * FROM alumno"
+        cursor.execute(sql_select_query)
+        alumnos = cursor.fetchall()
+        return alumnos
+    except Exception as e:
+        print(f"Error al obtener alumnos: {e}")
+        return []
+    
+def get_cuotas_por_alumno_materia(connection, alumno = "NULL", materia = "NULL"):
+    try:
+        cursor = connection.cursor()
+
+        sql_query = """
+            SELECT cuota FROM pago
+            WHERE id_alumno = %s
+            AND id_materia = %s
+        """
+        cursor.execute(sql_query, (alumno, materia))
+        
+        cuotas = cursor.fetchall()
+        if len(cuotas) == 0:
+            return [0]
+        else:
+            return [cuota[0] for cuota in cuotas]
+    except Exception as e:
+        print(f"Error al obtener pagos: {e}")
+        return []
+    
