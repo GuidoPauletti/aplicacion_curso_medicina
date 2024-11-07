@@ -3,7 +3,6 @@ from curso_medicina.gui.utils.validators import validate_login_input
 
 from dataclasses import dataclass
 from typing import Callable, Optional
-from tkinter import messagebox
 
 import customtkinter as ctk
 

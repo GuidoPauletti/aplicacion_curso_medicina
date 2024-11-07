@@ -2,6 +2,7 @@ import customtkinter as ctk
 from curso_medicina.gui.frames.login_frame import LoginFrame, UserData
 from curso_medicina.gui.frames.sidebar import Sidebar
 from curso_medicina.gui.frames.alumno_frame import AlumnoFrame
+from curso_medicina.gui.frames.ver_pagos_frame import PagosFrame
 
 class Aplicacion:
     def __init__(self, root, conn):
@@ -56,11 +57,11 @@ class Aplicacion:
             
         # Diccionario de frames disponibles
         frames = {
-            "alta_alumno": lambda: AlumnoFrame(self.content_frame, self.conn)
-            # ... otros frames
+            "alta_alumno": lambda: AlumnoFrame(self.content_frame, self.conn),
+            "ver_pagos": lambda: PagosFrame(self.content_frame, self.conn)
         }
         
         # Crear y mostrar el frame correspondiente
         if page in frames:
             frame = frames[page]()
-            frame.pack(pady=20, padx=20, fill="both", expand=True)
+            frame.pack(fill="both", expand=True)
