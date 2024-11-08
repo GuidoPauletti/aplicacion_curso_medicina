@@ -1,8 +1,8 @@
-from curso_medicina.gui.frames.base_frame import BaseFrame
 from curso_medicina.database.operations.pagos_operations import get_pagos_con_detalles, borrar_pago, editar_pago
 
-import customtkinter as ctk
 from tkinter import ttk
+
+import customtkinter as ctk
 
 class VerPagosFrame(ctk.CTkFrame):
     def __init__(self, parent, conn):

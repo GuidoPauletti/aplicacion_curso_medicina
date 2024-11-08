@@ -14,3 +14,61 @@ def insert_gasto(connection, monto, divisa, correspondencia, descripcion, id_usu
         return None
     finally:
         cursor.close()
+
+def get_gastos_con_detalles(connection, correspondencia="%"):
+    if not isinstance(correspondencia,str):
+        correspondencia="%"
+    if correspondencia == "Todos":
+        correspondencia = "%"
+    try:
+        cursor = connection.cursor()
+
+        sql_query = f"""
+            SELECT g.id, g.monto, g.divisa, g.fecha, g.correspondencia, g.descripcion, u.nombre responsable
+            FROM gasto g INNER JOIN usuario u
+            ON g.id_usuario = u.id
+            WHERE g.correspondencia LIKE '{correspondencia}'
+            ORDER BY fecha DESC
+        """
+        cursor.execute(sql_query)
+        
+        gastos = cursor.fetchall()
+        return gastos
+    except Exception as e:
+        print(f"Error al obtener gastos: {e}")
+        return []
+    finally: cursor.close()
+
+def borrar_gasto(connection, id):
+    try:
+        cursor = connection.cursor()
+
+        sql_query = """
+            DELETE FROM gasto
+            WHERE id = %s
+        """
+        cursor.execute(sql_query, (id,))
+        connection.commit()
+        return "Registro de gasto eliminado correctamente"
+    except Exception as e:
+        print(f"Error al borrar el gasto: {e}")
+        return
+    finally:
+        cursor.close()
+
+def editar_gasto(connection, id, monto, correspondencia, descripcion, usuario):
+    try:
+        cursor = connection.cursor()
+        sql_query = """
+            UPDATE gasto
+            SET monto = %s, correspondencia = %s, descripcion = %s, id_usuario = %s
+            WHERE id = %s
+        """
+        cursor.execute(sql_query, (monto, correspondencia, descripcion, usuario, id))
+        connection.commit()
+        return "Registro de gasto editado correctamente"
+    except Exception as e:
+        print(f"Error al editar el gasto: {e}")
+        return
+    finally:
+        cursor.close()

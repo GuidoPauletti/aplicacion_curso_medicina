@@ -5,6 +5,7 @@ from curso_medicina.gui.frames.alta_alumno_frame import AltaAlumnoFrame
 from curso_medicina.gui.frames.alta_gasto_frame import AltaGastoFrame
 from curso_medicina.gui.frames.alta_pago_frame import AltaPagoFrame
 from curso_medicina.gui.frames.ver_pagos_frame import VerPagosFrame
+from curso_medicina.gui.frames.ver_gastos_frame import VerGastosFrame
 
 
 class Aplicacion:
@@ -63,7 +64,8 @@ class Aplicacion:
             "alta_alumno": lambda: AltaAlumnoFrame(self.content_frame, self.conn),
             "alta_gasto": lambda: AltaGastoFrame(self.content_frame, self.conn, self.usuario_actual),
             "alta_pago": lambda: AltaPagoFrame(self.content_frame, self.conn, self.usuario_actual),
-            "ver_pagos": lambda: VerPagosFrame(self.content_frame, self.conn)
+            "ver_pagos": lambda: VerPagosFrame(self.content_frame, self.conn),
+            "ver_gastos": lambda: VerGastosFrame(self.content_frame, self.conn, self.usuario_actual)
         }
         
         # Crear y mostrar el frame correspondiente

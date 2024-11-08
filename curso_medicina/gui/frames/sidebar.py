@@ -1,5 +1,5 @@
 import customtkinter as ctk
-from typing import Callable, Dict
+from typing import Callable
 
 class Sidebar(ctk.CTkFrame):
     def __init__(self, parent, navigation_callback: Callable, user_role: str):
@@ -34,5 +34,6 @@ class Sidebar(ctk.CTkFrame):
             {"text": "Alta Alumno", "page": "alta_alumno"},
             {"text": "Alta Gasto", "page": "alta_gasto"},
             {"text": "Alta Pago", "page": "alta_pago"},
-            {"text": "Ver Pagos", "page": "ver_pagos"}
+            {"text": "Ver Pagos", "page": "ver_pagos"},
+            {"text": "Ver Gastos", "page": "ver_gastos", "role": "administrador"}
         ]
