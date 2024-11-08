@@ -1,4 +1,3 @@
-import customtkinter as ctk
 from curso_medicina.gui.frames.login_frame import LoginFrame, UserData
 from curso_medicina.gui.frames.sidebar import Sidebar
 from curso_medicina.gui.frames.alta_alumno_frame import AltaAlumnoFrame
@@ -7,6 +6,10 @@ from curso_medicina.gui.frames.alta_pago_frame import AltaPagoFrame
 from curso_medicina.gui.frames.ver_pagos_frame import VerPagosFrame
 from curso_medicina.gui.frames.ver_gastos_frame import VerGastosFrame
 
+import customtkinter as ctk
+
+ctk.set_appearance_mode("light")
+ctk.set_default_color_theme("blue")
 
 class Aplicacion:
     def __init__(self, root, conn):
