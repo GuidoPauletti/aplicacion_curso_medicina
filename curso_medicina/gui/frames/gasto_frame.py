@@ -74,3 +74,4 @@ class GastoFrame(ctk.CTkScrollableFrame):
         self.entry_monto.delete(0, 'end')
         self.entry_correspondencia.delete(0, 'end')
         self.entry_descripcion.delete("1.0", "end-1c")
+        self.divisa_var.set("")

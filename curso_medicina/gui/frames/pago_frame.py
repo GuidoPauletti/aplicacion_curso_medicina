@@ -139,6 +139,10 @@ class AltaPagoFrame(ctk.CTkScrollableFrame):
             self.combobox_cuota.configure(values=valores_cuotas)
 
     def clear_fields(self):
-        #TODO
-        pass
-        
+        self.alumno_var.set("")
+        self.materia_var.set("")
+        self.entry_monto.delete(0, "end")
+        self.divisa_var.set("")
+        self.entry_correspondencia.delete(0, "end")
+        self.cuota_var.set("")
+        self.entry_efectivo.delete(0, "end")
