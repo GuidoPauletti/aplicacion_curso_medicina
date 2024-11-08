@@ -1,10 +1,10 @@
 import customtkinter as ctk
 from curso_medicina.gui.frames.login_frame import LoginFrame, UserData
 from curso_medicina.gui.frames.sidebar import Sidebar
-from curso_medicina.gui.frames.alumno_frame import AlumnoFrame
-from curso_medicina.gui.frames.gasto_frame import GastoFrame
-from curso_medicina.gui.frames.pago_frame import AltaPagoFrame
-from curso_medicina.gui.frames.ver_pagos_frame import PagosFrame
+from curso_medicina.gui.frames.alta_alumno_frame import AltaAlumnoFrame
+from curso_medicina.gui.frames.alta_gasto_frame import AltaGastoFrame
+from curso_medicina.gui.frames.alta_pago_frame import AltaPagoFrame
+from curso_medicina.gui.frames.ver_pagos_frame import VerPagosFrame
 
 
 class Aplicacion:
@@ -60,10 +60,10 @@ class Aplicacion:
             
         # Diccionario de frames disponibles
         frames = {
-            "alta_alumno": lambda: AlumnoFrame(self.content_frame, self.conn),
-            "alta_gasto": lambda: GastoFrame(self.content_frame, self.conn, self.usuario_actual),
+            "alta_alumno": lambda: AltaAlumnoFrame(self.content_frame, self.conn),
+            "alta_gasto": lambda: AltaGastoFrame(self.content_frame, self.conn, self.usuario_actual),
             "alta_pago": lambda: AltaPagoFrame(self.content_frame, self.conn, self.usuario_actual),
-            "ver_pagos": lambda: PagosFrame(self.content_frame, self.conn)
+            "ver_pagos": lambda: VerPagosFrame(self.content_frame, self.conn)
         }
         
         # Crear y mostrar el frame correspondiente

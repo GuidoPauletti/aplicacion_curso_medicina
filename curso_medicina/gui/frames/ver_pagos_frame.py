@@ -4,7 +4,7 @@ from curso_medicina.database.operations.pagos_operations import get_pagos_con_de
 import customtkinter as ctk
 from tkinter import ttk
 
-class PagosFrame(ctk.CTkFrame):
+class VerPagosFrame(ctk.CTkFrame):
     def __init__(self, parent, conn):
         super().__init__(parent)
         self.conn = conn

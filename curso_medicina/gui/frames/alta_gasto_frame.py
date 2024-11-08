@@ -6,7 +6,7 @@ from tkinter import messagebox
 import customtkinter as ctk
 
 
-class GastoFrame(ctk.CTkScrollableFrame):
+class AltaGastoFrame(ctk.CTkScrollableFrame):
     def __init__(self, parent, conn, usuario_actual):
         super().__init__(parent, width=400, height=500)
         self.conn = conn
