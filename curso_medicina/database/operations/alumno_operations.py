@@ -63,3 +63,21 @@ def get_cuotas_por_alumno_materia(connection, alumno = "NULL", materia = "NULL")
         print(f"Error al obtener pagos: {e}")
         return []
     
+def editar_alumno(connection, id, nombre, apellido, dni, calle, numero, email, telefono):
+    try:
+        cursor = connection.cursor()
+        sql_query = """
+            UPDATE alumno
+            SET nombre = %s, apellido = %s,
+            dni = %s, dir_calle = %s, dir_numero = %s,
+            email = %s, telefono = %s
+            WHERE id = %s
+        """
+        cursor.execute(sql_query, (nombre, apellido, dni, calle, numero, email, telefono, id))
+        connection.commit()
+        return "Alumno editado correctamente"
+    except Exception as e:
+        print(f"Error al editar alumno: {e}")
+        return
+    finally:
+        cursor.close()
