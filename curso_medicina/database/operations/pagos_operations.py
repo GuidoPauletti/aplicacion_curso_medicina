@@ -22,6 +22,8 @@ def get_pagos_con_detalles(connection, correspondencia="%"):
         print(f"Error al obtener pagos: {e}")
         connection.rollback()
         return []
+    finally:
+        cursor.close()
     
 def borrar_pago(connection, id):
     try:
@@ -37,6 +39,8 @@ def borrar_pago(connection, id):
     except Exception as e:
         print(f"Error al borrar el pago: {e}")
         return
+    finally:
+        cursor.close()
         
 
 def editar_pago(connection, id, monto, cuota):
@@ -53,6 +57,8 @@ def editar_pago(connection, id, monto, cuota):
     except Exception as e:
         print(f"Error al editar el pago: {e}")
         return
+    finally:
+        cursor.close()
     
 def insert_pago(connection, id_alumno, id_materia, monto, divisa, efectivo, cuota, correspondencia, id_usuario):
     try:
@@ -68,3 +74,5 @@ def insert_pago(connection, id_alumno, id_materia, monto, divisa, efectivo, cuot
     except Exception as e:
         print(f"Error al insertar pago: {e}")
         return None
+    finally:
+        cursor.close()
