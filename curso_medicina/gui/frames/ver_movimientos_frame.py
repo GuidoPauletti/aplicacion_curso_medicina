@@ -1,6 +1,8 @@
 from curso_medicina.database.operations.movimiento_operations import get_movimientos_con_detalles
+from ..utils.report_generator import generate_movement_report
 
-from tkinter import ttk
+from tkinter import ttk, messagebox
+import os
 
 import customtkinter as ctk
 
@@ -42,10 +44,9 @@ class VerMovimientosFrame(ctk.CTkFrame):
         self.btn_editar = ctk.CTkButton(
             self, 
             text="Obtener informe", 
-            command=lambda: print("TODO"),
-            state="disabled"
+            command=self.generate_report
         )
-        self.btn_editar.pack()
+        self.btn_editar.pack(pady=20)
 
         # Obtener los movimientos
         self.cargar_movimientos()
@@ -61,3 +62,25 @@ class VerMovimientosFrame(ctk.CTkFrame):
 
     def filtrar_por_tiempo(self, ventana_temporal):
         self.cargar_movimientos(ventana_temporal)
+
+    def generate_report(self):
+        try:
+            # Verificar si hay datos en la tabla
+            if not self.tabla.get_children():
+                messagebox.showwarning("Advertencia", "No hay datos para generar el informe")
+                return
+            
+            # Generar el reporte
+            output_path = generate_movement_report(self.tabla)
+            
+            # Mostrar mensaje de éxito
+            messagebox.showinfo(
+                "Éxito", 
+                f"Reporte generado exitosamente en:\n{output_path}"
+            )
+            
+            # Abrir el archivo con el visor de PDF predeterminado
+            os.startfile(output_path) if os.name == 'nt' else os.system(f'xdg-open "{output_path}"')
+            
+        except Exception as e:
+            messagebox.showerror("Error", f"Error al generar el reporte: {str(e)}")

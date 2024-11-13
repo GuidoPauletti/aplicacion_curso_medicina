@@ -10,7 +10,7 @@ def get_movimientos_con_detalles(connection, ventana_temporal):
         sql_query = f"""
         SELECT 
             g.id AS ID,
-            'Gasto' AS Tipo,
+            'Salida' AS Tipo,
             g.monto AS Monto,
             g.divisa AS Divisa,
             g.descripcion AS Descripción,
@@ -24,7 +24,7 @@ def get_movimientos_con_detalles(connection, ventana_temporal):
 
         SELECT 
             p.id AS ID,
-            'Pago' AS Tipo,
+            'Entrada' AS Tipo,
             p.monto AS Monto,
             p.divisa AS Divisa,
             CONCAT(a.nombre, ' ', a.apellido, ' - Cuota ', p.cuota, ' de ', m.denominacion) AS Descripción,
