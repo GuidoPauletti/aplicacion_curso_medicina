@@ -1,6 +1,7 @@
 # gui/utils/pdf_generator.py
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
+from reportlab.lib.units import inch
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from datetime import datetime
@@ -13,6 +14,16 @@ class PDFGenerator:
         """
         self.tree_data = tree_data
         self.styles = getSampleStyleSheet()
+        # Definir anchos fijos para las columnas (en puntos)
+        self.col_widths = [
+            40,     # ID
+            70,     # Tipo
+            70,     # Monto
+            50,     # Divisa
+            150,    # Descripción
+            100,    # Cuenta
+            70      # Fecha
+        ]
         
     def _get_table_data(self):
         """
@@ -23,12 +34,14 @@ class PDFGenerator:
         total_entradas = 0
         total_salidas = 0
         
-        # Procesar cada fila
         for item in self.tree_data:
-            row = list(item)  # Convertir la tupla en lista
-            if row[1] == "Entrada":  # El índice 1 corresponde al Tipo
+            row = list(item)
+            # Formatear el monto para que siempre tenga 2 decimales
+            row[2] = f"{float(row[2]):.2f}"
+            
+            if row[1] == "Entrada":
                 entradas.append(row)
-                total_entradas += float(row[2])  # El índice 2 corresponde al Monto
+                total_entradas += float(row[2])
             else:
                 salidas.append(row)
                 total_salidas += float(row[2])
@@ -45,86 +58,125 @@ class PDFGenerator:
         """
         Genera el PDF con el informe financiero
         """
+        # Configurar el documento con márgenes específicos
         doc = SimpleDocTemplate(
             output_path,
             pagesize=letter,
-            rightMargin=72,
-            leftMargin=72,
-            topMargin=72,
-            bottomMargin=72
+            rightMargin=0.5*inch,
+            leftMargin=0.5*inch,
+            topMargin=0.5*inch,
+            bottomMargin=0.5*inch
         )
         
-        # Preparar los elementos del documento
         elements = []
         
-        # Añadir fecha
+        # Estilo para la fecha
         date_style = ParagraphStyle(
             'CustomDateStyle',
             parent=self.styles['Normal'],
-            fontSize=12,
-            spaceAfter=30
+            fontSize=10,
+            spaceAfter=20,
+            alignment=0  # 0 = Izquierda
         )
+        
+        # Estilo para títulos
+        title_style = ParagraphStyle(
+            'CustomTitleStyle',
+            parent=self.styles['Heading1'],
+            fontSize=12,
+            spaceAfter=10,
+            alignment=0,  # 0 = Izquierda
+            textTransform='uppercase'
+        )
+        
+        # Estilo para totales
+        total_style = ParagraphStyle(
+            'TotalStyle',
+            parent=self.styles['Normal'],
+            fontSize=10,
+            spaceAfter=20,
+            alignment=0  # 0 = Izquierda
+        )
+        
+        # Estilo base para las tablas - más minimalista y profesional
+        table_style = TableStyle([
+            # Encabezados
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 10),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('TOPPADDING', (0, 0), (-1, 0), 12),
+            # Cuerpo de la tabla
+            ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 1), (-1, -1), 10),
+            # Alineación
+            ('ALIGN', (0, 0), (0, -1), 'CENTER'),  # ID centrado
+            ('ALIGN', (2, 0), (2, -1), 'RIGHT'),   # Monto alineado a la derecha
+            ('ALIGN', (1, 0), (1, -1), 'LEFT'),    # Tipo alineado a la izquierda
+            ('ALIGN', (3, 0), (6, -1), 'LEFT'),    # Resto de columnas a la izquierda
+            # Líneas
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
+            ('LINEBELOW', (0, 0), (-1, 0), 1, colors.black),  # Línea más gruesa bajo encabezados
+        ])
+        
+        # Añadir fecha
         current_date = datetime.now().strftime("%d/%m/%Y")
         date_paragraph = Paragraph(f"Fecha: {current_date}", date_style)
         elements.append(date_paragraph)
         
         # Obtener datos organizados
         data = self._get_table_data()
-        
-        # Estilo base para las tablas
-        table_style = TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 0), (-1, 0), 12),
-            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
-            ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
-            ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-            ('FONTSIZE', (0, 1), (-1, -1), 10),
-            ('GRID', (0, 0), (-1, -1), 1, colors.black)
-        ])
+        headers = ["ID", "Tipo", "Monto", "Divisa", "Descripción", "Cuenta", "Fecha"]
         
         # Sección de Entradas
-        title_style = ParagraphStyle(
-            'CustomTitleStyle',
-            parent=self.styles['Heading1'],
-            fontSize=14,
-            spaceAfter=30
-        )
-        elements.append(Paragraph("Entradas", title_style))
-        
+        elements.append(Paragraph("Movimientos de Entrada", title_style))
         if data['entradas']:
-            headers = ["ID", "Tipo", "Monto", "Divisa", "Descripción", "Cuenta", "Fecha"]
             table_data = [headers] + data['entradas']
-            t = Table(table_data)
+            t = Table(table_data, colWidths=self.col_widths)
             t.setStyle(table_style)
             elements.append(t)
         else:
             elements.append(Paragraph("No hay entradas registradas", self.styles['Normal']))
             
+        elements.append(Spacer(1, 10))
+        elements.append(Paragraph(
+            f"Total Entradas: ${data['total_entradas']:.2f}", 
+            total_style
+        ))
         elements.append(Spacer(1, 20))
-        elements.append(Paragraph(f"Total Entradas: {data['total_entradas']}", self.styles['Normal']))
-        elements.append(Spacer(1, 30))
         
         # Sección de Salidas
-        elements.append(Paragraph("Salidas", title_style))
-        
+        elements.append(Paragraph("Movimientos de Salida", title_style))
         if data['salidas']:
             table_data = [headers] + data['salidas']
-            t = Table(table_data)
+            t = Table(table_data, colWidths=self.col_widths)
             t.setStyle(table_style)
             elements.append(t)
         else:
             elements.append(Paragraph("No hay salidas registradas", self.styles['Normal']))
             
+        elements.append(Spacer(1, 10))
+        elements.append(Paragraph(
+            f"Total Salidas: ${data['total_salidas']:.2f}", 
+            total_style
+        ))
         elements.append(Spacer(1, 20))
-        elements.append(Paragraph(f"Total Salidas: {data['total_salidas']}", self.styles['Normal']))
-        elements.append(Spacer(1, 30))
         
-        # Balance Final
-        elements.append(Paragraph(f"Balance Final: {data['balance']}", self.styles['Heading2']))
+        # Balance Final con línea separadora
+        elements.append(Paragraph("_" * 50, ParagraphStyle(
+            'Separator',
+            parent=self.styles['Normal'],
+            alignment=0
+        )))
+        elements.append(Spacer(1, 10))
+        elements.append(Paragraph(
+            f"Balance Final: ${data['balance']:.2f}",
+            ParagraphStyle(
+                'Balance',
+                parent=self.styles['Normal'],
+                fontSize=11,
+                fontName='Helvetica-Bold'
+            )
+        ))
         
         # Generar el PDF
         doc.build(elements)
