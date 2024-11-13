@@ -46,7 +46,7 @@ class VerMovimientosFrame(ctk.CTkFrame):
             text="Obtener informe", 
             command=self.generate_report
         )
-        self.btn_editar.pack(pady=20)
+        self.btn_editar.pack(pady=10)
 
         # Obtener los movimientos
         self.cargar_movimientos()

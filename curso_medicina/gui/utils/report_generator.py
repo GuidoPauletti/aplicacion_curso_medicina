@@ -16,11 +16,8 @@ class PDFGenerator:
         self.styles = getSampleStyleSheet()
         # Definir anchos fijos para las columnas (en puntos)
         self.col_widths = [
-            40,     # ID
-            70,     # Tipo
             70,     # Monto
-            50,     # Divisa
-            150,    # Descripción
+            240,    # Descripción
             100,    # Cuenta
             70      # Fecha
         ]
@@ -40,10 +37,10 @@ class PDFGenerator:
             row[2] = f"{float(row[2]):.2f}"
             
             if row[1] == "Entrada":
-                entradas.append(row)
+                entradas.append([row[i] for i in(2,4,5,6)])
                 total_entradas += float(row[2])
             else:
-                salidas.append(row)
+                salidas.append([row[i] for i in(2,4,5,6)])
                 total_salidas += float(row[2])
                 
         return {
@@ -125,7 +122,7 @@ class PDFGenerator:
         
         # Obtener datos organizados
         data = self._get_table_data()
-        headers = ["ID", "Tipo", "Monto", "Divisa", "Descripción", "Cuenta", "Fecha"]
+        headers = ["Monto", "Descripción", "Cuenta", "Fecha"]
         
         # Sección de Entradas
         elements.append(Paragraph("Movimientos de Entrada", title_style))
