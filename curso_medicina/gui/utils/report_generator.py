@@ -178,7 +178,7 @@ class PDFGenerator:
         # Generar el PDF
         doc.build(elements)
 
-def generate_movement_report(tree_view):
+def generate_movement_report(tree_view, divisa):
     """
     Función helper para generar el reporte desde cualquier parte de la aplicación
     """
@@ -186,7 +186,8 @@ def generate_movement_report(tree_view):
     data = []
     for item in tree_view.get_children():
         values = tree_view.item(item)['values']
-        data.append(values)
+        if values[3] == divisa:  # El índice 3 corresponde a la columna de divisa
+            data.append(values)
     
     # Crear el directorio de reportes si no existe
     reports_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'reports')

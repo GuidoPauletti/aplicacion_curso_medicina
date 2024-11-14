@@ -41,12 +41,31 @@ class VerMovimientosFrame(ctk.CTkFrame):
 
         self.tabla.pack(fill="both", expand=True)
 
-        self.btn_editar = ctk.CTkButton(
-            self, 
-            text="Obtener informe", 
-            command=self.generate_report
+        # Frame para los botones
+        self.buttons_frame = ctk.CTkFrame(self)
+        self.buttons_frame.pack(padx=10, pady=10)
+        
+        # Botones para cada divisa
+        self.btn_pesos = ctk.CTkButton(
+            self.buttons_frame,
+            text="Informe en Pesos",
+            command=lambda: self.generate_report("Peso")
         )
-        self.btn_editar.pack(pady=10)
+        self.btn_pesos.grid(row=0, column=0, padx=5)
+        
+        self.btn_reales = ctk.CTkButton(
+            self.buttons_frame,
+            text="Informe en Reales",
+            command=lambda: self.generate_report("Real")
+        )
+        self.btn_reales.grid(row=0, column=1, padx=5)
+        
+        self.btn_dolares = ctk.CTkButton(
+            self.buttons_frame,
+            text="Informe en Dólares",
+            command=lambda: self.generate_report("Dolar")
+        )
+        self.btn_dolares.grid(row=0, column=3, padx=5)
 
         # Obtener los movimientos
         self.cargar_movimientos()
@@ -63,7 +82,7 @@ class VerMovimientosFrame(ctk.CTkFrame):
     def filtrar_por_tiempo(self, ventana_temporal):
         self.cargar_movimientos(ventana_temporal)
 
-    def generate_report(self):
+    def generate_report(self, divisa):
         try:
             # Verificar si hay datos en la tabla
             if not self.tabla.get_children():
@@ -71,7 +90,7 @@ class VerMovimientosFrame(ctk.CTkFrame):
                 return
             
             # Generar el reporte
-            output_path = generate_movement_report(self.tabla)
+            output_path = generate_movement_report(self.tabla, divisa)
             
             # Mostrar mensaje de éxito
             messagebox.showinfo(
