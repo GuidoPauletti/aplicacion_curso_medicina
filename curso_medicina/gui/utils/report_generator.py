@@ -8,11 +8,12 @@ from datetime import datetime
 import os
 
 class PDFGenerator:
-    def __init__(self, tree_data):
+    def __init__(self, tree_data, exchange_rate = None):
         """
         Inicializa el generador de PDF con los datos del TreeView
         """
         self.tree_data = tree_data
+        self.exchange_rate = exchange_rate
         self.styles = getSampleStyleSheet()
         # Definir anchos fijos para las columnas (en puntos)
         self.col_widths = [
@@ -21,6 +22,10 @@ class PDFGenerator:
             100,    # Cuenta
             70      # Fecha
         ]
+
+    @staticmethod
+    def format_number(number):
+        return "{:,.2f}".format(number).replace(",", "X").replace(".", ",").replace("X", ".")
         
     def _get_table_data(self):
         """
@@ -35,13 +40,16 @@ class PDFGenerator:
             row = list(item)
             # Formatear el monto para que siempre tenga 2 decimales
             row[2] = f"{float(row[2]):.2f}"
+            row[2] = float(row[2])
+            monto = row[2]
+            row[2] = self.format_number(row[2])
             
             if row[1] == "Entrada":
                 entradas.append([row[i] for i in(2,4,5,6)])
-                total_entradas += float(row[2])
+                total_entradas += float(monto)
             else:
                 salidas.append([row[i] for i in(2,4,5,6)])
-                total_salidas += float(row[2])
+                total_salidas += float(monto)
                 
         return {
             'entradas': entradas,
@@ -136,7 +144,7 @@ class PDFGenerator:
             
         elements.append(Spacer(1, 10))
         elements.append(Paragraph(
-            f"Total Entradas: ${data['total_entradas']:.2f}", 
+            f"Total Entradas: {self.format_number(data['total_entradas'])}", 
             total_style
         ))
         elements.append(Spacer(1, 20))
@@ -153,7 +161,7 @@ class PDFGenerator:
             
         elements.append(Spacer(1, 10))
         elements.append(Paragraph(
-            f"Total Salidas: ${data['total_salidas']:.2f}", 
+            f"Total Salidas: {self.format_number(data['total_salidas'])}", 
             total_style
         ))
         elements.append(Spacer(1, 20))
@@ -166,7 +174,7 @@ class PDFGenerator:
         )))
         elements.append(Spacer(1, 10))
         elements.append(Paragraph(
-            f"Balance Final: ${data['balance']:.2f}",
+            f"Balance Final: {self.format_number(data['balance'])}",
             ParagraphStyle(
                 'Balance',
                 parent=self.styles['Normal'],
@@ -174,11 +182,25 @@ class PDFGenerator:
                 fontName='Helvetica-Bold'
             )
         ))
+
+        # Agregar balance convertido a pesos si hay tasa de cambio
+        if self.exchange_rate is not None:
+            balance_pesos = data['balance'] * self.exchange_rate
+            elements.append(Paragraph(
+                f"Balance Final en Pesos: {self.format_number(balance_pesos)}",
+                ParagraphStyle(
+                    'BalancePesos',
+                    parent=self.styles['Normal'],
+                    fontSize=11,
+                    fontName='Helvetica-Bold'
+                )
+            ))
         
         # Generar el PDF
         doc.build(elements)
 
-def generate_movement_report(tree_view, divisa):
+
+def generate_movement_report(tree_view, divisa, exchange_rate = None):
     """
     Función helper para generar el reporte desde cualquier parte de la aplicación
     """
@@ -199,7 +221,7 @@ def generate_movement_report(tree_view, divisa):
     output_path = os.path.join(reports_dir, filename)
     
     # Generar el PDF
-    generator = PDFGenerator(data)
+    generator = PDFGenerator(data, exchange_rate)
     generator.generate_pdf(output_path)
     
     return output_path

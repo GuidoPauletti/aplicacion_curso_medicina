@@ -1,7 +1,7 @@
 from curso_medicina.database.operations.movimiento_operations import get_movimientos_con_detalles
 from ..utils.report_generator import generate_movement_report
 
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, simpledialog
 import os
 
 import customtkinter as ctk
@@ -42,7 +42,7 @@ class VerMovimientosFrame(ctk.CTkFrame):
         self.tabla.pack(fill="both", expand=True)
 
         # Frame para los botones
-        self.buttons_frame = ctk.CTkFrame(self)
+        self.buttons_frame = ctk.CTkFrame(self, fg_color="transparent")
         self.buttons_frame.pack(padx=10, pady=10)
         
         # Botones para cada divisa
@@ -82,6 +82,20 @@ class VerMovimientosFrame(ctk.CTkFrame):
     def filtrar_por_tiempo(self, ventana_temporal):
         self.cargar_movimientos(ventana_temporal)
 
+    @staticmethod
+    def ask_exchange_rate(divisa):
+        """
+        Solicita al usuario la tasa de cambio para la divisa seleccionada
+        """
+        if divisa.lower() in ['dolar', 'real']:
+            rate = simpledialog.askfloat(
+                "Tasa de Cambio",
+                f"Ingrese la cantidad de pesos equivalente a 1 {divisa}:",
+                minvalue=0.01
+            )
+            return rate
+        return None
+
     def generate_report(self, divisa):
         try:
             # Verificar si hay datos en la tabla
@@ -89,8 +103,11 @@ class VerMovimientosFrame(ctk.CTkFrame):
                 messagebox.showwarning("Advertencia", "No hay datos para generar el informe")
                 return
             
+            # Obtener tasa de cambio si es necesario
+            exchange_rate = self.ask_exchange_rate(divisa)
+            
             # Generar el reporte
-            output_path = generate_movement_report(self.tabla, divisa)
+            output_path = generate_movement_report(self.tabla, divisa, exchange_rate)
             
             # Mostrar mensaje de éxito
             messagebox.showinfo(
