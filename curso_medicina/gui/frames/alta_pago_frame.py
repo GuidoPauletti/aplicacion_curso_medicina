@@ -87,7 +87,6 @@ class AltaPagoFrame(ctk.CTkScrollableFrame):
                                                                       self.entry_efectivo.get(),
                                                                       self.cuota_var.get(),
                                                                       self.entry_correspondencia.get(),
-                                                                      self.usuario_actual.id,
                                                                       self))
         btn_guardar.pack(pady=20)
 
@@ -100,7 +99,7 @@ class AltaPagoFrame(ctk.CTkScrollableFrame):
         filtro = self.combobox_alumno.get()
         self.actualizar_combobox(filtro)
     
-    def save_pago(self, alumno_seleccionado, materia, monto, divisa, efectivo, cuota, correspondencia, usuario_actual, ventana):
+    def save_pago(self, alumno_seleccionado, materia, monto, divisa, efectivo, cuota, correspondencia, ventana):
         if alumno_seleccionado and materia and monto and divisa and cuota and correspondencia:
             try:
                 alumno_id = int(alumno_seleccionado.split(" - ")[0])

@@ -7,6 +7,7 @@ from curso_medicina.gui.frames.ver_pagos_frame import VerPagosFrame
 from curso_medicina.gui.frames.ver_gastos_frame import VerGastosFrame
 from curso_medicina.gui.frames.ver_alumnos_frame import VerAlumnosFrame
 from curso_medicina.gui.frames.ver_movimientos_frame import VerMovimientosFrame
+from curso_medicina.database.operations.deuda_operations import call_update_debts
 
 import customtkinter as ctk
 
@@ -19,6 +20,7 @@ class Aplicacion:
         self.conn = conn
         self.setup_main_window()
         self.show_login()
+        self.update_debts_on_startup()
         
     def setup_main_window(self):
         self.root.title("Sistema de Gestión de Cursos de Medicina")
@@ -79,3 +81,6 @@ class Aplicacion:
         if page in frames:
             frame = frames[page]()
             frame.pack(fill="both", expand=True)
+
+    def update_debts_on_startup(self):
+        call_update_debts(self.conn)

@@ -33,6 +33,7 @@ class VerAlumnosFrame(ctk.CTkFrame):
         for col in columnas:
             self.tabla_alumno.heading(col, text=col)
 
+        self.tabla_alumno.tag_configure('deudor', background='red')
         self.tabla_alumno.column("ID", width=50, stretch=False)
 
         self.tabla_alumno.bind("<<TreeviewSelect>>", self.on_tree_select_alumno) # accion al seleccionar un registro
@@ -59,7 +60,10 @@ class VerAlumnosFrame(ctk.CTkFrame):
         alumnos = get_alumnos(self.conn)
 
         for alumno in alumnos:
-            self.tabla_alumno.insert("", tk.END, values=(alumno[0], alumno[1], alumno[2], alumno[3], alumno[4], alumno[5], alumno[6], alumno[7]))
+            if alumno[0] < 5:
+                self.tabla_alumno.insert("", tk.END, values=(alumno[0], alumno[1], alumno[2], alumno[3], alumno[4], alumno[5], alumno[6], alumno[7]), tags='deudor')
+            else:
+                self.tabla_alumno.insert("", tk.END, values=(alumno[0], alumno[1], alumno[2], alumno[3], alumno[4], alumno[5], alumno[6], alumno[7]))
 
     def on_tree_select_alumno(self, event):
         # Habilitar botones

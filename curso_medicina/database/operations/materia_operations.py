@@ -16,8 +16,8 @@ def get_materias_por_alumno(connection, id_alumno):
         sql_select_query = """
         SELECT m.id, m.denominacion 
         FROM materia m
-        JOIN alumno_materia am ON m.id = am.id_materia
-        WHERE am.id_alumno = %s
+        JOIN inscripcion i ON m.id = i.id_materia
+        WHERE i.id_alumno = %s AND i.estado = 'curso'
         """
         cursor.execute(sql_select_query, (id_alumno,))
         materias = cursor.fetchall()

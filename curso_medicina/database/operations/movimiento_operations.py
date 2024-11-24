@@ -32,10 +32,12 @@ def get_movimientos_con_detalles(connection, ventana_temporal):
             p.fecha AS Fecha
         FROM 
             pago p
+        JOIN
+            inscripcion i ON p.id_inscripcion = i.id
         JOIN 
-            alumno a ON p.id_alumno = a.id
+            alumno a ON i.id_alumno = a.id
         JOIN 
-            materia m ON p.id_materia = m.id
+            materia m ON i.id_materia = m.id
         WHERE Fecha {condicion[ventana_temporal]}
 
         ORDER BY 

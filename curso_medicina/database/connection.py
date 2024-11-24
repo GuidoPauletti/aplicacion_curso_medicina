@@ -8,7 +8,7 @@ def create_connection():
             host="localhost",
             user="root",
             password="grootsql",
-            database="cursomedicina"
+            database="curso_medicina"
         )
         if connection.is_connected():
             print("Conexión exitosa a la base de datos")

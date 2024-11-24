@@ -7,10 +7,11 @@ def get_pagos_con_detalles(connection, correspondencia="%"):
         cursor = connection.cursor()
 
         sql_query = f"""
-            SELECT pago. id, alumno.nombre, alumno.apellido, materia.denominacion, pago.monto, pago.cuota, pago.fecha
+            SELECT pago.id, alumno.nombre, alumno.apellido, materia.denominacion, pago.monto, pago.cuota, pago.fecha
             FROM pago
-            JOIN alumno ON pago.id_alumno = alumno.id
-            JOIN materia ON pago.id_materia = materia.id
+            JOIN inscripcion ON pago.id_inscripcion = inscripcion.id
+            JOIN alumno ON inscripcion.id_alumno = alumno.id
+            JOIN materia ON inscripcion.id_materia = materia.id
             WHERE pago.correspondencia LIKE '{correspondencia}'
             ORDER BY fecha DESC
         """
@@ -64,8 +65,18 @@ def insert_pago(connection, id_alumno, id_materia, monto, divisa, efectivo, cuot
     try:
         cursor = connection.cursor()
         sql_insert_query = f"""
-        INSERT INTO pago (id_alumno, id_materia, monto, divisa, efectivo, cuota, correspondencia, fecha, id_usuario) 
-        VALUES ({id_alumno}, {id_materia}, {monto}, '{divisa}', '{efectivo}', {cuota}, '{correspondencia}', CURDATE(), {id_usuario})
+        INSERT INTO pago (id_inscripcion, monto, divisa, efectivo, cuota, correspondencia, fecha, id_usuario, cuota_de_mes) 
+        VALUES (
+            (SELECT DISTINCT id FROM inscripcion WHERE id_alumno = {id_alumno} AND id_materia = {id_materia} AND estado = 'curso'),
+            {monto},
+            '{divisa}',
+            '{efectivo}',
+            {cuota},
+            '{correspondencia}',
+            CURDATE(),
+            {id_usuario},
+            {cuota} - 1 + (SELECT DISTINCT mes FROM inscripcion WHERE id_alumno = {id_alumno} AND id_materia = {id_materia} AND estado = 'curso')
+        )
         """
         cursor.execute(sql_insert_query)
         connection.commit()
