@@ -38,7 +38,7 @@ class AltaPagoFrame(ctk.CTkScrollableFrame):
         # Obtener lista de materias
         self.materias = get_materias(self.conn)
 
-        # Aquí va el código original de alta pago, adaptado para este frame.
+        # Materia
         self.label_materia = ctk.CTkLabel(self, text="Materia:")
         self.label_materia.pack(pady=5)
         self.materia_var = ctk.StringVar()
@@ -68,7 +68,7 @@ class AltaPagoFrame(ctk.CTkScrollableFrame):
         self.label_cuota = ctk.CTkLabel(self, text="Cuota número:")
         self.label_cuota.pack(pady=5)
         self.cuota_var = ctk.StringVar()
-        self.combobox_cuota = ctk.CTkComboBox(self, variable=self.cuota_var,values=['Peso','Real','Dolar'],width=300)
+        self.combobox_cuota = ctk.CTkComboBox(self, variable=self.cuota_var,values=[],width=300)
         self.combobox_cuota.pack(pady=5)
 
         # Label y Entry para correspondencia

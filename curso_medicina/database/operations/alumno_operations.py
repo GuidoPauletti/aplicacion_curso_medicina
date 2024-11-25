@@ -15,14 +15,14 @@ def insert_alumno(connection, nombre, apellido, dni, email, telefono, dir_calle,
     finally:
         cursor.close()
 
-def insert_alumno_materia(connection, alumno_id, materia_id):
+def insert_alumno_materia(connection, alumno_id, materia_id, tipo_inscripcion_id):
     try:
         cursor = connection.cursor()
         sql_insert_query = """
         INSERT INTO inscripcion (id_alumno, id_materia, id_info_inscripcion, paga_el, estado, mes, año)
-        VALUES (%s, %s, 1, 10, 'curso', 1, 2025)
+        VALUES (%s, %s, %s, 10, 'curso', 1, 2025)
         """
-        cursor.execute(sql_insert_query, (alumno_id, materia_id))
+        cursor.execute(sql_insert_query, (alumno_id, materia_id, tipo_inscripcion_id))
         connection.commit()
         return None
     except Exception as e:
@@ -56,6 +56,7 @@ def get_alumnos(connection):
     except Exception as e:
         print(f"Error al obtener alumnos: {e}")
         return []
+    finally: cursor.close()
     
 def get_cuotas_por_alumno_materia(connection, alumno = "NULL", materia = "NULL"):
     try:
@@ -92,6 +93,7 @@ def get_cuotas_por_alumno_materia(connection, alumno = "NULL", materia = "NULL")
     except Exception as e:
         print(f"Error al obtener pagos: {e}")
         return []
+    finally: cursor.close()
     
 def editar_alumno(connection, id, nombre, apellido, dni, calle, numero, email, telefono):
     try:

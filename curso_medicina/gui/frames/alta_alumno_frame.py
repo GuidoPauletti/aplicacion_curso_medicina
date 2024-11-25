@@ -1,5 +1,7 @@
 from curso_medicina.database.operations.alumno_operations import insert_alumno, insert_alumno_materia
+from curso_medicina.database.operations.inscripcion_operations import get_descripciones
 from curso_medicina.gui.utils.validators import validate_alumno_input
+
 
 from tkinter import messagebox
 
@@ -31,6 +33,19 @@ class AltaAlumnoFrame(ctk.CTkScrollableFrame):
 
         # Materias
         self.create_checkboxes_materias()
+
+        # Tipo Inscripcion
+        self.label_inscripcion = ctk.CTkLabel(self, text="Tipo Inscripción:")
+        self.label_inscripcion.pack(pady=5)
+        self.inscripcion_var = ctk.StringVar()
+        self.inscripcion_var.set("regular")
+
+        # obtenemos los valores para el dropdown de inscripciones
+        self.tipo_inscripciones = self.get_tipo_inscripciones()
+        lista_inscripciones = [f"{inscripcion[0]} - {inscripcion[1]}" for inscripcion in self.tipo_inscripciones]
+
+        self.combobox_inscripcion = ctk.CTkComboBox(self, variable=self.inscripcion_var,values=lista_inscripciones,width=300)
+        self.combobox_inscripcion.pack(pady=5)
 
         # DNI
         self.label_dni = ctk.CTkLabel(self, text="DNI:")
@@ -144,12 +159,18 @@ class AltaAlumnoFrame(ctk.CTkScrollableFrame):
                 )
                 # Inscribimos el alumno a la materia
                 seleccion_materias = self.get_materias_seleccionadas()
-                self.save_alumno_materia(alumno_id, seleccion_materias)
+                tipo_inscripcion = self.inscripcion_var.get()
+                inscripcion_id = int(tipo_inscripcion.split(" - ")[0])
+                self.save_alumno_materia(alumno_id, seleccion_materias, inscripcion_id)
                 self.clear_fields()
                 
-    def save_alumno_materia(self, alumno_id, seleccion_materias):
+    def save_alumno_materia(self, alumno_id, seleccion_materias, inscripcion_id):
         for materia_id in seleccion_materias:
-            insert_alumno_materia(self.conn, alumno_id, materia_id)
+            insert_alumno_materia(self.conn, alumno_id, materia_id, inscripcion_id)
+
+    def get_tipo_inscripciones(self):
+        inscripciones = get_descripciones(self.conn)
+        return inscripciones
 
     def clear_fields(self):
         self.entry_nombre.delete(0, 'end')
