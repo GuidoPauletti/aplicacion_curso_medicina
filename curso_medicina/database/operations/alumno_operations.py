@@ -19,8 +19,8 @@ def insert_alumno_materia(connection, alumno_id, materia_id):
     try:
         cursor = connection.cursor()
         sql_insert_query = """
-        INSERT INTO inscripcion (id_alumno, id_materia, n_cuotas, monto_cuota, paga_el, monto_cuota_recargo, estado, mes, año)
-        VALUES (%s, %s, 5, 1000, 10, 1100, 'curso', 1, 2025)
+        INSERT INTO inscripcion (id_alumno, id_materia, id_info_inscripcion, paga_el, estado, mes, año)
+        VALUES (%s, %s, 1, 10, 'curso', 1, 2025)
         """
         cursor.execute(sql_insert_query, (alumno_id, materia_id))
         connection.commit()
@@ -35,7 +35,21 @@ def insert_alumno_materia(connection, alumno_id, materia_id):
 def get_alumnos(connection):
     try:
         cursor = connection.cursor()
-        sql_select_query = "SELECT * FROM alumno"
+        sql_select_query = """
+        SELECT 
+            a.*,
+            CASE 
+                WHEN EXISTS (
+                    SELECT 1 
+                    FROM inscripcion i
+                    JOIN deuda d ON i.id = d.id_inscripcion
+                    WHERE i.id_alumno = a.id AND d.estado = 'pendiente'
+                ) THEN 'Si'
+                ELSE 'No'
+            END AS tiene_deuda_pendiente
+        FROM 
+            alumno a;
+        """
         cursor.execute(sql_select_query)
         alumnos = cursor.fetchall()
         return alumnos

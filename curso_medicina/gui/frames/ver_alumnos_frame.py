@@ -60,7 +60,7 @@ class VerAlumnosFrame(ctk.CTkFrame):
         alumnos = get_alumnos(self.conn)
 
         for alumno in alumnos:
-            if alumno[0] < 5:
+            if alumno[8] == "Si":
                 self.tabla_alumno.insert("", tk.END, values=(alumno[0], alumno[1], alumno[2], alumno[3], alumno[4], alumno[5], alumno[6], alumno[7]), tags='deudor')
             else:
                 self.tabla_alumno.insert("", tk.END, values=(alumno[0], alumno[1], alumno[2], alumno[3], alumno[4], alumno[5], alumno[6], alumno[7]))
