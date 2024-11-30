@@ -1,5 +1,5 @@
 from curso_medicina.database.operations.alumno_operations import insert_alumno, insert_alumno_materia
-from curso_medicina.database.operations.inscripcion_operations import get_descripciones
+from curso_medicina.database.operations.inscripcion_operations import get_descripciones, get_detalle_tipo_inscripcion, save_tipo_inscripcion
 from curso_medicina.gui.utils.validators import validate_alumno_input
 
 
@@ -38,14 +38,23 @@ class AltaAlumnoFrame(ctk.CTkScrollableFrame):
         self.label_inscripcion = ctk.CTkLabel(self, text="Tipo Inscripción:")
         self.label_inscripcion.pack(pady=5)
         self.inscripcion_var = ctk.StringVar()
-        self.inscripcion_var.set("regular")
+        self.inscripcion_var.set("1 - regular")
 
         # obtenemos los valores para el dropdown de inscripciones
         self.tipo_inscripciones = self.get_tipo_inscripciones()
-        lista_inscripciones = [f"{inscripcion[0]} - {inscripcion[1]}" for inscripcion in self.tipo_inscripciones]
+        self.lista_inscripciones = [f"{inscripcion[0]} - {inscripcion[1]}" for inscripcion in self.tipo_inscripciones] + ["Otro"]
 
-        self.combobox_inscripcion = ctk.CTkComboBox(self, variable=self.inscripcion_var,values=lista_inscripciones,width=300)
+        self.combobox_inscripcion = ctk.CTkComboBox(self,
+                                                    variable=self.inscripcion_var,
+                                                    values=self.lista_inscripciones,
+                                                    width=300,
+                                                    command=self.display_info_inscripcion)
         self.combobox_inscripcion.pack(pady=5)
+
+        # Mostrar la informacion del tipo de inscripcion
+        self.label_info_inscripcion = ctk.CTkLabel(self, text="", text_color="#0066ff")
+        self.label_info_inscripcion.pack(pady=3)
+        self.display_info_inscripcion(event=None)
 
         # DNI
         self.label_dni = ctk.CTkLabel(self, text="DNI:")
@@ -171,6 +180,68 @@ class AltaAlumnoFrame(ctk.CTkScrollableFrame):
     def get_tipo_inscripciones(self):
         inscripciones = get_descripciones(self.conn)
         return inscripciones
+    
+    def display_info_inscripcion(self, event):
+        tipo_inscripcion = self.inscripcion_var.get()
+        if tipo_inscripcion != "Otro":
+            tipo_inscripcion_id = int(tipo_inscripcion.split(" - ")[0])
+            info_tipo_inscripcion = get_detalle_tipo_inscripcion(self.conn, tipo_inscripcion_id)
+            monto = info_tipo_inscripcion[2]
+            monto_recargo = info_tipo_inscripcion[3]
+            n_cuotas = info_tipo_inscripcion[4]
+            string_tipo_inscripcion = f"{n_cuotas} cuotas de ${monto} o ${monto_recargo} con recargo"
+            self.label_info_inscripcion.configure(text=string_tipo_inscripcion)
+            return
+        else:
+            self.ventana_crear_tipo_inscripcion()
+
+    def ventana_crear_tipo_inscripcion(self):
+        # Crear una nueva ventana para crear tipo de inscripcion
+        self.create_window_inscripcion = ctk.CTkToplevel(self)
+        self.create_window_inscripcion.title("Crear tipo de inscripción")
+        self.create_window_inscripcion.geometry("400x300")
+
+        label_descripcion = ctk.CTkLabel(self.create_window_inscripcion, text="Descripción")
+        label_descripcion.pack(pady=5)
+        entry_descripcion = ctk.CTkEntry(self.create_window_inscripcion)
+        entry_descripcion.pack(pady=5)
+        entry_descripcion.insert(0,"Ingrese aqui una descripción breve para el tipo de incripcion")
+
+        label_cuota = ctk.CTkLabel(self.create_window_inscripcion, text="Monto cuota")
+        label_cuota.pack(pady=5)
+        entry_cuota = ctk.CTkEntry(self.create_window_inscripcion)
+        entry_cuota.pack(pady=5)
+
+        label_cuota_recargo = ctk.CTkLabel(self.create_window_inscripcion, text="Monto cuota con recargo")
+        label_cuota_recargo.pack(pady=5)
+        entry_cuota_recargo = ctk.CTkEntry(self.create_window_inscripcion)
+        entry_cuota_recargo.pack(pady=5)
+
+        label_n_cuotas = ctk.CTkLabel(self.create_window_inscripcion, text="Numero de cuotas")
+        label_n_cuotas.pack(pady=5)
+        entry_n_cuotas = ctk.CTkEntry(self.create_window_inscripcion)
+        entry_n_cuotas.pack(pady=5)
+
+        # Botón para guardar los cambios
+        btn_guardar = ctk.CTkButton(self.create_window_inscripcion,
+                                    text="Guardar",
+                                    command=lambda: self.guardar_tipo_inscripcion(
+                                        descripcion = entry_descripcion.get(),
+                                        cuota = entry_cuota.get(),
+                                        cuota_recargo = entry_cuota_recargo.get(),
+                                        n_cuotas = entry_n_cuotas.get()
+                                    ))
+        btn_guardar.pack(pady=10)
+
+    def guardar_tipo_inscripcion(self, descripcion, cuota, cuota_recargo, n_cuotas):
+        nuevo_tipo_incripcion = save_tipo_inscripcion(self.conn, descripcion, cuota, cuota_recargo, n_cuotas)
+        if nuevo_tipo_incripcion:
+            self.lista_inscripciones += [f"{nuevo_tipo_incripcion} - {descripcion}"]
+            self.combobox_inscripcion.configure(values=self.lista_inscripciones)
+            self.inscripcion_var.set(f"{nuevo_tipo_incripcion} - {descripcion}")
+            self.create_window_inscripcion.destroy()
+        else:
+            return
 
     def clear_fields(self):
         self.entry_nombre.delete(0, 'end')
@@ -180,3 +251,4 @@ class AltaAlumnoFrame(ctk.CTkScrollableFrame):
         self.entry_dir_calle.delete(0, 'end')
         self.entry_dir_numero.delete(0, 'end')
         self.entry_telefono.delete(0, 'end')
+        self.inscripcion_var.set("regular")

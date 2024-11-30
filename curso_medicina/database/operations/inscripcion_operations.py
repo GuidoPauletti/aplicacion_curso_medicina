@@ -14,3 +14,37 @@ def get_descripciones(connection):
         return None
     finally:
         cursor.close()
+
+def get_detalle_tipo_inscripcion(connection, id):
+    try:
+        cursor = connection.cursor()
+        sql_insert_query = """
+        SELECT *
+        FROM info_inscripcion
+        WHERE id = %s
+        """
+        cursor.execute(sql_insert_query, (id,))
+        detalle_tipo_inscripcion = cursor.fetchone()
+        return detalle_tipo_inscripcion
+    except Exception as e:
+        print(f"Error al traer detalle de tipo de inscripcion: {e}")
+        return None
+    finally:
+        cursor.close()
+
+def save_tipo_inscripcion(connection, descripcion, cuota, cuota_recargo, n_cuotas):
+    try:
+        cursor = connection.cursor()
+        sql_insert_query = """
+        INSERT INTO info_inscripcion(descripcion, monto_cuota, monto_cuota_recargo, n_cuotas)
+        VALUES (%s, %s, %s, %s)
+        """
+        cursor.execute(sql_insert_query, (descripcion, cuota, cuota_recargo, n_cuotas))
+        connection.commit()
+        return cursor.lastrowid
+    except Exception as e:
+        print(f"Error al crear tipo de inscripción: {e}")
+        connection.rollback()
+        return None
+    finally:
+        cursor.close()
