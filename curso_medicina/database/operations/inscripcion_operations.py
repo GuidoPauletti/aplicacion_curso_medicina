@@ -64,3 +64,21 @@ def save_tipo_inscripcion(connection, descripcion, cuota, cuota_recargo, n_cuota
         return None
     finally:
         cursor.close()
+
+def editar_tipo_inscripcion(connection, id, descripcion, cuota, cuota_recargo, n_cuotas):
+    try:
+        cursor = connection.cursor()
+        sql_query = """
+            UPDATE info_inscripcion
+            SET descripcion = %s, monto_cuota = %s, monto_cuota_recargo = %s, n_cuotas = %s
+            WHERE id = %s
+        """
+        cursor.execute(sql_query, (descripcion, cuota, cuota_recargo, n_cuotas, id))
+        connection.commit()
+        return "Tipo de inscripcion editado correctamente"
+    except Exception as e:
+        print(f"Error al editar el tipo de inscripcion: {e}")
+        connection.rollback()
+        return
+    finally:
+        cursor.close()

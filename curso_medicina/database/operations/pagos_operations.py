@@ -57,6 +57,7 @@ def editar_pago(connection, id, monto, cuota):
         return "Registro de pago editado correctamente"
     except Exception as e:
         print(f"Error al editar el pago: {e}")
+        connection.rollback()
         return
     finally:
         cursor.close()
