@@ -199,13 +199,13 @@ class AltaAlumnoFrame(ctk.CTkScrollableFrame):
         # Crear una nueva ventana para crear tipo de inscripcion
         self.create_window_inscripcion = ctk.CTkToplevel(self)
         self.create_window_inscripcion.title("Crear tipo de inscripción")
-        self.create_window_inscripcion.geometry("400x300")
+        self.create_window_inscripcion.geometry("500x500")
 
         label_descripcion = ctk.CTkLabel(self.create_window_inscripcion, text="Descripción")
         label_descripcion.pack(pady=5)
-        entry_descripcion = ctk.CTkEntry(self.create_window_inscripcion)
+        entry_descripcion = ctk.CTkEntry(self.create_window_inscripcion, width=300)
         entry_descripcion.pack(pady=5)
-        entry_descripcion.insert(0,"Ingrese aqui una descripción breve para el tipo de incripcion")
+        entry_descripcion.insert(0,"Descripción breve del tipo de incripción")
 
         label_cuota = ctk.CTkLabel(self.create_window_inscripcion, text="Monto cuota")
         label_cuota.pack(pady=5)
@@ -236,9 +236,10 @@ class AltaAlumnoFrame(ctk.CTkScrollableFrame):
     def guardar_tipo_inscripcion(self, descripcion, cuota, cuota_recargo, n_cuotas):
         nuevo_tipo_incripcion = save_tipo_inscripcion(self.conn, descripcion, cuota, cuota_recargo, n_cuotas)
         if nuevo_tipo_incripcion:
-            self.lista_inscripciones += [f"{nuevo_tipo_incripcion} - {descripcion}"]
+            self.lista_inscripciones = self.lista_inscripciones[:-1] + [f"{nuevo_tipo_incripcion} - {descripcion}", "Otro"]
             self.combobox_inscripcion.configure(values=self.lista_inscripciones)
             self.inscripcion_var.set(f"{nuevo_tipo_incripcion} - {descripcion}")
+            self.display_info_inscripcion(event=None)
             self.create_window_inscripcion.destroy()
         else:
             return
