@@ -1,3 +1,19 @@
+def get_info_inscripciones(connection):
+    try:
+        cursor = connection.cursor()
+
+        sql_query = f"SELECT * FROM info_inscripcion"
+        cursor.execute(sql_query)
+        
+        tipos_inscripcion = cursor.fetchall()
+        return tipos_inscripcion
+    except Exception as e:
+        print(f"Error al obtener tipos de inscripcion: {e}")
+        connection.rollback()
+        return None
+    finally:
+        cursor.close()
+
 def get_descripciones(connection):
     try:
         cursor = connection.cursor()

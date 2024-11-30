@@ -37,5 +37,6 @@ class Sidebar(ctk.CTkFrame):
             {"text": "Ver Pagos", "page": "ver_pagos"},
             {"text": "Ver Gastos", "page": "ver_gastos", "role": "administrador"},
             {"text": "Ver Movimientos", "page": "ver_movimientos"},
-            {"text": "Ver Alumnos", "page": "ver_alumnos"}
+            {"text": "Ver Alumnos", "page": "ver_alumnos"},
+            {"text": "Ajustes", "page": "ajustes"}
         ]

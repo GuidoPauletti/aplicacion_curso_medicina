@@ -7,6 +7,7 @@ from curso_medicina.gui.frames.ver_pagos_frame import VerPagosFrame
 from curso_medicina.gui.frames.ver_gastos_frame import VerGastosFrame
 from curso_medicina.gui.frames.ver_alumnos_frame import VerAlumnosFrame
 from curso_medicina.gui.frames.ver_movimientos_frame import VerMovimientosFrame
+from curso_medicina.gui.frames.ajustes_frame import AjustesFrame
 from curso_medicina.database.operations.deuda_operations import call_update_debts
 
 import customtkinter as ctk
@@ -74,7 +75,8 @@ class Aplicacion:
             "ver_pagos": lambda: VerPagosFrame(self.content_frame, self.conn),
             "ver_gastos": lambda: VerGastosFrame(self.content_frame, self.conn, self.usuario_actual),
             "ver_alumnos": lambda: VerAlumnosFrame(self.content_frame, self.conn, self.usuario_actual),
-            "ver_movimientos": lambda: VerMovimientosFrame(self.content_frame, self.conn)
+            "ver_movimientos": lambda: VerMovimientosFrame(self.content_frame, self.conn),
+            "ajustes": lambda: AjustesFrame(self.content_frame, self.conn, self.usuario_actual)
         }
         
         # Crear y mostrar el frame correspondiente
