@@ -20,7 +20,7 @@ def insert_alumno_materia(connection, alumno_id, materia_id, tipo_inscripcion_id
         cursor = connection.cursor()
         sql_insert_query = """
         INSERT INTO inscripcion (id_alumno, id_materia, id_info_inscripcion, paga_el, estado, mes, año)
-        VALUES (%s, %s, %s, 10, 'curso', 1, 2025)
+        VALUES (%s, %s, %s, 10, 'curso', (SELECT MONTH(CURDATE())), (SELECT YEAR(CURDATE())))
         """
         cursor.execute(sql_insert_query, (alumno_id, materia_id, tipo_inscripcion_id))
         connection.commit()

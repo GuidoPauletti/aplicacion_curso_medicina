@@ -20,7 +20,6 @@ def get_descripciones(connection):
         sql_insert_query = """
         SELECT id, descripcion
         FROM info_inscripcion
-        WHERE id != 2
         """
         cursor.execute(sql_insert_query)
         descripciones = cursor.fetchall()
