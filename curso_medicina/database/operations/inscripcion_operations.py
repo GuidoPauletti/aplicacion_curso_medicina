@@ -47,6 +47,25 @@ def get_detalle_tipo_inscripcion(connection, id):
     finally:
         cursor.close()
 
+def get_inscripcion_alumno_materia(connection, id_alumno, id_materia):
+    try:
+        cursor = connection.cursor()
+        sql_insert_query = """
+        SELECT DISTINCT i.id, ii.n_cuotas
+        FROM inscripcion i INNER JOIN info_inscripcion ii
+        ON i.id_info_inscripcion = ii.id
+        WHERE id_alumno = %s AND id_materia = %s AND i.estado = 'curso'
+        """
+        cursor.execute(sql_insert_query, (id_alumno, id_materia))
+        inscripcion = cursor.fetchone()
+        return inscripcion
+    except Exception as e:
+        print(f"Error al traer detalle de tipo de inscripcion: {e}")
+        return None
+    finally:
+        cursor.close()
+
+
 def save_tipo_inscripcion(connection, descripcion, cuota, cuota_recargo, n_cuotas):
     try:
         cursor = connection.cursor()
@@ -81,3 +100,22 @@ def editar_tipo_inscripcion(connection, id, descripcion, cuota, cuota_recargo, n
         return
     finally:
         cursor.close()
+
+def finalizar_inscripcion(connection, id):
+    try:
+        cursor = connection.cursor()
+        sql_query = """
+            UPDATE inscripcion
+            SET estado = 'finalizado'
+            WHERE id = %s
+        """
+        cursor.execute(sql_query, (id,))
+        connection.commit()
+        return "Inscripcion finalizada correctamente"
+    except Exception as e:
+        print(f"Error al editar el tipo de inscripcion: {e}")
+        connection.rollback()
+        return
+    finally:
+        cursor.close()
+    

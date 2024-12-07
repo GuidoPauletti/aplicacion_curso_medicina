@@ -1,6 +1,7 @@
 from curso_medicina.database.operations.alumno_operations import get_alumnos, get_cuotas_por_alumno_materia
 from curso_medicina.database.operations.materia_operations import get_materias, get_materias_por_alumno
-from curso_medicina.database.operations.pagos_operations import insert_pago
+from curso_medicina.database.operations.pagos_operations import insert_pago, get_info_ultimo_pago
+from curso_medicina.database.operations.inscripcion_operations import finalizar_inscripcion, get_inscripcion_alumno_materia
 
 from tkinter import messagebox
 
@@ -110,6 +111,10 @@ class AltaPagoFrame(ctk.CTkScrollableFrame):
                 pago_id = insert_pago(self.conn, alumno_id, materia_id, monto, divisa, efectivo, cuota, correspondencia, self.usuario_actual.id)
                 if pago_id:
                     messagebox.showinfo("Éxito", f"Pago ID {pago_id} guardado correctamente")
+                    cuotas_restantes = self.combobox_cuota.cget("values")
+                    print(f"cuotas restantes: {cuotas_restantes}, de largo {len(cuotas_restantes)}")
+                    if len(cuotas_restantes) <= 1:
+                        self.chequear_fin_inscripcion(pago_id, cuota)
                     self.clear_fields()
                 else:
                     messagebox.showerror("Error", "No se pudo guardar el pago")
@@ -132,10 +137,22 @@ class AltaPagoFrame(ctk.CTkScrollableFrame):
         materia_seleccionada = self.combobox_materia.get()
         alumno_id = int(alumno_seleccionado.split(" - ")[0])
         materia_id = int(materia_seleccionada.split(" - ")[0])
+        inscripcion_alumno_materia = get_inscripcion_alumno_materia(self.conn, alumno_id, materia_id)
+        n_cuotas = inscripcion_alumno_materia[-1]
         if alumno_seleccionado and materia_seleccionada:
             cuotas = get_cuotas_por_alumno_materia(self.conn, alumno_id, materia_id)
-            valores_cuotas = [f"{i}" for i in range(cuotas[-1] + 1, 11)]
+            valores_cuotas = [f"{i}" for i in range(cuotas[-1] + 1, n_cuotas + 1)]
             self.combobox_cuota.configure(values=valores_cuotas)
+
+    def chequear_fin_inscripcion(self, pago_id, cuota):
+        info_pago = get_info_ultimo_pago(self.conn, pago_id, cuota)
+        monto_pagado = sum([pago[2] for pago in info_pago])
+        deuda = info_pago[-1][-1]
+        id_inscripcion = info_pago[0][1]
+        print(f"la deuda es {deuda}, el monto pagado es {monto_pagado} y el id_inscripcion es {id_inscripcion}")
+        if monto_pagado >= deuda:
+            finalizar_inscripcion(self.conn, id_inscripcion)
+        
 
     def clear_fields(self):
         self.alumno_var.set("")

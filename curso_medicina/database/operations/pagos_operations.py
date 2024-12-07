@@ -25,6 +25,24 @@ def get_pagos_con_detalles(connection, correspondencia="%"):
         return []
     finally:
         cursor.close()
+
+def get_info_ultimo_pago(connection, id, cuota):
+    try:
+        cursor = connection.cursor()
+
+        sql_query = """
+            SELECT * FROM view_chequear_ultima_cuota
+            WHERE id_inscripcion = (SELECT DISTINCT id_inscripcion FROM pago WHERE id = %s)
+            AND cuota = %s
+        """
+        cursor.execute(sql_query, (id, cuota))
+        info_pago = cursor.fetchall()
+        return info_pago
+    except Exception as e:
+        print(f"Error al obtener info del pago: {e}")
+        return
+    finally:
+        cursor.close()
     
 def borrar_pago(connection, id):
     try:
