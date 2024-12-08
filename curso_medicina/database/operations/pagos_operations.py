@@ -106,3 +106,19 @@ def insert_pago(connection, id_alumno, id_materia, monto, divisa, efectivo, cuot
         return None
     finally:
         cursor.close()
+
+def insert_pago_moneda_extranjera(connection, id_pago, divisa, monto):
+    try:
+        cursor = connection.cursor()
+        sql_insert_query = """
+        INSERT INTO pago_divisa_extranjera (pago_id, divisa, monto) 
+        VALUES (%s, %s, %s)
+        """
+        cursor.execute(sql_insert_query, (id_pago, divisa, monto))
+        connection.commit()
+        return
+    except Exception as e:
+        print(f"Error al insertar pago en divisa extranjera: {e}")
+        return None
+    finally:
+        cursor.close()

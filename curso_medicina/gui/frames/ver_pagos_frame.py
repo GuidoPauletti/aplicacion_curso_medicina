@@ -26,7 +26,7 @@ class VerPagosFrame(ctk.CTkFrame):
         self.optionmenu_correspondencia.pack(side="left", padx=10)
 
         # Crear tabla
-        columnas = ("ID", "Nombre", "Apellido", "Materia", "Monto", "Cuota", "Fecha")
+        columnas = ("ID", "Nombre", "Apellido", "Materia", "Monto (AR$)", "Cuota", "Fecha")
         
         self.tabla = ttk.Treeview(self, columns=columnas, show="headings", selectmode="browse")
         

@@ -1,9 +1,9 @@
 from curso_medicina.database.operations.alumno_operations import get_alumnos, get_cuotas_por_alumno_materia
 from curso_medicina.database.operations.materia_operations import get_materias, get_materias_por_alumno
-from curso_medicina.database.operations.pagos_operations import insert_pago, get_info_ultimo_pago
+from curso_medicina.database.operations.pagos_operations import insert_pago, get_info_ultimo_pago, insert_pago_moneda_extranjera
 from curso_medicina.database.operations.inscripcion_operations import finalizar_inscripcion, get_inscripcion_alumno_materia
 
-from tkinter import messagebox
+from tkinter import messagebox, simpledialog
 
 import customtkinter as ctk
 
@@ -53,7 +53,7 @@ class AltaPagoFrame(ctk.CTkScrollableFrame):
         self.entry_monto.pack(pady=5)
 
         # Label y Entry para divisa
-        self.label_divisa = ctk.CTkLabel(self, text="Divisa (Peso/Real):")
+        self.label_divisa = ctk.CTkLabel(self, text="Divisa:")
         self.label_divisa.pack(pady=5)
         self.divisa_var = ctk.StringVar()
         self.entry_divisa = ctk.CTkComboBox(self, variable=self.divisa_var,values=['Peso','Real','Dolar'],width=300)
@@ -108,11 +108,21 @@ class AltaPagoFrame(ctk.CTkScrollableFrame):
                 if efectivo == 'Si': efectivo = 1
                 else: efectivo = 0
                 monto = float(monto)
-                pago_id = insert_pago(self.conn, alumno_id, materia_id, monto, divisa, efectivo, cuota, correspondencia, self.usuario_actual.id)
+
+                if divisa == "Real" or divisa == "Dolar": #caso moneda extranjera
+                    monto_en_pesos = self.ask_exchange_rate(divisa)
+                    pago_id = insert_pago(self.conn, alumno_id, materia_id, monto_en_pesos, divisa, efectivo, cuota, correspondencia, self.usuario_actual.id)
+                    # guardamos ademas el registro en moneda extranjera
+                    insert_pago_moneda_extranjera(self.conn, pago_id, divisa, monto)
+
+                elif divisa == "Peso":   #caso moneda local
+                    pago_id = insert_pago(self.conn, alumno_id, materia_id, monto, divisa, efectivo, cuota, correspondencia, self.usuario_actual.id)
+
+                else: messagebox.showerror("Error", "Seleccione una divisa de la lista")
+
                 if pago_id:
                     messagebox.showinfo("Éxito", f"Pago ID {pago_id} guardado correctamente")
                     cuotas_restantes = self.combobox_cuota.cget("values")
-                    print(f"cuotas restantes: {cuotas_restantes}, de largo {len(cuotas_restantes)}")
                     if len(cuotas_restantes) <= 1:
                         self.chequear_fin_inscripcion(pago_id, cuota)
                     self.clear_fields()
@@ -149,9 +159,21 @@ class AltaPagoFrame(ctk.CTkScrollableFrame):
         monto_pagado = sum([pago[2] for pago in info_pago])
         deuda = info_pago[-1][-1]
         id_inscripcion = info_pago[0][1]
-        print(f"la deuda es {deuda}, el monto pagado es {monto_pagado} y el id_inscripcion es {id_inscripcion}")
         if monto_pagado >= deuda:
             finalizar_inscripcion(self.conn, id_inscripcion)
+
+    @staticmethod
+    def ask_exchange_rate(divisa):
+        """
+        Solicita al usuario la tasa de cambio para la divisa seleccionada
+        """
+        rate = simpledialog.askfloat(
+            "Total en pesos",
+            f"Ingrese el equivalente en pesos del pago en {divisa}:",
+            minvalue=0.01
+        )
+        return rate
+        return None
         
 
     def clear_fields(self):

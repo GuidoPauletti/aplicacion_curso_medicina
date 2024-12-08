@@ -28,7 +28,7 @@ class VerMovimientosFrame(ctk.CTkFrame):
         self.optionmenu_correspondencia.pack(side="left", padx=10)
 
         # Crear tabla
-        columnas = ("ID", "Tipo", "Monto", "Divisa", "Descripción", "Cuenta", "Fecha")
+        columnas = ("ID", "Tipo", "Monto (AR$)", "Divisa", "Descripción", "Cuenta", "Fecha")
         
         self.tabla = ttk.Treeview(self, columns=columnas, show="headings", selectmode="browse")
         
@@ -48,24 +48,10 @@ class VerMovimientosFrame(ctk.CTkFrame):
         # Botones para cada divisa
         self.btn_pesos = ctk.CTkButton(
             self.buttons_frame,
-            text="Informe en Pesos",
+            text="Informe",
             command=lambda: self.generate_report("Peso")
         )
-        self.btn_pesos.grid(row=0, column=0, padx=5)
-        
-        self.btn_reales = ctk.CTkButton(
-            self.buttons_frame,
-            text="Informe en Reales",
-            command=lambda: self.generate_report("Real")
-        )
-        self.btn_reales.grid(row=0, column=1, padx=5)
-        
-        self.btn_dolares = ctk.CTkButton(
-            self.buttons_frame,
-            text="Informe en Dólares",
-            command=lambda: self.generate_report("Dolar")
-        )
-        self.btn_dolares.grid(row=0, column=3, padx=5)
+        self.btn_pesos.grid(row=0, column=1, padx=5)
 
         # Obtener los movimientos
         self.cargar_movimientos()
