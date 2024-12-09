@@ -25,7 +25,10 @@ def get_movimientos_con_detalles(connection, ventana_temporal):
         SELECT 
             p.id AS ID,
             'Entrada' AS Tipo,
-            p.monto AS Monto,
+            CASE
+                WHEN p.divisa != 'Peso' THEN pde.monto
+                ELSE p.monto
+            END AS Monto,
             p.divisa AS Divisa,
             CONCAT(a.nombre, ' ', a.apellido, ' - Cuota ', p.cuota, ' de ', m.denominacion) AS Descripción,
             p.correspondencia AS Cuenta,
@@ -38,6 +41,8 @@ def get_movimientos_con_detalles(connection, ventana_temporal):
             alumno a ON i.id_alumno = a.id
         JOIN 
             materia m ON i.id_materia = m.id
+        LEFT JOIN
+            pago_divisa_extranjera pde ON p.id = pde.pago_id
         WHERE Fecha {condicion[ventana_temporal]}
 
         ORDER BY 

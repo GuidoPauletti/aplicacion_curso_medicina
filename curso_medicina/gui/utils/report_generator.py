@@ -8,16 +8,16 @@ from datetime import datetime
 import os
 
 class PDFGenerator:
-    def __init__(self, tree_data, exchange_rate = None):
+    def __init__(self, tree_data):
         """
         Inicializa el generador de PDF con los datos del TreeView
         """
         self.tree_data = tree_data
-        self.exchange_rate = exchange_rate
         self.styles = getSampleStyleSheet()
         # Definir anchos fijos para las columnas (en puntos)
         self.col_widths = [
             70,     # Monto
+            70,     # Divisa
             240,    # Descripción
             100,    # Cuenta
             70      # Fecha
@@ -34,7 +34,11 @@ class PDFGenerator:
         entradas = []
         salidas = []
         total_entradas = 0
+        total_entradas_reales = 0
+        total_entradas_dolares = 0
         total_salidas = 0
+        total_salidas_reales = 0
+        total_salidas_dolares = 0
         
         for item in self.tree_data:
             row = list(item)
@@ -45,18 +49,34 @@ class PDFGenerator:
             row[2] = self.format_number(row[2])
             
             if row[1] == "Entrada":
-                entradas.append([row[i] for i in(2,4,5,6)])
-                total_entradas += float(monto)
+                entradas.append([row[i] for i in(2,3,4,5,6)])
+                if row[3] == "Peso":
+                    total_entradas += float(monto)
+                elif row[3] == "Real":
+                    total_entradas_reales += float(monto)
+                elif row[3] == "Dolar":
+                    total_entradas_dolares += float(monto)
             else:
-                salidas.append([row[i] for i in(2,4,5,6)])
-                total_salidas += float(monto)
+                salidas.append([row[i] for i in(2,3,4,5,6)])
+                if row[3] == "Peso":
+                    total_salidas += float(monto)
+                elif row[3] == "Real":
+                    total_salidas_reales += float(monto)
+                elif row[3] == "Dolar":
+                    total_salidas_dolares += float(monto)
                 
         return {
             'entradas': entradas,
             'salidas': salidas,
             'total_entradas': total_entradas,
+            'total_entradas_reales': total_entradas_reales,
+            'total_entradas_dolares': total_entradas_dolares,
             'total_salidas': total_salidas,
-            'balance': total_entradas - total_salidas
+            'total_salidas_reales': total_salidas_reales,
+            'total_salidas_dolares': total_salidas_dolares,
+            'balance': total_entradas - total_salidas,
+            'balance_reales': total_entradas_reales - total_salidas_reales,
+            'balance_dolares': total_entradas_dolares - total_salidas_dolares
         }
     
     def generate_pdf(self, output_path):
@@ -130,7 +150,7 @@ class PDFGenerator:
         
         # Obtener datos organizados
         data = self._get_table_data()
-        headers = ["Monto", "Descripción", "Cuenta", "Fecha"]
+        headers = ["Monto", "Divisa", "Descripción", "Cuenta", "Fecha"]
         
         # Sección de Entradas
         elements.append(Paragraph("Movimientos de Entrada", title_style))
@@ -143,12 +163,28 @@ class PDFGenerator:
             elements.append(Paragraph("No hay entradas registradas", self.styles['Normal']))
             
         elements.append(Spacer(1, 10))
-        elements.append(Paragraph(
-            f"Total Entradas: {self.format_number(data['total_entradas'])}", 
-            total_style
-        ))
-        elements.append(Spacer(1, 20))
+
+        if data['total_entradas_reales'] > 0:
+            elements.append(Paragraph(
+                f"Total Entradas en Reales: {self.format_number(data['total_entradas_reales'])} R$", 
+                total_style
+            ))
+            elements.append(Spacer(1, 1))
         
+        if data['total_entradas_dolares'] > 0:
+            elements.append(Paragraph(
+                f"Total Entradas en Dolares: {self.format_number(data['total_entradas_dolares'])} USD$", 
+                total_style
+            ))
+            elements.append(Spacer(1, 1))
+
+        if data['total_entradas'] > 0:
+            elements.append(Paragraph(
+                f"Total Entradas en Pesos: {self.format_number(data['total_entradas'])} ARS$", 
+                total_style
+            ))
+            elements.append(Spacer(1, 3))
+
         # Sección de Salidas
         elements.append(Paragraph("Movimientos de Salida", title_style))
         if data['salidas']:
@@ -160,11 +196,27 @@ class PDFGenerator:
             elements.append(Paragraph("No hay salidas registradas", self.styles['Normal']))
             
         elements.append(Spacer(1, 10))
-        elements.append(Paragraph(
-            f"Total Salidas: {self.format_number(data['total_salidas'])}", 
-            total_style
-        ))
-        elements.append(Spacer(1, 20))
+
+        if data['total_salidas_reales'] > 0:
+            elements.append(Paragraph(
+                f"Total Salidas en Reales: {self.format_number(data['total_salidas_reales'])} R$", 
+                total_style
+            ))
+            elements.append(Spacer(1, 1))
+
+        if data['total_salidas_dolares'] > 0:
+            elements.append(Paragraph(
+                f"Total Salidas en Dolares: {self.format_number(data['total_salidas_dolares'])} USD$", 
+                total_style
+            ))
+            elements.append(Spacer(1, 1))
+
+        if data['total_salidas'] > 0:
+            elements.append(Paragraph(
+                f"Total Salidas: {self.format_number(data['total_salidas'])} ARS$", 
+                total_style
+            ))
+            elements.append(Spacer(1, 5))
         
         # Balance Final con línea separadora
         elements.append(Paragraph("_" * 50, ParagraphStyle(
@@ -173,34 +225,48 @@ class PDFGenerator:
             alignment=0
         )))
         elements.append(Spacer(1, 10))
-        elements.append(Paragraph(
-            f"Balance Final: {self.format_number(data['balance'])}",
-            ParagraphStyle(
-                'Balance',
-                parent=self.styles['Normal'],
-                fontSize=11,
-                fontName='Helvetica-Bold'
-            )
-        ))
 
-        # Agregar balance convertido a pesos si hay tasa de cambio
-        if self.exchange_rate is not None:
-            balance_pesos = data['balance'] * self.exchange_rate
+        if data['total_entradas'] > 0 or data['total_salidas'] > 0:
             elements.append(Paragraph(
-                f"Balance Final en Pesos: {self.format_number(balance_pesos)}",
+                f"Balance Final en Pesos: {self.format_number(data['balance'])} ARS$",
                 ParagraphStyle(
-                    'BalancePesos',
+                    'Balance',
                     parent=self.styles['Normal'],
                     fontSize=11,
                     fontName='Helvetica-Bold'
                 )
             ))
+            elements.append(Spacer(1, 5))
+
+        if data['total_entradas_reales'] > 0 or data['total_salidas_reales'] > 0:
+            elements.append(Paragraph(
+                f"Balance Final en Reales: {self.format_number(data['balance_reales'])} R$",
+                ParagraphStyle(
+                    'Balance',
+                    parent=self.styles['Normal'],
+                    fontSize=11,
+                    fontName='Helvetica-Bold'
+                )
+            ))
+            elements.append(Spacer(1, 5))
+
+        if data['total_entradas_dolares'] > 0 or data['total_salidas_dolares'] > 0:
+            elements.append(Paragraph(
+                f"Balance Final en Dolares: {self.format_number(data['balance_dolares'])} USD$",
+                ParagraphStyle(
+                    'Balance',
+                    parent=self.styles['Normal'],
+                    fontSize=11,
+                    fontName='Helvetica-Bold'
+                )
+            ))
+            elements.append(Spacer(1, 5))
         
         # Generar el PDF
         doc.build(elements)
 
 
-def generate_movement_report(tree_view, divisa, exchange_rate = None):
+def generate_movement_report(tree_view):
     """
     Función helper para generar el reporte desde cualquier parte de la aplicación
     """
@@ -208,8 +274,7 @@ def generate_movement_report(tree_view, divisa, exchange_rate = None):
     data = []
     for item in tree_view.get_children():
         values = tree_view.item(item)['values']
-        if values[3] == divisa:  # El índice 3 corresponde a la columna de divisa
-            data.append(values)
+        data.append(values)
     
     # Crear el directorio de reportes si no existe
     reports_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'reports')
@@ -221,7 +286,7 @@ def generate_movement_report(tree_view, divisa, exchange_rate = None):
     output_path = os.path.join(reports_dir, filename)
     
     # Generar el PDF
-    generator = PDFGenerator(data, exchange_rate)
+    generator = PDFGenerator(data)
     generator.generate_pdf(output_path)
     
     return output_path

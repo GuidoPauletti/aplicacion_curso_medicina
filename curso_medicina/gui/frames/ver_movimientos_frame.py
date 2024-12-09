@@ -1,7 +1,7 @@
 from curso_medicina.database.operations.movimiento_operations import get_movimientos_con_detalles
 from ..utils.report_generator import generate_movement_report
 
-from tkinter import ttk, messagebox, simpledialog
+from tkinter import ttk, messagebox
 import os
 
 import customtkinter as ctk
@@ -28,7 +28,7 @@ class VerMovimientosFrame(ctk.CTkFrame):
         self.optionmenu_correspondencia.pack(side="left", padx=10)
 
         # Crear tabla
-        columnas = ("ID", "Tipo", "Monto (AR$)", "Divisa", "Descripción", "Cuenta", "Fecha")
+        columnas = ("ID", "Tipo", "Monto", "Divisa", "Descripción", "Cuenta", "Fecha")
         
         self.tabla = ttk.Treeview(self, columns=columnas, show="headings", selectmode="browse")
         
@@ -49,7 +49,7 @@ class VerMovimientosFrame(ctk.CTkFrame):
         self.btn_pesos = ctk.CTkButton(
             self.buttons_frame,
             text="Informe",
-            command=lambda: self.generate_report("Peso")
+            command=lambda: self.generate_report()
         )
         self.btn_pesos.grid(row=0, column=1, padx=5)
 
@@ -68,32 +68,15 @@ class VerMovimientosFrame(ctk.CTkFrame):
     def filtrar_por_tiempo(self, ventana_temporal):
         self.cargar_movimientos(ventana_temporal)
 
-    @staticmethod
-    def ask_exchange_rate(divisa):
-        """
-        Solicita al usuario la tasa de cambio para la divisa seleccionada
-        """
-        if divisa.lower() in ['dolar', 'real']:
-            rate = simpledialog.askfloat(
-                "Tasa de Cambio",
-                f"Ingrese la cantidad de pesos equivalente a 1 {divisa}:",
-                minvalue=0.01
-            )
-            return rate
-        return None
-
-    def generate_report(self, divisa):
+    def generate_report(self):
         try:
             # Verificar si hay datos en la tabla
             if not self.tabla.get_children():
                 messagebox.showwarning("Advertencia", "No hay datos para generar el informe")
                 return
             
-            # Obtener tasa de cambio si es necesario
-            exchange_rate = self.ask_exchange_rate(divisa)
-            
             # Generar el reporte
-            output_path = generate_movement_report(self.tabla, divisa, exchange_rate)
+            output_path = generate_movement_report(self.tabla)
             
             # Mostrar mensaje de éxito
             messagebox.showinfo(
