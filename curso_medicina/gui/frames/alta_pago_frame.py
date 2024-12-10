@@ -60,10 +60,11 @@ class AltaPagoFrame(ctk.CTkScrollableFrame):
         self.entry_divisa.pack(pady=5)
 
         # Label y Entry para efectivo
-        self.label_efectivo = ctk.CTkLabel(self, text="Efectivo (Si/No):")
-        self.label_efectivo.pack(pady=5)
-        self.entry_efectivo = ctk.CTkEntry(self, width=300)
-        self.entry_efectivo.pack(pady=5)
+        self.label_metodo = ctk.CTkLabel(self, text="Método de Pago")
+        self.label_metodo.pack(pady=5)
+        self.metodo_var = ctk.StringVar()
+        self.entry_metodo = ctk.CTkComboBox(self, variable=self.metodo_var,values=['Efectivo','Debito','Credito'],width=300)
+        self.entry_metodo.pack(pady=5)
         
         # Label y Entry para cuota
         self.label_cuota = ctk.CTkLabel(self, text="Cuota número:")
@@ -85,7 +86,7 @@ class AltaPagoFrame(ctk.CTkScrollableFrame):
                                                                       self.materia_var.get(),
                                                                       self.entry_monto.get(),
                                                                       self.divisa_var.get(),
-                                                                      self.entry_efectivo.get(),
+                                                                      self.metodo_var.get(),
                                                                       self.cuota_var.get(),
                                                                       self.entry_correspondencia.get(),
                                                                       self))
@@ -100,23 +101,21 @@ class AltaPagoFrame(ctk.CTkScrollableFrame):
         filtro = self.combobox_alumno.get()
         self.actualizar_combobox(filtro)
     
-    def save_pago(self, alumno_seleccionado, materia, monto, divisa, efectivo, cuota, correspondencia, ventana):
+    def save_pago(self, alumno_seleccionado, materia, monto, divisa, metodo, cuota, correspondencia, ventana):
         if alumno_seleccionado and materia and monto and divisa and cuota and correspondencia:
             try:
                 alumno_id = int(alumno_seleccionado.split(" - ")[0])
                 materia_id = int(materia.split(" - ")[0])
-                if efectivo == 'Si': efectivo = 1
-                else: efectivo = 0
                 monto = float(monto)
 
                 if divisa == "Real" or divisa == "Dolar": #caso moneda extranjera
                     monto_en_pesos = self.ask_exchange_rate(divisa)
-                    pago_id = insert_pago(self.conn, alumno_id, materia_id, monto_en_pesos, divisa, efectivo, cuota, correspondencia, self.usuario_actual.id)
+                    pago_id = insert_pago(self.conn, alumno_id, materia_id, monto_en_pesos, divisa, metodo, cuota, correspondencia, self.usuario_actual.id)
                     # guardamos ademas el registro en moneda extranjera
                     insert_pago_moneda_extranjera(self.conn, pago_id, divisa, monto)
 
                 elif divisa == "Peso":   #caso moneda local
-                    pago_id = insert_pago(self.conn, alumno_id, materia_id, monto, divisa, efectivo, cuota, correspondencia, self.usuario_actual.id)
+                    pago_id = insert_pago(self.conn, alumno_id, materia_id, monto, divisa, metodo, cuota, correspondencia, self.usuario_actual.id)
 
                 else: messagebox.showerror("Error", "Seleccione una divisa de la lista")
 
@@ -169,11 +168,10 @@ class AltaPagoFrame(ctk.CTkScrollableFrame):
         """
         rate = simpledialog.askfloat(
             "Total en pesos",
-            f"Ingrese el equivalente en pesos del pago en {divisa}:",
+            f"Ingrese el equivalente en pesos del pago en {divisa}es:",
             minvalue=0.01
         )
         return rate
-        return None
         
 
     def clear_fields(self):
@@ -183,4 +181,4 @@ class AltaPagoFrame(ctk.CTkScrollableFrame):
         self.divisa_var.set("")
         self.entry_correspondencia.delete(0, "end")
         self.cuota_var.set("")
-        self.entry_efectivo.delete(0, "end")
+        self.metodo_var.set("")

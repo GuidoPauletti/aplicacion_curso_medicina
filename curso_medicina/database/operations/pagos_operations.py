@@ -80,16 +80,16 @@ def editar_pago(connection, id, monto, cuota):
     finally:
         cursor.close()
     
-def insert_pago(connection, id_alumno, id_materia, monto, divisa, efectivo, cuota, correspondencia, id_usuario):
+def insert_pago(connection, id_alumno, id_materia, monto, divisa, metodo, cuota, correspondencia, id_usuario):
     try:
         cursor = connection.cursor()
         sql_insert_query = f"""
-        INSERT INTO pago (id_inscripcion, monto, divisa, efectivo, cuota, correspondencia, fecha, id_usuario, cuota_de_mes) 
+        INSERT INTO pago (id_inscripcion, monto, divisa, metodo, cuota, correspondencia, fecha, id_usuario, cuota_de_mes) 
         VALUES (
             (SELECT DISTINCT id FROM inscripcion WHERE id_alumno = {id_alumno} AND id_materia = {id_materia} AND estado = 'curso'),
             {monto},
             '{divisa}',
-            '{efectivo}',
+            '{metodo}',
             {cuota},
             '{correspondencia}',
             CURDATE(),
