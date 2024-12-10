@@ -17,7 +17,7 @@ class PDFGenerator:
         # Definir anchos fijos para las columnas (en puntos)
         self.col_widths = [
             70,     # Monto
-            70,     # Divisa
+            75,     # Divisa
             240,    # Descripción
             100,    # Cuenta
             70      # Fecha
@@ -50,19 +50,19 @@ class PDFGenerator:
             
             if row[1] == "Entrada":
                 entradas.append([row[i] for i in(2,3,4,5,6)])
-                if row[3] == "Peso":
+                if row[3].startswith("Peso"):
                     total_entradas += float(monto)
-                elif row[3] == "Real":
+                elif row[3].startswith("Real"):
                     total_entradas_reales += float(monto)
-                elif row[3] == "Dolar":
+                elif row[3].startswith("Dolar"):
                     total_entradas_dolares += float(monto)
             else:
                 salidas.append([row[i] for i in(2,3,4,5,6)])
-                if row[3] == "Peso":
+                if row[3].startswith("Peso"):
                     total_salidas += float(monto)
-                elif row[3] == "Real":
+                elif row[3].startswith("Real"):
                     total_salidas_reales += float(monto)
-                elif row[3] == "Dolar":
+                elif row[3].startswith("Dolar"):
                     total_salidas_dolares += float(monto)
                 
         return {

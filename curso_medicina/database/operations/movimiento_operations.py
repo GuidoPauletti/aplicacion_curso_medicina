@@ -29,7 +29,7 @@ def get_movimientos_con_detalles(connection, ventana_temporal):
                 WHEN p.divisa != 'Peso' THEN pde.monto
                 ELSE p.monto
             END AS Monto,
-            p.divisa AS Divisa,
+            CONCAT(p.divisa, ' (', p.metodo, ')') AS Divisa,
             CONCAT(a.nombre, ' ', a.apellido, ' - Cuota ', p.cuota, ' de ', m.denominacion) AS Descripción,
             p.correspondencia AS Cuenta,
             p.fecha AS Fecha
