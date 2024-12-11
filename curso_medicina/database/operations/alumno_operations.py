@@ -113,3 +113,20 @@ def editar_alumno(connection, id, nombre, apellido, dni, calle, numero, email, t
         return
     finally:
         cursor.close()
+
+def editar_dia_de_pago_alumno(connection, id, paga_el):
+    try:
+        cursor = connection.cursor()
+        sql_query = """
+            UPDATE inscripcion
+            SET paga_el = %s
+            WHERE id_alumno = %s
+        """
+        cursor.execute(sql_query, (paga_el, id))
+        connection.commit()
+        return "Dia de pago editado correctamente"
+    except Exception as e:
+        print(f"Error al editar dia de pago del alumno: {e}")
+        return
+    finally:
+        cursor.close()

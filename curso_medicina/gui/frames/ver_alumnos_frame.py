@@ -1,4 +1,4 @@
-from curso_medicina.database.operations.alumno_operations import get_alumnos, editar_alumno
+from curso_medicina.database.operations.alumno_operations import get_alumnos, editar_alumno, editar_dia_de_pago_alumno
 
 import tkinter as tk
 from tkinter import ttk
@@ -92,9 +92,11 @@ class VerAlumnosFrame(ctk.CTkFrame):
             self.ventana_editar_alumno(alumno_data, selected_item)
 
     def ventana_editar_alumno(self, alumno_data, selected_item):
-        self.edit_window_alumno = ctk.CTkToplevel(self)
-        self.edit_window_alumno.title("Editar Alumno")
-        self.edit_window_alumno.geometry("400x600")
+        self.edit_window_alumno_frame = ctk.CTkToplevel(self)
+        self.edit_window_alumno_frame.title("Editar Alumno")
+        self.edit_window_alumno_frame.geometry("400x600")
+        self.edit_window_alumno = ctk.CTkScrollableFrame(self.edit_window_alumno_frame)
+        self.edit_window_alumno.pack(fill="both", expand=True)
 
         label_nombre = ctk.CTkLabel(self.edit_window_alumno, text="Nombre")
         label_nombre.pack(pady=5)
@@ -138,6 +140,12 @@ class VerAlumnosFrame(ctk.CTkFrame):
         entry_telefono.pack(pady = 5)
         entry_telefono.insert(0,alumno_data[7])
 
+        label_paga_el = ctk.CTkLabel(self.edit_window_alumno, text="Dia límite para pagar cada mes")
+        label_paga_el.pack(pady = 5)
+        entry_paga_el = ctk.CTkEntry(self.edit_window_alumno, width=300)
+        entry_paga_el.pack(pady = 5)
+        entry_paga_el.insert(0,'10')
+
         # Botón para guardar los cambios
         btn_guardar = ctk.CTkButton(self.edit_window_alumno, text="Guardar",
                                     command=lambda: self.guardar_cambios_alumno(selected_item,
@@ -148,12 +156,14 @@ class VerAlumnosFrame(ctk.CTkFrame):
                                                                                 entry_numero.get(),
                                                                                 entry_email.get(),
                                                                                 entry_telefono.get(),
+                                                                                entry_paga_el.get(),
                                                                                 alumno_data))
         btn_guardar.pack(pady=10)
 
-    def guardar_cambios_alumno(self, selected_item, nombre, apellido, dni, calle, numero, email, telefono, alumno_data):
+    def guardar_cambios_alumno(self, selected_item, nombre, apellido, dni, calle, numero, email, telefono, paga_el, alumno_data):
         editado = editar_alumno(self.conn, alumno_data[0], nombre, apellido, dni, calle, numero, email, telefono)
+        editar_dia_de_pago_alumno(self.conn, alumno_data[0], paga_el)
         if editado:
             # Actualizar el registro en la tabla con los nuevos datos
             self.tabla_alumno.item(selected_item, values=(alumno_data[0], nombre, apellido, dni, calle, numero, email, telefono))
-            self.edit_window_alumno.destroy()
+            self.edit_window_alumno_frame.destroy()
