@@ -1,4 +1,4 @@
-from curso_medicina.database.operations.alumno_operations import get_alumnos, editar_alumno, editar_dia_de_pago_alumno
+from curso_medicina.database.operations.alumno_operations import get_alumnos, editar_alumno, editar_dia_de_pago_alumno, get_inscripciones_alumno
 
 import tkinter as tk
 from tkinter import ttk
@@ -79,10 +79,36 @@ class VerAlumnosFrame(ctk.CTkFrame):
             # Crear una nueva ventana para ver alumno
             self.vista_alumno = ctk.CTkToplevel(self)
             self.vista_alumno.title("Vista Alumno")
-            self.vista_alumno.geometry("400x300")
+            self.vista_alumno.geometry("400x400")
 
-            label_alumno = ctk.CTkLabel(self.vista_alumno, text=datos_alumno[1])
-            label_alumno.pack(pady=5)
+            self.label_nombre_alumno = ctk.CTkLabel(self.vista_alumno, text=f"{datos_alumno[1]} {datos_alumno[2]}")
+            self.label_nombre_alumno.pack(pady=5)
+
+            # Definir las columnas de la tabla
+            columnas_va = ("Materia", "Tipo de inscripcion", "Dia limite para pagar cada mes", "Deuda")
+
+            self.frame_inscripciones_alumno = ctk.CTkFrame(self.vista_alumno)
+            self.frame_inscripciones_alumno.pack(fill="both", expand=True)
+
+            # Crear la tabla
+            self.tabla_inscripciones_alumno = ttk.Treeview(self.frame_inscripciones_alumno, columns=columnas_va, show="headings", selectmode="browse")
+            for col in columnas_va:
+                self.tabla_inscripciones_alumno.heading(col, text=col)
+
+            self.tabla_inscripciones_alumno.bind("<<TreeviewSelect>>", self.on_tree_select_incripcion_alumno) # accion al seleccionar un registro
+
+            self.tabla_inscripciones_alumno.pack(fill="both", expand=True)
+
+            # Obtener datos de inscripciones del alumno
+            self.cargar_inscripcion_alumno(alumno_id)
+
+            # Crear frame para los botones debajo de la tabla
+            self.buttons_frame_inscripciones_alumno = ctk.CTkFrame(self.frame_inscripciones_alumno, fg_color="transparent")
+            self.buttons_frame_inscripciones_alumno.pack(padx=10, pady=10)
+
+            # Crear botón "Editar inscripcion"
+            self.btn_ver_detalle_inscripcion_alumno = ctk.CTkButton(self.buttons_frame_inscripciones_alumno, text="Ver Alumno", command=lambda: print('ver inscripcion') ,state="disabled")
+            self.btn_ver_detalle_inscripcion_alumno.grid(row=0, column=1, padx=5)
 
     def editar_alumno(self):
         # Obtener el item seleccionado
@@ -167,3 +193,17 @@ class VerAlumnosFrame(ctk.CTkFrame):
             # Actualizar el registro en la tabla con los nuevos datos
             self.tabla_alumno.item(selected_item, values=(alumno_data[0], nombre, apellido, dni, calle, numero, email, telefono))
             self.edit_window_alumno_frame.destroy()
+
+    def cargar_inscripcion_alumno(self, id_alumno):
+        
+        # Limpiar tabla existente
+        for item in self.tabla_inscripciones_alumno.get_children():
+            self.tabla_inscripciones_alumno.delete(item)
+
+        inscripciones_alumno = get_inscripciones_alumno(self.conn, id_alumno)
+
+        for inscripcion in inscripciones_alumno:
+            self.tabla_inscripciones_alumno.insert("", tk.END, values=(inscripcion[0],inscripcion[1],inscripcion[2],inscripcion[3],))
+
+    def on_tree_select_incripcion_alumno(self, event):
+        self.btn_ver_detalle_inscripcion_alumno.configure(state="normal")
