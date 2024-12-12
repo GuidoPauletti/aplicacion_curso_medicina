@@ -119,3 +119,20 @@ def finalizar_inscripcion(connection, id):
     finally:
         cursor.close()
     
+def editar_inscripcion(connection, id_inscripcion, tipo, paga_el):
+    try:
+        cursor = connection.cursor()
+        sql_query = """
+            UPDATE inscripcion
+            SET id_info_inscripcion = (SELECT MAX(id) FROM info_inscripcion WHERE descripcion = %s), paga_el = %s
+            WHERE id = %s
+        """
+        cursor.execute(sql_query, (tipo, paga_el, id_inscripcion))
+        connection.commit()
+        return "Inscripcion editada correctamente"
+    except Exception as e:
+        print(f"Error al editar la inscripcion: {e}")
+        connection.rollback()
+        return
+    finally:
+        cursor.close()

@@ -135,7 +135,7 @@ def get_inscripciones_alumno(connection, id_alumno):
     try:
         cursor = connection.cursor()
         sql_select_query = """
-        SELECT m.denominacion, ii.descripcion, i.paga_el, COALESCE(d.monto, 0) AS deuda
+        SELECT i.id, m.denominacion, ii.descripcion, i.paga_el, COALESCE(d.monto, 0) AS deuda
         FROM alumno a
         LEFT JOIN inscripcion i ON a.id = i.id_alumno
         LEFT JOIN materia m ON m.id = i.id_materia
