@@ -25,10 +25,11 @@ class AltaGastoFrame(ctk.CTkScrollableFrame):
         self.entry_monto.pack(pady=5)
 
         # Label y Entry para divisa
-        self.label_divisa = ctk.CTkLabel(self, text="Divisa (Peso/Real):")
+        self.label_divisa = ctk.CTkLabel(self, text="Divisa:")
         self.label_divisa.pack(pady=5)
         self.divisa_var = ctk.StringVar()
-        self.entry_divisa = ctk.CTkComboBox(self, variable=self.divisa_var,values=['Peso','Real','Dolar'],width=300)
+        self.divisa_var.set("Peso")
+        self.entry_divisa = ctk.CTkOptionMenu(self, variable=self.divisa_var,values=['Peso','Real','Dolar'],width=300)
         self.entry_divisa.pack(pady=5)
 
         # Label y Entry para correspondencia

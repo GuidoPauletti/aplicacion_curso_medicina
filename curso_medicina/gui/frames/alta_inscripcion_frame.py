@@ -48,7 +48,7 @@ class AltaInscripcionFrame(ctk.CTkScrollableFrame):
         self.tipo_inscripciones = self.get_tipo_inscripciones()
         self.lista_inscripciones = [f"{inscripcion[0]} - {inscripcion[1]}" for inscripcion in self.tipo_inscripciones] + ["Otro"]
 
-        self.combobox_inscripcion = ctk.CTkComboBox(self,
+        self.combobox_inscripcion = ctk.CTkOptionMenu(self,
                                                     variable=self.inscripcion_var,
                                                     values=self.lista_inscripciones,
                                                     width=300,

@@ -43,7 +43,7 @@ class AltaPagoFrame(ctk.CTkScrollableFrame):
         self.label_materia = ctk.CTkLabel(self, text="Materia:")
         self.label_materia.pack(pady=5)
         self.materia_var = ctk.StringVar()
-        self.combobox_materia = ctk.CTkComboBox(self, variable=self.materia_var, values=self.materias, width=300, command=self.actualizar_cuotas)
+        self.combobox_materia = ctk.CTkOptionMenu(self, variable=self.materia_var, values=self.materias, width=300, command=self.actualizar_cuotas)
         self.combobox_materia.pack(pady=5)
         
         # Label y Entry para monto
@@ -56,14 +56,16 @@ class AltaPagoFrame(ctk.CTkScrollableFrame):
         self.label_divisa = ctk.CTkLabel(self, text="Divisa:")
         self.label_divisa.pack(pady=5)
         self.divisa_var = ctk.StringVar()
-        self.entry_divisa = ctk.CTkComboBox(self, variable=self.divisa_var,values=['Peso','Real','Dolar'],width=300)
+        self.divisa_var.set("Peso")
+        self.entry_divisa = ctk.CTkOptionMenu(self, variable=self.divisa_var,values=['Peso','Real','Dolar'],width=300)
         self.entry_divisa.pack(pady=5)
 
         # Label y Entry para efectivo
         self.label_metodo = ctk.CTkLabel(self, text="Método de Pago")
         self.label_metodo.pack(pady=5)
         self.metodo_var = ctk.StringVar()
-        self.entry_metodo = ctk.CTkComboBox(self, variable=self.metodo_var,values=['Efectivo','Debito','Credito'],width=300)
+        self.metodo_var.set("Efectivo")
+        self.entry_metodo = ctk.CTkOptionMenu(self, variable=self.metodo_var,values=['Efectivo','Debito','Credito'],width=300)
         self.entry_metodo.pack(pady=5)
         
         # Label y Entry para cuota

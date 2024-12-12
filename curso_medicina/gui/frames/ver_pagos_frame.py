@@ -20,7 +20,7 @@ class VerPagosFrame(ctk.CTkFrame):
         
         self.optionmenu_correspondencia = ctk.CTkOptionMenu(
             self.frame_filtros,
-            values=["Todos", "Fernanda", "Duanne"],
+            values=["Todos", "Fernanda", "Duanne", "Felipe"],
             command=self.filtrar_por_correspondencia
         )
         self.optionmenu_correspondencia.pack(side="left", padx=10)
