@@ -1,11 +1,12 @@
-# gui/utils/pdf_generator.py
+from datetime import datetime
+from tkinter import filedialog
+
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.units import inch
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from datetime import datetime
-import os
+
 
 class PDFGenerator:
     def __init__(self, tree_data):
@@ -276,15 +277,20 @@ def generate_movement_report(tree_view):
         values = tree_view.item(item)['values']
         data.append(values)
     
-    # Crear el directorio de reportes si no existe
-    reports_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'reports')
-    os.makedirs(reports_dir, exist_ok=True)
     
     # Generar nombre único para el archivo
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    filename = f"reporte_movimientos_{timestamp}.pdf"
-    output_path = os.path.join(reports_dir, filename)
+    default_filename = f"reporte_movimientos_{timestamp}.pdf"
+    output_path = filedialog.asksaveasfilename(
+        defaultextension=".pdf",
+        filetypes=[("PDF files", "*.pdf")],
+        initialfile=default_filename
+    )
     
+    # Verificar si el usuario seleccionó una ubicación
+    if not output_path:
+        return None  # El usuario canceló la selección
+
     # Generar el PDF
     generator = PDFGenerator(data)
     generator.generate_pdf(output_path)

@@ -77,6 +77,10 @@ class VerMovimientosFrame(ctk.CTkFrame):
             
             # Generar el reporte
             output_path = generate_movement_report(self.tabla)
+
+            # Verificar si el usuario seleccionó una ubicación
+            if not output_path:
+                return None  # El usuario canceló la selección
             
             # Mostrar mensaje de éxito
             messagebox.showinfo(
