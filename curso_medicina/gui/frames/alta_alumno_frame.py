@@ -203,9 +203,8 @@ class AltaAlumnoFrame(ctk.CTkScrollableFrame):
 
         label_descripcion = ctk.CTkLabel(self.create_window_inscripcion, text="Descripción")
         label_descripcion.pack(pady=5)
-        entry_descripcion = ctk.CTkEntry(self.create_window_inscripcion, width=300)
+        entry_descripcion = ctk.CTkEntry(self.create_window_inscripcion, width=300, placeholder_text="Descripción breve del tipo de incripción")
         entry_descripcion.pack(pady=5)
-        entry_descripcion.insert(0,"Descripción breve del tipo de incripción")
 
         label_cuota = ctk.CTkLabel(self.create_window_inscripcion, text="Monto cuota")
         label_cuota.pack(pady=5)
