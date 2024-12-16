@@ -5,9 +5,9 @@ def create_connection():
     """Crear una conexión a la base de datos MySQL"""
     try:
         connection = mysql.connector.connect(
-            host="localhost",
+            host="34.171.118.187",
             user="root",
-            password="grootsql",
+            password="f/J+*)<1_'zTr09g",
             database="curso_medicina"
         )
         if connection.is_connected():
