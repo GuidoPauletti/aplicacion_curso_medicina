@@ -39,5 +39,6 @@ exe = EXE(
 
 app = BUNDLE(
     exe,
-    name='CursoMedicina.app'
+    name='CursoMedicina.app',
+    icon='icon.icns'
 )
