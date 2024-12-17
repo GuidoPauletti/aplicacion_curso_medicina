@@ -36,3 +36,10 @@ exe = EXE(
     codesign_identity=None,
     entitlements_file=None,
 )
+
+app = BUNDLE(
+    exe,
+    name='CursoMedicina.app',
+    icon=None,  # Cambiar si tienes un ícono en formato .icns
+    bundle_identifier='com.tuempresa.cursomedicina',  # Opcional
+)
