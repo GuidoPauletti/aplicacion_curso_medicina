@@ -2,7 +2,7 @@
 
 
 a = Analysis(
-    ['curso_medicina\\main.py'],
+    ['curso_medicina/main.py'],
     pathex=[],
     binaries=[],
     datas=[],
