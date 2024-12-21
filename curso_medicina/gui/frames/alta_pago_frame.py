@@ -60,12 +60,14 @@ class AltaPagoFrame(ctk.CTkScrollableFrame):
         self.entry_divisa = ctk.CTkOptionMenu(self, variable=self.divisa_var,values=['Peso','Real','Dolar'],width=300)
         self.entry_divisa.pack(pady=5)
 
-        # Label y Entry para efectivo
+        # Label y Entry para metodo de pago
         self.label_metodo = ctk.CTkLabel(self, text="Método de Pago")
         self.label_metodo.pack(pady=5)
         self.metodo_var = ctk.StringVar()
-        self.metodo_var.set("Efectivo")
-        self.entry_metodo = ctk.CTkOptionMenu(self, variable=self.metodo_var,values=['Efectivo','Debito','Credito'],width=300)
+        self.entry_metodo = ctk.CTkOptionMenu(self,
+                                              variable=self.metodo_var,values=['Efectivo','Transferencia'],
+                                              command=self.on_metodo_seleccionado,
+                                              width=300)
         self.entry_metodo.pack(pady=5)
         
         # Label y Entry para cuota
@@ -76,9 +78,14 @@ class AltaPagoFrame(ctk.CTkScrollableFrame):
         self.combobox_cuota.pack(pady=5)
 
         # Label y Entry para correspondencia
-        self.label_correspondencia = ctk.CTkLabel(self, text="Corresponde a:")
+        self.label_correspondencia = ctk.CTkLabel(self, text="Cuenta:")
         self.label_correspondencia.pack(pady=5)
-        self.entry_correspondencia = ctk.CTkEntry(self, width=300)
+        self.correspondencia_var = ctk.StringVar()
+        self.correspondencia_var.set("")
+        self.entry_correspondencia = ctk.CTkOptionMenu(self,
+                                                       variable=self.correspondencia_var,
+                                                       values=["enyn", "Fernanda", "Felipe"],
+                                                       width=300)
         self.entry_correspondencia.pack(pady=5)
 
     def create_save_button(self):
@@ -90,7 +97,7 @@ class AltaPagoFrame(ctk.CTkScrollableFrame):
                                                                       self.divisa_var.get(),
                                                                       self.metodo_var.get(),
                                                                       self.cuota_var.get(),
-                                                                      self.entry_correspondencia.get(),
+                                                                      self.correspondencia_var.get(),
                                                                       self))
         btn_guardar.pack(pady=20)
 
@@ -104,33 +111,38 @@ class AltaPagoFrame(ctk.CTkScrollableFrame):
         self.actualizar_combobox(filtro)
     
     def save_pago(self, alumno_seleccionado, materia, monto, divisa, metodo, cuota, correspondencia, ventana):
-        if alumno_seleccionado and materia and monto and divisa and cuota and correspondencia:
-            try:
-                alumno_id = int(alumno_seleccionado.split(" - ")[0])
-                materia_id = int(materia.split(" - ")[0])
-                monto = float(monto)
+        if alumno_seleccionado and materia and monto and divisa and cuota:
+            if metodo == "Transferencia" and correspondencia == "":
+                messagebox.showerror("Advertencia", "Debe elegir la cuenta para pagos realizados por transferencia")
+            elif metodo == "Efectivo" and correspondencia != "":
+                messagebox.showerror("Advertencia", "Para pagos en efectivo debe seleccionar 'No aplica' en el campo de cuenta")
+            else:
+                try:
+                    alumno_id = int(alumno_seleccionado.split(" - ")[0])
+                    materia_id = int(materia.split(" - ")[0])
+                    monto = float(monto)
 
-                if divisa == "Real" or divisa == "Dolar": #caso moneda extranjera
-                    monto_en_pesos = self.ask_exchange_rate(divisa)
-                    pago_id = insert_pago(self.conn, alumno_id, materia_id, monto_en_pesos, divisa, metodo, cuota, correspondencia, self.usuario_actual.id)
-                    # guardamos ademas el registro en moneda extranjera
-                    insert_pago_moneda_extranjera(self.conn, pago_id, divisa, monto)
+                    if divisa == "Real" or divisa == "Dolar": #caso moneda extranjera
+                        monto_en_pesos = self.ask_exchange_rate(divisa)
+                        pago_id = insert_pago(self.conn, alumno_id, materia_id, monto_en_pesos, divisa, metodo, cuota, correspondencia, self.usuario_actual.id)
+                        # guardamos ademas el registro en moneda extranjera
+                        insert_pago_moneda_extranjera(self.conn, pago_id, divisa, monto)
 
-                elif divisa == "Peso":   #caso moneda local
-                    pago_id = insert_pago(self.conn, alumno_id, materia_id, monto, divisa, metodo, cuota, correspondencia, self.usuario_actual.id)
+                    elif divisa == "Peso":   #caso moneda local
+                        pago_id = insert_pago(self.conn, alumno_id, materia_id, monto, divisa, metodo, cuota, correspondencia, self.usuario_actual.id)
 
-                else: messagebox.showerror("Error", "Seleccione una divisa de la lista")
+                    else: messagebox.showerror("Error", "Seleccione una divisa de la lista")
 
-                if pago_id:
-                    messagebox.showinfo("Éxito", f"Pago ID {pago_id} guardado correctamente")
-                    cuotas_restantes = self.combobox_cuota.cget("values")
-                    if len(cuotas_restantes) <= 1:
-                        self.chequear_fin_inscripcion(pago_id, cuota)
-                    self.clear_fields()
-                else:
-                    messagebox.showerror("Error", "No se pudo guardar el pago")
-            except ValueError:
-                messagebox.showerror("Error", "Datos inválidos. Verifique la información ingresada.")
+                    if pago_id:
+                        messagebox.showinfo("Éxito", f"Pago ID {pago_id} guardado correctamente")
+                        cuotas_restantes = self.combobox_cuota.cget("values")
+                        if len(cuotas_restantes) <= 1:
+                            self.chequear_fin_inscripcion(pago_id, cuota)
+                        self.clear_fields()
+                    else:
+                        messagebox.showerror("Error", "No se pudo guardar el pago")
+                except ValueError:
+                    messagebox.showerror("Error", "Datos inválidos. Verifique la información ingresada.")
         else:
             messagebox.showwarning("Advertencia", "Todos los campos son obligatorios")
 
@@ -163,6 +175,13 @@ class AltaPagoFrame(ctk.CTkScrollableFrame):
         if monto_pagado >= deuda:
             finalizar_inscripcion(self.conn, id_inscripcion)
 
+    def on_metodo_seleccionado(self, event):
+        if self.metodo_var.get() == "Transferencia":
+            self.entry_correspondencia.configure(state="normal")
+        else:
+            self.correspondencia_var.set("")
+            self.entry_correspondencia.configure(state="disabled")
+
     @staticmethod
     def ask_exchange_rate(divisa):
         """
@@ -181,6 +200,6 @@ class AltaPagoFrame(ctk.CTkScrollableFrame):
         self.materia_var.set("")
         self.entry_monto.delete(0, "end")
         self.divisa_var.set("")
-        self.entry_correspondencia.delete(0, "end")
+        self.correspondencia_var.set("")
         self.cuota_var.set("")
         self.metodo_var.set("")

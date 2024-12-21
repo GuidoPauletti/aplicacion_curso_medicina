@@ -1,0 +1,11 @@
+# Ignorar carpetas de compilación y distribución
+dist/
+build/
+
+# Ignorar __pycache__ y archivos compilados de Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Ignorar archivos generados por setuptools
+curso_medicina.egg-info/
