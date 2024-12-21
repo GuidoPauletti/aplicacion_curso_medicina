@@ -14,6 +14,28 @@ def get_info_inscripciones(connection):
     finally:
         cursor.close()
 
+def get_info_inscripcion(connection, id_inscripcion):
+    try:
+        cursor = connection.cursor()
+
+        sql_query = """
+        SELECT ii.monto_cuota, ii.monto_cuota_recargo, ii.n_cuotas, ii.descripcion
+        FROM inscripcion i
+        LEFT JOIN info_inscripcion ii
+        ON i.id_info_inscripcion = ii.id
+        WHERE i.id = %s
+        """
+        cursor.execute(sql_query, (id_inscripcion,))
+        
+        info_inscripcion = cursor.fetchone()
+        return info_inscripcion
+    except Exception as e:
+        print(f"Error al obtener info de inscripcion: {e}")
+        connection.rollback()
+        return None
+    finally:
+        cursor.close()
+
 def get_descripciones(connection):
     try:
         cursor = connection.cursor()

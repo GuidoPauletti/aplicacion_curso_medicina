@@ -1,7 +1,7 @@
 from curso_medicina.database.operations.alumno_operations import get_alumnos, get_cuotas_por_alumno_materia
 from curso_medicina.database.operations.materia_operations import get_materias, get_materias_por_alumno
 from curso_medicina.database.operations.pagos_operations import insert_pago, get_info_ultimo_pago, insert_pago_moneda_extranjera
-from curso_medicina.database.operations.inscripcion_operations import finalizar_inscripcion, get_inscripcion_alumno_materia
+from curso_medicina.database.operations.inscripcion_operations import finalizar_inscripcion, get_inscripcion_alumno_materia, get_info_inscripcion
 
 from tkinter import messagebox, simpledialog
 
@@ -45,6 +45,10 @@ class AltaPagoFrame(ctk.CTkScrollableFrame):
         self.materia_var = ctk.StringVar()
         self.combobox_materia = ctk.CTkOptionMenu(self, variable=self.materia_var, values=self.materias, width=300, command=self.actualizar_cuotas)
         self.combobox_materia.pack(pady=5)
+
+        # Mostrar la informacion del tipo de inscripcion
+        self.label_info_inscripcion = ctk.CTkLabel(self, text="", text_color="#0066ff")
+        self.label_info_inscripcion.pack(pady=3)
         
         # Label y Entry para monto
         self.label_monto = ctk.CTkLabel(self, text="Monto:")
@@ -158,7 +162,12 @@ class AltaPagoFrame(ctk.CTkScrollableFrame):
     def actualizar_cuotas(self, event):
         alumno_seleccionado = self.combobox_alumno.get()
         materia_seleccionada = self.combobox_materia.get()
-        alumno_id = int(alumno_seleccionado.split(" - ")[0])
+        try:
+            alumno_id = int(alumno_seleccionado.split(" - ")[0])
+        except ValueError:
+            self.combobox_materia.configure(values=self.materias)
+            self.label_info_inscripcion.configure(text="")
+            return
         materia_id = int(materia_seleccionada.split(" - ")[0])
         inscripcion_alumno_materia = get_inscripcion_alumno_materia(self.conn, alumno_id, materia_id)
         n_cuotas = inscripcion_alumno_materia[-1]
@@ -166,6 +175,7 @@ class AltaPagoFrame(ctk.CTkScrollableFrame):
             cuotas = get_cuotas_por_alumno_materia(self.conn, alumno_id, materia_id)
             valores_cuotas = [f"{i}" for i in range(cuotas[-1] + 1, n_cuotas + 1)]
             self.combobox_cuota.configure(values=valores_cuotas)
+            self.display_info_inscripcion(inscripcion_alumno_materia[0])
 
     def chequear_fin_inscripcion(self, pago_id, cuota):
         info_pago = get_info_ultimo_pago(self.conn, pago_id, cuota)
@@ -181,6 +191,10 @@ class AltaPagoFrame(ctk.CTkScrollableFrame):
         else:
             self.correspondencia_var.set("")
             self.entry_correspondencia.configure(state="disabled")
+
+    def display_info_inscripcion(self, id_inscripcion):
+        info_inscripcion = get_info_inscripcion(self.conn, id_inscripcion)
+        self.label_info_inscripcion.configure(text=f"Inscripción {info_inscripcion[3]}: {info_inscripcion[2]} cuotas de {info_inscripcion[0]} o {info_inscripcion[1]} con recargo")
 
     @staticmethod
     def ask_exchange_rate(divisa):
