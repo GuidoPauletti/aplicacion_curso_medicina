@@ -1,4 +1,5 @@
 from curso_medicina.database.operations.pagos_operations import get_pagos_con_detalles, borrar_pago, editar_pago
+from curso_medicina.database.operations.alumno_operations import get_alumnos
 
 from tkinter import ttk
 
@@ -12,18 +13,37 @@ class VerPagosFrame(ctk.CTkFrame):
 
     def setup_ui(self):
         # Crear elementos de filtro
-        self.label_filtro = ctk.CTkLabel(self, text="Filtrar por Correspondencia:")
-        self.label_filtro.pack(pady=5)
-
         self.frame_filtros = ctk.CTkFrame(self, fg_color="transparent")
         self.frame_filtros.pack(pady=5)
+
+        self.label_filtro_cuenta = ctk.CTkLabel(self.frame_filtros, text="Filtrar por Cuenta:")
+        self.label_filtro_cuenta.grid(row=0, column=0, padx=5)
+
+        self.label_filtro_cuenta = ctk.CTkLabel(self.frame_filtros, text="Filtrar por Alumno:")
+        self.label_filtro_cuenta.grid(row=0, column=1, padx=5)
         
         self.optionmenu_correspondencia = ctk.CTkOptionMenu(
             self.frame_filtros,
-            values=["Todos", "Fernanda", "Duanne", "Felipe"],
+            values=["Todos", "enyn", "Fernanda", "Felipe"],
             command=self.filtrar_por_correspondencia
         )
-        self.optionmenu_correspondencia.pack(side="left", padx=10)
+        self.optionmenu_correspondencia.grid(row=1, column=0, padx=5)
+
+        # Obtener lista de alumnos
+        self.alumnos = get_alumnos(self.conn)
+
+        self.alumno_var = ctk.StringVar()
+        self.optionmenu_alumno = ctk.CTkComboBox(
+            self.frame_filtros,
+            variable=self.alumno_var,
+            command=self.filtrar_por_alumno
+        )
+        self.optionmenu_alumno.grid(row=1, column=1, padx=5)
+
+        self.actualizar_combobox("")  # Inicializa la lista completa
+
+        # Evento para filtrar nombres mientras se escribe en el ComboBox
+        self.optionmenu_alumno.bind('<KeyRelease>', self.filtrar_alumnos)
 
         # Crear tabla
         columnas = ("ID", "Nombre", "Apellido", "Materia", "Monto (AR$)", "Cuota", "Fecha")
@@ -64,18 +84,37 @@ class VerPagosFrame(ctk.CTkFrame):
         # Cargar datos iniciales
         self.cargar_pagos()
 
-    def cargar_pagos(self, correspondencia="Todos"):
+    def cargar_pagos(self, correspondencia="Todos", alumno = None):
         # Limpiar tabla existente
         for item in self.tabla.get_children():
             self.tabla.delete(item)
             
         # Traer info de pagos desde base de datos
-        pagos = get_pagos_con_detalles(self.conn, correspondencia)
+        pagos = get_pagos_con_detalles(self.conn, correspondencia, alumno)
         for pago in pagos:
             self.tabla.insert("", "end", values=pago)
 
     def filtrar_por_correspondencia(self, correspondencia):
-        self.cargar_pagos(correspondencia)
+        alumno = self.alumno_var.get()
+        if alumno == "":
+            self.cargar_pagos(correspondencia)
+        else:
+            self.cargar_pagos(correspondencia, alumno[0])
+
+    def filtrar_por_alumno(self, alumno):
+        self.cargar_pagos(self.optionmenu_correspondencia.get(), alumno[0])
+
+    def actualizar_combobox(self, filtro):
+        # Filtra la lista de alumnos por el filtro (ignora mayúsculas/minúsculas)
+        alumnos_filtrados = [f"{alumno[0]} - {alumno[1]} {alumno[2]}"
+                             for alumno in self.alumnos
+                             if alumno[1].lower().startswith(filtro.lower())
+                             or alumno[2].lower().startswith(filtro.lower())]
+        self.optionmenu_alumno.configure(values=alumnos_filtrados)
+
+    def filtrar_alumnos(self, event):
+        filtro = self.optionmenu_alumno.get()
+        self.actualizar_combobox(filtro)
 
     def borrar_registro_pago(self):
         # Obtener el item seleccionado

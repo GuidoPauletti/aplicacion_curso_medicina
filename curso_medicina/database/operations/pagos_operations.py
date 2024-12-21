@@ -1,4 +1,4 @@
-def get_pagos_con_detalles(connection, correspondencia="%"):
+def get_pagos_con_detalles(connection, correspondencia="%", alumno = None):
     if not isinstance(correspondencia,str):
         correspondencia="%"
     if correspondencia == "Todos":
@@ -6,15 +6,27 @@ def get_pagos_con_detalles(connection, correspondencia="%"):
     try:
         cursor = connection.cursor()
 
-        sql_query = f"""
-            SELECT pago.id, alumno.nombre, alumno.apellido, materia.denominacion, pago.monto, pago.cuota, pago.fecha
-            FROM pago
-            JOIN inscripcion ON pago.id_inscripcion = inscripcion.id
-            JOIN alumno ON inscripcion.id_alumno = alumno.id
-            JOIN materia ON inscripcion.id_materia = materia.id
-            WHERE pago.correspondencia LIKE '{correspondencia}'
-            ORDER BY fecha DESC
-        """
+        if alumno:
+            sql_query = f"""
+                SELECT pago.id, alumno.nombre, alumno.apellido, materia.denominacion, pago.monto, pago.cuota, pago.fecha
+                FROM pago
+                JOIN inscripcion ON pago.id_inscripcion = inscripcion.id
+                JOIN alumno ON inscripcion.id_alumno = alumno.id
+                JOIN materia ON inscripcion.id_materia = materia.id
+                WHERE pago.correspondencia LIKE '{correspondencia}'
+                AND inscripcion.id_alumno = {alumno}
+                ORDER BY fecha DESC
+            """
+        else:
+            sql_query = f"""
+                SELECT pago.id, alumno.nombre, alumno.apellido, materia.denominacion, pago.monto, pago.cuota, pago.fecha
+                FROM pago
+                JOIN inscripcion ON pago.id_inscripcion = inscripcion.id
+                JOIN alumno ON inscripcion.id_alumno = alumno.id
+                JOIN materia ON inscripcion.id_materia = materia.id
+                WHERE pago.correspondencia LIKE '{correspondencia}'
+                ORDER BY fecha DESC
+            """
         cursor.execute(sql_query)
         
         pagos = cursor.fetchall()
