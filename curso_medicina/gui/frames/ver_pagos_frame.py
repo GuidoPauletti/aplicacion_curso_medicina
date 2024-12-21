@@ -6,9 +6,10 @@ from tkinter import ttk
 import customtkinter as ctk
 
 class VerPagosFrame(ctk.CTkFrame):
-    def __init__(self, parent, conn):
+    def __init__(self, parent, conn, usuario_actual):
         super().__init__(parent)
         self.conn = conn
+        self.usuario_actual = usuario_actual
         self.setup_ui()
 
     def setup_ui(self):
@@ -46,7 +47,7 @@ class VerPagosFrame(ctk.CTkFrame):
         self.optionmenu_alumno.bind('<KeyRelease>', self.filtrar_alumnos)
 
         # Crear tabla
-        columnas = ("ID", "Nombre", "Apellido", "Materia", "Monto (AR$)", "Cuota", "Fecha")
+        columnas = ("ID", "Nombre", "Apellido", "Materia", "Monto (AR$)", "Cuota", "Fecha", "Responsable")
         
         self.tabla = ttk.Treeview(self, columns=columnas, show="headings", selectmode="browse")
         
@@ -155,10 +156,10 @@ class VerPagosFrame(ctk.CTkFrame):
         btn_guardar.pack(pady=10)
 
     def guardar_cambios_pago(self, selected_item, monto, cuota, pago_data):
-        editado = editar_pago(self.conn, pago_data[0], monto, cuota)
+        editado = editar_pago(self.conn, pago_data[0], monto, cuota, self.usuario_actual.id)
         if editado:
             # Actualizar el registro en la tabla con los nuevos datos
-            self.tabla.item(selected_item, values=(pago_data[0], pago_data[1], pago_data[2], pago_data[3], monto, cuota, pago_data[6]))
+            self.tabla.item(selected_item, values=(pago_data[0], pago_data[1], pago_data[2], pago_data[3], monto, cuota, pago_data[6], self.usuario_actual.nombre))
             self.edit_window_pago.destroy()
 
     def on_tree_select(self, event):

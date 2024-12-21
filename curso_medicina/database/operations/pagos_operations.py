@@ -8,23 +8,25 @@ def get_pagos_con_detalles(connection, correspondencia="%", alumno = None):
 
         if alumno:
             sql_query = f"""
-                SELECT pago.id, alumno.nombre, alumno.apellido, materia.denominacion, pago.monto, pago.cuota, pago.fecha
-                FROM pago
-                JOIN inscripcion ON pago.id_inscripcion = inscripcion.id
-                JOIN alumno ON inscripcion.id_alumno = alumno.id
-                JOIN materia ON inscripcion.id_materia = materia.id
-                WHERE pago.correspondencia LIKE '{correspondencia}'
+                SELECT p.id, a.nombre, a.apellido, m.denominacion, p.monto, p.cuota, p.fecha, u.nombre
+                FROM pago p
+                JOIN inscripcion ON p.id_inscripcion = inscripcion.id
+                JOIN alumno a ON inscripcion.id_alumno = a.id
+                JOIN materia m ON inscripcion.id_materia = m.id
+                JOIN usuario u ON p.id_usuario = u.id
+                WHERE p.correspondencia LIKE '{correspondencia}'
                 AND inscripcion.id_alumno = {alumno}
                 ORDER BY fecha DESC
             """
         else:
             sql_query = f"""
-                SELECT pago.id, alumno.nombre, alumno.apellido, materia.denominacion, pago.monto, pago.cuota, pago.fecha
-                FROM pago
-                JOIN inscripcion ON pago.id_inscripcion = inscripcion.id
-                JOIN alumno ON inscripcion.id_alumno = alumno.id
-                JOIN materia ON inscripcion.id_materia = materia.id
-                WHERE pago.correspondencia LIKE '{correspondencia}'
+                SELECT p.id, a.nombre, a.apellido, m.denominacion, p.monto, p.cuota, p.fecha, u.nombre
+                FROM pago p
+                JOIN inscripcion ON p.id_inscripcion = inscripcion.id
+                JOIN alumno a ON inscripcion.id_alumno = a.id
+                JOIN materia m ON inscripcion.id_materia = m.id
+                JOIN usuario u ON p.id_usuario = u.id 
+                WHERE p.correspondencia LIKE '{correspondencia}'
                 ORDER BY fecha DESC
             """
         cursor.execute(sql_query)
@@ -74,12 +76,12 @@ def borrar_pago(connection, id):
         cursor.close()
         
 
-def editar_pago(connection, id, monto, cuota):
+def editar_pago(connection, id, monto, cuota, id_usuario):
     try:
         cursor = connection.cursor()
         sql_query = f"""
             UPDATE pago
-            SET monto = {monto}, cuota = {cuota}
+            SET monto = {monto}, cuota = {cuota}, id_usuario = {id_usuario}
             WHERE id = {id}
         """
         cursor.execute(sql_query)

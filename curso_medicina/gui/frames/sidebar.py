@@ -28,13 +28,14 @@ class Sidebar(ctk.CTkFrame):
         
         self.currently_selected_btn = btn_alta_alumno
 
-        btn_alta_gasto = ctk.CTkButton(
-            self,
-            text="Alta Gasto",
-            width=100
-        )
-        btn_alta_gasto.configure(command = lambda: self.navigation("alta_gasto", btn_alta_gasto))
-        btn_alta_gasto.pack(pady=10, anchor='center')
+        if self.user_role == "administrador":
+            btn_alta_gasto = ctk.CTkButton(
+                self,
+                text="Alta Gasto",
+                width=100
+            )
+            btn_alta_gasto.configure(command = lambda: self.navigation("alta_gasto", btn_alta_gasto))
+            btn_alta_gasto.pack(pady=10, anchor='center')
 
         btn_alta_pago = ctk.CTkButton(
             self,
@@ -69,13 +70,14 @@ class Sidebar(ctk.CTkFrame):
             btn_ver_gastos.configure(command = lambda: self.navigation("ver_gastos", btn_ver_gastos))
             btn_ver_gastos.pack(pady=10, anchor='center')
 
-        btn_ver_movimientos = ctk.CTkButton(
-            self,
-            text="Ver Movimientos",
-            width=100
-        )
-        btn_ver_movimientos.configure(command = lambda: self.navigation("ver_movimientos", btn_ver_movimientos))
-        btn_ver_movimientos.pack(pady=10, anchor='center')
+        if self.user_role == "administrador":
+            btn_ver_movimientos = ctk.CTkButton(
+                self,
+                text="Ver Movimientos",
+                width=100
+            )
+            btn_ver_movimientos.configure(command = lambda: self.navigation("ver_movimientos", btn_ver_movimientos))
+            btn_ver_movimientos.pack(pady=10, anchor='center')
 
         btn_ver_alumnos = ctk.CTkButton(
             self,

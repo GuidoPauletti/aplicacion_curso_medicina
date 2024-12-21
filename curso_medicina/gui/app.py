@@ -74,7 +74,7 @@ class Aplicacion:
             "alta_gasto": lambda: AltaGastoFrame(self.content_frame, self.conn, self.usuario_actual),
             "alta_pago": lambda: AltaPagoFrame(self.content_frame, self.conn, self.usuario_actual),
             "alta_inscripcion": lambda: AltaInscripcionFrame(self.content_frame, self.conn, self.usuario_actual),
-            "ver_pagos": lambda: VerPagosFrame(self.content_frame, self.conn),
+            "ver_pagos": lambda: VerPagosFrame(self.content_frame, self.conn, self.usuario_actual),
             "ver_gastos": lambda: VerGastosFrame(self.content_frame, self.conn, self.usuario_actual),
             "ver_alumnos": lambda: VerAlumnosFrame(self.content_frame, self.conn, self.usuario_actual),
             "ver_movimientos": lambda: VerMovimientosFrame(self.content_frame, self.conn),

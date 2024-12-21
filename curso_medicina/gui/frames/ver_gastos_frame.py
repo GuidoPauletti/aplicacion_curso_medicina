@@ -13,18 +13,18 @@ class VerGastosFrame(ctk.CTkFrame):
         self.setup_ui()
 
     def setup_ui(self):
-        label_filtro = ctk.CTkLabel(self, text="Filtrar por Correspondencia:")
+        label_filtro = ctk.CTkLabel(self, text="Filtrar por Cuenta:")
         label_filtro.pack(pady=5)
         
         self.optionmenu_correspondencia_gasto = ctk.CTkOptionMenu(
             self, 
-            values=["Todos", "Fernanda", "Duanne", "Felipe"],
+            values=["Todos", "enyn", "Fernanda", "Felipe"],
             command=self.filtrar_por_correspondencia_gasto  # Asocia el filtro con el método
         )
         self.optionmenu_correspondencia_gasto.pack(pady=5)
 
         # Definir las columnas de la tabla
-        columnas = ("ID","Monto", "Divisa", "Fecha", "Correspondencia", "Descripcion", "Responsable")
+        columnas = ("ID","Monto", "Divisa", "Fecha", "Cuenta", "Descripcion", "Responsable")
 
         # Crear la tabla
         self.tabla_gasto = ttk.Treeview(self, columns=columnas, show="headings", selectmode="browse")
@@ -103,7 +103,7 @@ class VerGastosFrame(ctk.CTkFrame):
         entry_monto.insert(0, gasto_data[1])
 
         # Label y Entry para correspondencia
-        label_correspondencia = ctk.CTkLabel(self.edit_window_gasto, text="Corresponde a:")
+        label_correspondencia = ctk.CTkLabel(self.edit_window_gasto, text="Cuenta:")
         label_correspondencia.pack(pady=5)
         entry_correspondencia = ctk.CTkEntry(self.edit_window_gasto, width=300)
         entry_correspondencia.pack(pady=5)
@@ -124,5 +124,5 @@ class VerGastosFrame(ctk.CTkFrame):
         editado = editar_gasto(self.conn, gasto_data[0], monto, correspondencia, descripcion, self.usuario_actual.id)
         if editado:
             # Actualizar el registro en la tabla con los nuevos datos
-            self.tabla_gasto.item(selected_item, values=(gasto_data[0], monto, gasto_data[2], gasto_data[3], correspondencia, descripcion, self.usuario_actual.id))
+            self.tabla_gasto.item(selected_item, values=(gasto_data[0], monto, gasto_data[2], gasto_data[3], correspondencia, descripcion, self.usuario_actual.nombre))
             self.edit_window_gasto.destroy()
