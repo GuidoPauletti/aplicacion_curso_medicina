@@ -2,6 +2,7 @@ from curso_medicina.database.operations.alumno_operations import get_alumnos, ge
 from curso_medicina.database.operations.materia_operations import get_materias, get_materias_por_alumno
 from curso_medicina.database.operations.pagos_operations import insert_pago, get_info_ultimo_pago, insert_pago_moneda_extranjera
 from curso_medicina.database.operations.inscripcion_operations import finalizar_inscripcion, get_inscripcion_alumno_materia, get_info_inscripcion
+from curso_medicina.database.operations.deuda_operations import sanear_deuda
 
 from tkinter import messagebox, simpledialog
 
@@ -139,6 +140,7 @@ class AltaPagoFrame(ctk.CTkScrollableFrame):
 
                     if pago_id:
                         messagebox.showinfo("Éxito", f"Pago ID {pago_id} guardado correctamente")
+                        self.chequear_deuda(pago_id, cuota)
                         cuotas_restantes = self.combobox_cuota.cget("values")
                         if len(cuotas_restantes) <= 1:
                             self.chequear_fin_inscripcion(pago_id, cuota)
@@ -188,6 +190,14 @@ class AltaPagoFrame(ctk.CTkScrollableFrame):
                 title="Pago de curso completado",
                 message="El alumno terminó de pagar todas las cuotas para esta materia"
             )
+
+    def chequear_deuda(self, pago_id, cuota):
+        info_pago = get_info_ultimo_pago(self.conn, pago_id, cuota)
+        monto_pagado = sum([pago[2] for pago in info_pago])
+        deuda = info_pago[-1][-1]
+        id_inscripcion = info_pago[0][1]
+        if monto_pagado >= deuda:
+            sanear_deuda(self.conn, id_inscripcion, cuota)
 
     def on_metodo_seleccionado(self, event):
         if self.metodo_var.get() == "Transferencia":

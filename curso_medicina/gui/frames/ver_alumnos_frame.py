@@ -210,7 +210,8 @@ class VerAlumnosFrame(ctk.CTkFrame):
         inscripciones_alumno = get_inscripciones_alumno(self.conn, id_alumno)
 
         for inscripcion in inscripciones_alumno:
-            self.tabla_inscripciones_alumno.insert("", tk.END, values=(inscripcion[0],inscripcion[1],inscripcion[2],inscripcion[3],inscripcion[4]))
+            deuda = inscripcion[4] - inscripcion[5]
+            self.tabla_inscripciones_alumno.insert("", tk.END, values=(inscripcion[0],inscripcion[1],inscripcion[2],inscripcion[3],deuda))
 
     def on_tree_select_incripcion_alumno(self, event):
         self.btn_editar_inscripcion_alumno.configure(state="normal")

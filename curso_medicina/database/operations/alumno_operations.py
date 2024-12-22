@@ -155,13 +155,15 @@ def get_inscripciones_alumno(connection, id_alumno):
     try:
         cursor = connection.cursor()
         sql_select_query = """
-        SELECT i.id, m.denominacion, ii.descripcion, i.paga_el, COALESCE(d.monto, 0) AS deuda
+        SELECT i.id, m.denominacion, ii.descripcion, i.paga_el, COALESCE(d.monto, 0) deuda, SUM(COALESCE(p.monto,0)) AS pagado
         FROM alumno a
         LEFT JOIN inscripcion i ON a.id = i.id_alumno
         LEFT JOIN materia m ON m.id = i.id_materia
         LEFT JOIN info_inscripcion ii ON ii.id = i.id_info_inscripcion
         LEFT JOIN (SELECT * FROM deuda WHERE estado = 'pendiente') d ON d.id_inscripcion = i.id
+        LEFT JOIN pago p ON d.id_inscripcion = p.id_inscripcion AND d.cuota = p.cuota
         WHERE a.id = %s
+        GROUP BY id, denominacion, descripcion, paga_el, deuda
         """
         cursor.execute(sql_select_query, (id_alumno,))
         alumnos = cursor.fetchall()
