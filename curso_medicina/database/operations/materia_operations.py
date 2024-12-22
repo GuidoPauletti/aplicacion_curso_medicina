@@ -1,3 +1,5 @@
+from tkinter import messagebox
+
 def get_materias(connection):
     try:
         cursor = connection.cursor()
@@ -6,7 +8,10 @@ def get_materias(connection):
         materias = [f'{row[0]} - {row[1]}' for row in cursor.fetchall()]
         return materias
     except Exception as e:
-        print(f"Error al obtener materias: {e}")
+        messagebox.showerror(
+            title="Error",
+            message=f"Error al obtener materias: {e}"
+        )
         return []
 
 def get_materias_por_alumno(connection, id_alumno):
@@ -23,5 +28,8 @@ def get_materias_por_alumno(connection, id_alumno):
         materias = cursor.fetchall()
         return materias
     except Exception as e:
-        print(f"Error al obtener materias para el alumno {id_alumno}: {e}")
+        messagebox.showerror(
+            title="Error",
+            message=f"Error al obtener materias para el alumno {id_alumno}: {e}"
+        )
         return []

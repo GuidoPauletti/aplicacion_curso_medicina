@@ -1,4 +1,5 @@
 from typing import Optional, Tuple
+from tkinter import messagebox
 
 import mysql.connector
 from mysql.connector.cursor import MySQLCursor
@@ -24,7 +25,10 @@ def validate_user_credentials(
         return result
         
     except mysql.connector.Error as error:
-        print(f"Error al validar credenciales: {error}")
+        messagebox.showerror(
+            title="Error",
+            message=f"Error al validar credenciales: {error}"
+        )
         return None
     finally:
         cursor.close()

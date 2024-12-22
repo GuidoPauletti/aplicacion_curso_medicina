@@ -1,3 +1,5 @@
+from tkinter import messagebox
+
 def get_movimientos_con_detalles(connection, ventana_temporal):
     """Obtiene informacion de movimientos dentro de la ventana temporal"""
     condicion = {
@@ -52,7 +54,10 @@ def get_movimientos_con_detalles(connection, ventana_temporal):
         movimientos = cursor.fetchall()
         return movimientos
     except Exception as e:
-        print(f"Error al obtener movimientos: {e}")
+        messagebox.showerror(
+            title="Error",
+            message=f"Error al obtener movimientos: {e}"
+        )
         connection.rollback()
         return []
     finally:

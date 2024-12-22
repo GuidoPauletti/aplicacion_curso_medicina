@@ -1,3 +1,5 @@
+from tkinter import messagebox
+
 def insert_gasto(connection, monto, divisa, correspondencia, descripcion, id_usuario):
     try:
         cursor = connection.cursor()
@@ -9,7 +11,10 @@ def insert_gasto(connection, monto, divisa, correspondencia, descripcion, id_usu
         connection.commit()
         return cursor.lastrowid
     except Exception as e:
-        print(f"Error al insertar gasto: {e}")
+        messagebox.showerror(
+            title="Error",
+            message=f"Error al insertar gasto: {e}"
+        )
         connection.rollback()
         return None
     finally:
@@ -35,7 +40,10 @@ def get_gastos_con_detalles(connection, correspondencia="%"):
         gastos = cursor.fetchall()
         return gastos
     except Exception as e:
-        print(f"Error al obtener gastos: {e}")
+        messagebox.showerror(
+            title="Error",
+            message=f"Error al obtener gastos: {e}"
+        )
         return []
     finally: cursor.close()
 
@@ -51,7 +59,10 @@ def borrar_gasto(connection, id):
         connection.commit()
         return "Registro de gasto eliminado correctamente"
     except Exception as e:
-        print(f"Error al borrar el gasto: {e}")
+        messagebox.showerror(
+            title="Error",
+            message=f"Error al borrar el gasto: {e}"
+        )
         return
     finally:
         cursor.close()
@@ -68,7 +79,10 @@ def editar_gasto(connection, id, monto, correspondencia, descripcion, usuario):
         connection.commit()
         return "Registro de gasto editado correctamente"
     except Exception as e:
-        print(f"Error al editar el gasto: {e}")
+        messagebox.showerror(
+            title="Error",
+            message=f"Error al editar el gasto: {e}"
+        )
         return
     finally:
         cursor.close()

@@ -1,3 +1,5 @@
+from tkinter import messagebox
+
 def get_pagos_con_detalles(connection, correspondencia="%", alumno = None):
     if not isinstance(correspondencia,str):
         correspondencia="%"
@@ -34,7 +36,10 @@ def get_pagos_con_detalles(connection, correspondencia="%", alumno = None):
         pagos = cursor.fetchall()
         return pagos
     except Exception as e:
-        print(f"Error al obtener pagos: {e}")
+        messagebox.showerror(
+            title="Error",
+            message=f"Error al obtener pagos: {e}"
+        )
         connection.rollback()
         return []
     finally:
@@ -53,7 +58,10 @@ def get_info_ultimo_pago(connection, id, cuota):
         info_pago = cursor.fetchall()
         return info_pago
     except Exception as e:
-        print(f"Error al obtener info del pago: {e}")
+        messagebox.showerror(
+            title="Error",
+            message=f"Error al obtener info del pago: {e}"
+        )
         return
     finally:
         cursor.close()
@@ -70,7 +78,10 @@ def borrar_pago(connection, id):
         connection.commit()
         return "Registro de pago eliminado correctamente"
     except Exception as e:
-        print(f"Error al borrar el pago: {e}")
+        messagebox.showerror(
+            title="Error",
+            message=f"Error al borrar el pago: {e}"
+        )
         return
     finally:
         cursor.close()
@@ -88,7 +99,10 @@ def editar_pago(connection, id, monto, cuota, id_usuario):
         connection.commit()
         return "Registro de pago editado correctamente"
     except Exception as e:
-        print(f"Error al editar el pago: {e}")
+        messagebox.showerror(
+            title="Error",
+            message=f"Error al editar el pago: {e}"
+        )
         connection.rollback()
         return
     finally:
@@ -116,7 +130,10 @@ def insert_pago(connection, id_alumno, id_materia, monto, divisa, metodo, cuota,
         pago_id = cursor.lastrowid  # Obtener el ID del pago insertado
         return pago_id
     except Exception as e:
-        print(f"Error al insertar pago: {e}")
+        messagebox.showerror(
+            title="Error",
+            message=f"Error al insertar pago: {e}"
+        )
         return None
     finally:
         cursor.close()
@@ -132,7 +149,10 @@ def insert_pago_moneda_extranjera(connection, id_pago, divisa, monto):
         connection.commit()
         return
     except Exception as e:
-        print(f"Error al insertar pago en divisa extranjera: {e}")
+        messagebox.showerror(
+            title="Error",
+            message=f"Error al insertar pago en divisa extranjera: {e}"
+        )
         return None
     finally:
         cursor.close()

@@ -1,3 +1,5 @@
+from tkinter import messagebox
+
 def insert_alumno(connection, nombre, apellido, dni, email, telefono, dir_calle, dir_numero):
     try:
         cursor = connection.cursor()
@@ -9,7 +11,10 @@ def insert_alumno(connection, nombre, apellido, dni, email, telefono, dir_calle,
         connection.commit()
         return cursor.lastrowid
     except Exception as e:
-        print(f"Error al insertar alumno: {e}")
+        messagebox.showerror(
+            title="Error",
+            message=f"Error al insertar alumno: {e}"
+        )
         connection.rollback()
         return None
     finally:
@@ -26,7 +31,10 @@ def insert_alumno_materia(connection, alumno_id, materia_id, tipo_inscripcion_id
         connection.commit()
         return None
     except Exception as e:
-        print(f"Error al inscribir alumno a materia/s: {e}")
+        messagebox.showerror(
+            title="Error",
+            message=f"Error al inscribir alumno a materia/s: {e}"
+        )
         connection.rollback()
         return None
     finally:
@@ -54,7 +62,10 @@ def get_alumnos(connection):
         alumnos = cursor.fetchall()
         return alumnos
     except Exception as e:
-        print(f"Error al obtener alumnos: {e}")
+        messagebox.showerror(
+            title="Error",
+            message=f"Error al obtener alumnos: {e}"
+        )
         return []
     finally: cursor.close()
     
@@ -91,7 +102,10 @@ def get_cuotas_por_alumno_materia(connection, alumno = "NULL", materia = "NULL")
         else:
             return [cuota[0] for cuota in cuotas]
     except Exception as e:
-        print(f"Error al obtener pagos: {e}")
+        messagebox.showerror(
+            title="Error",
+            message=f"Error al obtener cuotas de alumno: {e}"
+        )
         return []
     finally: cursor.close()
     
@@ -109,7 +123,10 @@ def editar_alumno(connection, id, nombre, apellido, dni, calle, numero, email, t
         connection.commit()
         return "Alumno editado correctamente"
     except Exception as e:
-        print(f"Error al editar alumno: {e}")
+        messagebox.showerror(
+            title="Error",
+            message=f"Error al editar alumno: {e}"
+        )
         return
     finally:
         cursor.close()
@@ -126,7 +143,10 @@ def editar_dia_de_pago_alumno(connection, id, paga_el):
         connection.commit()
         return "Dia de pago editado correctamente"
     except Exception as e:
-        print(f"Error al editar dia de pago del alumno: {e}")
+        messagebox.showerror(
+            title="Error",
+            message=f"Error al editar dia de pago del alumno: {e}"
+        )
         return
     finally:
         cursor.close()
@@ -147,6 +167,9 @@ def get_inscripciones_alumno(connection, id_alumno):
         alumnos = cursor.fetchall()
         return alumnos
     except Exception as e:
-        print(f"Error al obtener alumnos: {e}")
+        messagebox.showerror(
+            title="Error",
+            message=f"Error al obtener inscripciones de alumno: {e}"
+        )
         return []
     finally: cursor.close()

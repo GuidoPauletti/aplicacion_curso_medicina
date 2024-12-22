@@ -1,3 +1,5 @@
+from tkinter import messagebox
+
 def get_info_inscripciones(connection):
     try:
         cursor = connection.cursor()
@@ -8,7 +10,10 @@ def get_info_inscripciones(connection):
         tipos_inscripcion = cursor.fetchall()
         return tipos_inscripcion
     except Exception as e:
-        print(f"Error al obtener tipos de inscripcion: {e}")
+        messagebox.showerror(
+            title="Error",
+            message=f"Error al obtener tipos de inscripcion: {e}"
+        )
         connection.rollback()
         return None
     finally:
@@ -30,7 +35,10 @@ def get_info_inscripcion(connection, id_inscripcion):
         info_inscripcion = cursor.fetchone()
         return info_inscripcion
     except Exception as e:
-        print(f"Error al obtener info de inscripcion: {e}")
+        messagebox.showerror(
+            title="Error",
+            message=f"Error al obtener info de inscripcion: {e}"
+        )
         connection.rollback()
         return None
     finally:
@@ -47,7 +55,10 @@ def get_descripciones(connection):
         descripciones = cursor.fetchall()
         return descripciones
     except Exception as e:
-        print(f"Error al traer descripcion de inscripciones: {e}")
+        messagebox.showerror(
+            title="Error",
+            message=f"Error al traer descripcion de inscripciones: {e}"
+        )
         return None
     finally:
         cursor.close()
@@ -64,7 +75,10 @@ def get_detalle_tipo_inscripcion(connection, id):
         detalle_tipo_inscripcion = cursor.fetchone()
         return detalle_tipo_inscripcion
     except Exception as e:
-        print(f"Error al traer detalle de tipo de inscripcion: {e}")
+        messagebox.showerror(
+            title="Error",
+            message=f"Error al traer detalle de tipo de inscripcion: {e}"
+        )
         return None
     finally:
         cursor.close()
@@ -82,7 +96,10 @@ def get_inscripcion_alumno_materia(connection, id_alumno, id_materia):
         inscripcion = cursor.fetchone()
         return inscripcion
     except Exception as e:
-        print(f"Error al traer detalle de tipo de inscripcion: {e}")
+        messagebox.showerror(
+            title="Error",
+            message=f"Error al traer detalle de tipo de inscripcion: {e}"
+        )
         return None
     finally:
         cursor.close()
@@ -99,7 +116,10 @@ def save_tipo_inscripcion(connection, descripcion, cuota, cuota_recargo, n_cuota
         connection.commit()
         return cursor.lastrowid
     except Exception as e:
-        print(f"Error al crear tipo de inscripción: {e}")
+        messagebox.showerror(
+            title="Error",
+            message=f"Error al crear tipo de inscripción: {e}"
+        )
         connection.rollback()
         return None
     finally:
@@ -117,7 +137,10 @@ def editar_tipo_inscripcion(connection, id, descripcion, cuota, cuota_recargo, n
         connection.commit()
         return "Tipo de inscripcion editado correctamente"
     except Exception as e:
-        print(f"Error al editar el tipo de inscripcion: {e}")
+        messagebox.showerror(
+            title="Error",
+            message=f"Error al editar el tipo de inscripcion: {e}"
+        )
         connection.rollback()
         return
     finally:
@@ -135,7 +158,10 @@ def finalizar_inscripcion(connection, id):
         connection.commit()
         return "Inscripcion finalizada correctamente"
     except Exception as e:
-        print(f"Error al editar el tipo de inscripcion: {e}")
+        messagebox.showerror(
+            title="Error",
+            message=f"Error al editar el tipo de inscripcion: {e}"
+        )
         connection.rollback()
         return
     finally:
@@ -153,7 +179,10 @@ def editar_inscripcion(connection, id_inscripcion, tipo, paga_el):
         connection.commit()
         return "Inscripcion editada correctamente"
     except Exception as e:
-        print(f"Error al editar la inscripcion: {e}")
+        messagebox.showerror(
+            title="Error",
+            message=f"Error al editar la inscripcion: {e}"
+        )
         connection.rollback()
         return
     finally:
