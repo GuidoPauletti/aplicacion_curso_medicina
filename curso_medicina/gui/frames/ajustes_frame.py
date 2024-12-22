@@ -171,8 +171,8 @@ class AjustesFrame(ctk.CTkTabview):
             self.tabla.insert("", "end", values=(nuevo_tipo_incripcion, descripcion, cuota, cuota_recargo, n_cuotas))
             self.create_window_inscripcion.destroy()
             messagebox.showinfo(
-                title="Tipo de inscripción creado correctamente",
-                message=""
+                title="Exito",
+                message="Tipo de inscripción creado correctamente"
             )
         else:
             return
