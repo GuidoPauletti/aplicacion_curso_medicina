@@ -1,7 +1,7 @@
 from curso_medicina.database.operations.pagos_operations import get_pagos_con_detalles, borrar_pago, editar_pago
 from curso_medicina.database.operations.alumno_operations import get_alumnos
 
-from tkinter import ttk
+from tkinter import ttk, messagebox
 
 import customtkinter as ctk
 
@@ -160,6 +160,10 @@ class VerPagosFrame(ctk.CTkFrame):
         if editado:
             # Actualizar el registro en la tabla con los nuevos datos
             self.tabla.item(selected_item, values=(pago_data[0], pago_data[1], pago_data[2], pago_data[3], monto, cuota, pago_data[6], self.usuario_actual.nombre))
+            messagebox.showinfo(
+                title="Exito",
+                message="Información de pago editada correctamente"
+            )
             self.edit_window_pago.destroy()
 
     def on_tree_select(self, event):

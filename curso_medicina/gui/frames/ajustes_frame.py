@@ -2,6 +2,7 @@ from curso_medicina.database.operations.inscripcion_operations import (get_info_
                                                                        editar_tipo_inscripcion,
                                                                        save_tipo_inscripcion)
 
+from tkinter import messagebox
 from tkinter import ttk
 
 import customtkinter as ctk
@@ -122,6 +123,10 @@ class AjustesFrame(ctk.CTkTabview):
             # Actualizar el registro en la tabla con los nuevos datos
             self.tabla.item(selected_item, values=(info_inscripcion[0], descripcion, monto, monto_recargo, n_cuotas))
             self.edit_window_pago.destroy()
+            messagebox.showinfo(
+                title="Tipo de inscripción editado correctamente",
+                message=""
+            )
 
     def ventana_crear_tipo_inscripcion(self):
         # Crear una nueva ventana para crear tipo de inscripcion
@@ -165,5 +170,9 @@ class AjustesFrame(ctk.CTkTabview):
         if nuevo_tipo_incripcion:
             self.tabla.insert("", "end", values=(nuevo_tipo_incripcion, descripcion, cuota, cuota_recargo, n_cuotas))
             self.create_window_inscripcion.destroy()
+            messagebox.showinfo(
+                title="Tipo de inscripción creado correctamente",
+                message=""
+            )
         else:
             return

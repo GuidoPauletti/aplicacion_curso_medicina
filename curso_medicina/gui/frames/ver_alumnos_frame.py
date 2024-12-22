@@ -2,7 +2,7 @@ from curso_medicina.database.operations.alumno_operations import get_alumnos, ed
 from curso_medicina.database.operations.inscripcion_operations import editar_inscripcion, get_descripciones
 
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 
 import customtkinter as ctk
 
@@ -196,6 +196,10 @@ class VerAlumnosFrame(ctk.CTkFrame):
             # Actualizar el registro en la tabla con los nuevos datos
             self.tabla_alumno.item(selected_item, values=(alumno_data[0], nombre, apellido, dni, calle, numero, email, telefono))
             self.edit_window_alumno_frame.destroy()
+            messagebox.showinfo(
+                title="Exito",
+                message="Alumno editado correctamente"
+            )
 
     def cargar_inscripcion_alumno(self, id_alumno):
         
@@ -262,6 +266,10 @@ class VerAlumnosFrame(ctk.CTkFrame):
         if editado:
             # Actualizar el registro en la tabla con los nuevos datos
             self.tabla_inscripciones_alumno.item(selected_item, values=(inscripcion_data[0], inscripcion_data[1], tipo, paga_el, inscripcion_data[4]))
+            messagebox.showinfo(
+                title="Exito",
+                message="Inscripción de alumno editada correctamente"
+            )
             self.edit_window_inscripcion.destroy()
 
     def get_tipo_inscripciones(self):

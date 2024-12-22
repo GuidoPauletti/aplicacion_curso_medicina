@@ -184,6 +184,10 @@ class AltaPagoFrame(ctk.CTkScrollableFrame):
         id_inscripcion = info_pago[0][1]
         if monto_pagado >= deuda:
             finalizar_inscripcion(self.conn, id_inscripcion)
+            messagebox.showinfo(
+                title="Pago de curso completado",
+                message="El alumno terminó de pagar todas las cuotas para esta materia"
+            )
 
     def on_metodo_seleccionado(self, event):
         if self.metodo_var.get() == "Transferencia":

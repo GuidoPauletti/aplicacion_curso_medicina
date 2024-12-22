@@ -1,7 +1,7 @@
 from curso_medicina.database.operations.gasto_operations import get_gastos_con_detalles, borrar_gasto, editar_gasto
 
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 
 import customtkinter as ctk
 
@@ -125,4 +125,8 @@ class VerGastosFrame(ctk.CTkFrame):
         if editado:
             # Actualizar el registro en la tabla con los nuevos datos
             self.tabla_gasto.item(selected_item, values=(gasto_data[0], monto, gasto_data[2], gasto_data[3], correspondencia, descripcion, self.usuario_actual.nombre))
+            messagebox.showinfo(
+                title="Exito",
+                message="Gasto editado correctamente"
+            )
             self.edit_window_gasto.destroy()
