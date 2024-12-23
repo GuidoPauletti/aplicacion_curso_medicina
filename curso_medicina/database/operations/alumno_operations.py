@@ -74,33 +74,28 @@ def get_cuotas_por_alumno_materia(connection, alumno = "NULL", materia = "NULL")
         cursor = connection.cursor()
 
         sql_query = """
-        SELECT cuota FROM pago
-        WHERE id_inscripcion = (
-            SELECT DISTINCT id
-            FROM inscripcion
-            WHERE id_alumno = %s
-            AND id_materia = %s
-            AND estado = 'curso'
-        )
-        AND cuota NOT IN (
-            SELECT cuota 
-            FROM deuda
-            WHERE id_inscripcion = (
-                SELECT DISTINCT id
-                FROM inscripcion
-                WHERE id_alumno = %s
-                AND id_materia = %s
-            )
-            AND estado = 'pendiente'
-        );
+        SELECT i.id, ii.monto_cuota, SUM(p.monto) monto_pago, p.cuota, COALESCE(d.estado,'saneada') deuda
+        FROM inscripcion i
+        LEFT JOIN info_inscripcion ii ON ii.id = i.id_info_inscripcion
+        JOIN pago p ON p.id_inscripcion = i.id
+        LEFT JOIN deuda d ON d.id_inscripcion = p.id_inscripcion AND d.cuota = p.cuota
+        WHERE i.id = (
+                    SELECT DISTINCT id
+                    FROM inscripcion
+                    WHERE id_alumno = %s
+                    AND id_materia = %s
+                    AND estado = 'curso'
+                )
+        GROUP BY id, monto_cuota, cuota, deuda
+        HAVING monto_pago >= monto_cuota AND deuda = 'saneada';
         """
-        cursor.execute(sql_query, (alumno, materia, alumno, materia))
+        cursor.execute(sql_query, (alumno, materia))
         
         cuotas = cursor.fetchall()
         if len(cuotas) == 0:
             return [0]
         else:
-            return [cuota[0] for cuota in cuotas]
+            return [cuota[3] for cuota in cuotas]
     except Exception as e:
         messagebox.showerror(
             title="Error",
