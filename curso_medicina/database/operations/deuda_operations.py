@@ -3,12 +3,12 @@ from tkinter import messagebox
 def call_update_debts(connection):
     try:
         cursor = connection.cursor()
-        cursor.execute("CALL update_student_debts()")
+        cursor.execute("CALL update_student_debts2()")
         connection.commit()
     except Exception as e:
         messagebox.showerror(
             title="Error",
-            message=f"Error al validar credenciales: {e}"
+            message=f"Error al calcular las deudas: {e}"
         )
         connection.rollback()
         return None

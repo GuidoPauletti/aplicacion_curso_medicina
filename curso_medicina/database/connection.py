@@ -7,10 +7,11 @@ def create_connection():
     """Crear una conexión a la base de datos MySQL"""
     try:
         connection = mysql.connector.connect(
-            host="34.171.118.187",
-            user="root",
-            password="f/J+*)<1_'zTr09g",
-            database="curso_medicina"
+            host="149.50.133.127",
+            user="miscellium",
+            password="M&sc3LLium$",
+            database="curso_medicina",
+            port=3306
         )
         return connection
 
