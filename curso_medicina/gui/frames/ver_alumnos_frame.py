@@ -1,4 +1,4 @@
-from curso_medicina.database.operations.alumno_operations import get_alumnos, editar_alumno, editar_dia_de_pago_alumno, get_inscripciones_alumno
+from curso_medicina.database.operations.alumno_operations import get_alumnos, editar_alumno, editar_dia_de_pago_alumno, get_inscripciones_alumno, get_alumnos_por_materia
 from curso_medicina.database.operations.inscripcion_operations import editar_inscripcion, get_descripciones
 
 import tkinter as tk
@@ -19,7 +19,8 @@ class VerAlumnosFrame(ctk.CTkFrame):
         
         self.optionmenu_materia = ctk.CTkOptionMenu(
             self, 
-            values=["Todas", "Anatomia","Fisiologia","Farmacologia"] # Asocia el filtro con el método
+            values=["Todas","Anatomia","Fisiologia","Bioquimica","Inmunologia","Microbiologia","Farmacologia","Patologia"],
+            command= self.filtrar_alumnos_por_materia
         )
         self.optionmenu_materia.pack(pady=5)
 
@@ -188,6 +189,21 @@ class VerAlumnosFrame(ctk.CTkFrame):
                                                                                 entry_paga_el.get(),
                                                                                 alumno_data))
         btn_guardar.pack(pady=10)
+
+    def filtrar_alumnos_por_materia(self, event):
+        materia = self.optionmenu_materia.get()
+        alumnos = get_alumnos_por_materia(self.conn, materia)
+
+        # Limpiar tabla existente
+        for item in self.tabla_alumno.get_children():
+            self.tabla_alumno.delete(item)
+
+        if alumnos:
+            for alumno in alumnos:
+                if alumno[8] == "Si":
+                    self.tabla_alumno.insert("", tk.END, values=(alumno[0], alumno[1], alumno[2], alumno[3], alumno[4], alumno[5], alumno[6], alumno[7]), tags='deudor')
+                else:
+                    self.tabla_alumno.insert("", tk.END, values=(alumno[0], alumno[1], alumno[2], alumno[3], alumno[4], alumno[5], alumno[6], alumno[7]))
 
     def guardar_cambios_alumno(self, selected_item, nombre, apellido, dni, calle, numero, email, telefono, paga_el, alumno_data):
         editado = editar_alumno(self.conn, alumno_data[0], nombre, apellido, dni, calle, numero, email, telefono)

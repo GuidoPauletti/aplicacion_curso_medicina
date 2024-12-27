@@ -68,6 +68,41 @@ def get_alumnos(connection):
         )
         return []
     finally: cursor.close()
+
+def get_alumnos_por_materia(connection, materia):
+    if materia == "Todas":
+        return get_alumnos(connection)
+    try:
+        cursor = connection.cursor()
+        sql_select_query = """
+        SELECT 
+            a.*,
+            CASE 
+                WHEN EXISTS (
+                    SELECT 1 
+                    FROM inscripcion i
+                    JOIN deuda d ON i.id = d.id_inscripcion
+                    WHERE i.id_alumno = a.id AND d.estado = 'pendiente'
+                ) THEN 'Si'
+                ELSE 'No'
+            END AS tiene_deuda_pendiente,
+            m.denominacion
+        FROM 
+            alumno a
+        LEFT JOIN inscripcion i ON a.id = i.id_alumno
+        LEFT JOIN materia m ON i.id_materia = m.id
+        WHERE m.denominacion LIKE %s;
+        """
+        cursor.execute(sql_select_query, (materia,))
+        alumnos = cursor.fetchall()
+        return alumnos
+    except Exception as e:
+        messagebox.showerror(
+            title="Error",
+            message=f"Error al obtener alumnos por materia: {e}"
+        )
+        return []
+    finally: cursor.close()
     
 def get_cuotas_por_alumno_materia(connection, alumno = "NULL", materia = "NULL"):
     try:
