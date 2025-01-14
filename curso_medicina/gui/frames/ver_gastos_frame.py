@@ -18,7 +18,7 @@ class VerGastosFrame(ctk.CTkFrame):
         
         self.optionmenu_correspondencia_gasto = ctk.CTkOptionMenu(
             self, 
-            values=["Todos", "enyn", "Fernanda", "Felipe"],
+            values=["Todos", "enyn", "Fernanda", "Felipe", "Duanne", "Flávia"],
             command=self.filtrar_por_correspondencia_gasto  # Asocia el filtro con el método
         )
         self.optionmenu_correspondencia_gasto.pack(pady=5)
@@ -105,7 +105,11 @@ class VerGastosFrame(ctk.CTkFrame):
         # Label y Entry para correspondencia
         label_correspondencia = ctk.CTkLabel(self.edit_window_gasto, text="Cuenta:")
         label_correspondencia.pack(pady=5)
-        entry_correspondencia = ctk.CTkEntry(self.edit_window_gasto, width=300)
+        correspondencia_var = ctk.StringVar()
+        entry_correspondencia = ctk.CTkOptionMenu(self.edit_window_gasto,
+                                                  variable=correspondencia_var,
+                                                  values=["Todos", "enyn", "Fernanda", "Felipe", "Duanne", "Flávia"],
+                                                  width=300)
         entry_correspondencia.pack(pady=5)
         entry_correspondencia.insert(0,gasto_data[4])
 
@@ -117,7 +121,7 @@ class VerGastosFrame(ctk.CTkFrame):
         entry_descripcion.insert("1.0",gasto_data[5])
 
         # Botón para guardar los cambios
-        btn_guardar = ctk.CTkButton(self.edit_window_gasto, text="Guardar", command=lambda: self.guardar_cambios_gasto(selected_item, entry_monto.get(), entry_correspondencia.get(), entry_descripcion.get("1.0", "end-1c"), gasto_data))
+        btn_guardar = ctk.CTkButton(self.edit_window_gasto, text="Guardar", command=lambda: self.guardar_cambios_gasto(selected_item, entry_monto.get(), correspondencia_var.get(), entry_descripcion.get("1.0", "end-1c"), gasto_data))
         btn_guardar.pack(pady=10)
 
     def guardar_cambios_gasto(self, selected_item, monto, correspondencia, descripcion, gasto_data):

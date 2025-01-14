@@ -1,4 +1,5 @@
 from tkinter import messagebox
+from datetime import datetime
 
 def validate_login_input(data: dict) -> bool:
     """Valida que todos los campos necesarios estén presentes y no vacíos."""
@@ -24,3 +25,11 @@ def validate_gasto_input(data):
         )
         return False
     return True
+
+def is_valid_date(date_string):
+    try:
+        # Intentar convertir la cadena a un objeto datetime con el formato YYYY-MM-DD
+        datetime.strptime(date_string, "%Y-%m-%d")
+        return True  # Si no hay excepción, la fecha es válida
+    except ValueError:
+        return False  # Si hay excepción, la fecha es inválida

@@ -25,7 +25,7 @@ class VerPagosFrame(ctk.CTkFrame):
         
         self.optionmenu_correspondencia = ctk.CTkOptionMenu(
             self.frame_filtros,
-            values=["Todos", "enyn", "Fernanda", "Felipe"],
+            values=["Todos", "enyn", "Fernanda", "Felipe", "Duanne", "Flávia"],
             command=self.filtrar_por_correspondencia
         )
         self.optionmenu_correspondencia.grid(row=1, column=0, padx=5)
@@ -47,9 +47,12 @@ class VerPagosFrame(ctk.CTkFrame):
         self.optionmenu_alumno.bind('<KeyRelease>', self.filtrar_alumnos)
 
         # Crear tabla
-        columnas = ("ID", "Nombre", "Apellido", "Materia", "Monto (AR$)", "Cuota", "Fecha", "Responsable")
+        columnas = ("ID", "Nombre", "Apellido", "Materia", "Monto (AR$)", "Cuota", "Fecha", "Responsable", "Observaciones")
+
+        self.scrollable_frame = ctk.CTkScrollableFrame(self, orientation="horizontal")
+        self.scrollable_frame.pack(fill="both", expand=True)
         
-        self.tabla = ttk.Treeview(self, columns=columnas, show="headings", selectmode="browse")
+        self.tabla = ttk.Treeview(self.scrollable_frame, columns=columnas, show="headings", selectmode="browse")
         
         # Configurar columnas
         for col in columnas:

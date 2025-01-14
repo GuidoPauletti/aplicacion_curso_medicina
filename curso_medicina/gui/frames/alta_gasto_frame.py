@@ -33,9 +33,13 @@ class AltaGastoFrame(ctk.CTkScrollableFrame):
         self.entry_divisa.pack(pady=5)
 
         # Label y Entry para correspondencia
-        self.label_correspondencia = ctk.CTkLabel(self, text="Corresponde a:")
+        self.label_correspondencia = ctk.CTkLabel(self, text="Cuenta:")
         self.label_correspondencia.pack(pady=5)
-        self.entry_correspondencia = ctk.CTkEntry(self, width=300)
+        self.correspondencia_var = ctk.StringVar()
+        self.entry_correspondencia = ctk.CTkOptionMenu(self,
+                                                       variable=self.correspondencia_var,
+                                                       values=["enyn", "Fernanda", "Felipe", "Duanne", "Flávia"],
+                                                       width=300)
         self.entry_correspondencia.pack(pady=5)
 
         # Label y Entry para descripcion
@@ -57,7 +61,7 @@ class AltaGastoFrame(ctk.CTkScrollableFrame):
         data = {
             'monto': self.entry_monto.get(),
             'divisa': self.entry_divisa.get(),
-            'correspondencia': self.entry_correspondencia.get(),
+            'correspondencia': self.correspondencia_var.get(),
             'descripcion': self.entry_descripcion.get("1.0", "end-1c"),
             'id_usuario': self.usuario_actual.id
         }
@@ -73,6 +77,6 @@ class AltaGastoFrame(ctk.CTkScrollableFrame):
     
     def clear_fields(self):
         self.entry_monto.delete(0, 'end')
-        self.entry_correspondencia.delete(0, 'end')
+        self.correspondencia_var.set("")
         self.entry_descripcion.delete("1.0", "end-1c")
         self.divisa_var.set("")

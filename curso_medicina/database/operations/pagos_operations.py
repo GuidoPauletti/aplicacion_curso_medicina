@@ -10,7 +10,7 @@ def get_pagos_con_detalles(connection, correspondencia="%", alumno = None):
 
         if alumno:
             sql_query = f"""
-                SELECT p.id, a.nombre, a.apellido, m.denominacion, p.monto, p.cuota, p.fecha, u.nombre
+                SELECT p.id, a.nombre, a.apellido, m.denominacion, p.monto, p.cuota, p.fecha, u.nombre, p.observaciones
                 FROM pago p
                 JOIN inscripcion ON p.id_inscripcion = inscripcion.id
                 JOIN alumno a ON inscripcion.id_alumno = a.id
@@ -22,7 +22,7 @@ def get_pagos_con_detalles(connection, correspondencia="%", alumno = None):
             """
         else:
             sql_query = f"""
-                SELECT p.id, a.nombre, a.apellido, m.denominacion, p.monto, p.cuota, p.fecha, u.nombre
+                SELECT p.id, a.nombre, a.apellido, m.denominacion, p.monto, p.cuota, p.fecha, u.nombre, p.observaciones
                 FROM pago p
                 JOIN inscripcion ON p.id_inscripcion = inscripcion.id
                 JOIN alumno a ON inscripcion.id_alumno = a.id
@@ -108,11 +108,11 @@ def editar_pago(connection, id, monto, cuota, id_usuario):
     finally:
         cursor.close()
     
-def insert_pago(connection, id_alumno, id_materia, monto, divisa, metodo, cuota, correspondencia, id_usuario):
+def insert_pago(connection, id_alumno, id_materia, monto, divisa, metodo, cuota, correspondencia, fecha, obs,id_usuario):
     try:
         cursor = connection.cursor()
         sql_insert_query = f"""
-        INSERT INTO pago (id_inscripcion, monto, divisa, metodo, cuota, correspondencia, fecha, id_usuario, cuota_de_mes) 
+        INSERT INTO pago (id_inscripcion, monto, divisa, metodo, cuota, correspondencia, fecha, observaciones, id_usuario, cuota_de_mes) 
         VALUES (
             (SELECT DISTINCT id FROM inscripcion WHERE id_alumno = {id_alumno} AND id_materia = {id_materia} AND estado = 'curso'),
             {monto},
@@ -120,7 +120,8 @@ def insert_pago(connection, id_alumno, id_materia, monto, divisa, metodo, cuota,
             '{metodo}',
             {cuota},
             '{correspondencia}',
-            CURDATE(),
+            '{fecha}',
+            '{obs}',
             {id_usuario},
             {cuota} - 1 + (SELECT DISTINCT mes FROM inscripcion WHERE id_alumno = {id_alumno} AND id_materia = {id_materia} AND estado = 'curso')
         )

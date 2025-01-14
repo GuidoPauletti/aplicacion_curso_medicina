@@ -4,8 +4,10 @@ from curso_medicina.database.operations.pagos_operations import insert_pago, get
 from curso_medicina.database.operations.inscripcion_operations import finalizar_inscripcion, get_inscripcion_alumno_materia, get_info_inscripcion
 from curso_medicina.database.operations.deuda_operations import sanear_deuda
 from ..utils.receipt_generator import generate_payment_receipt
+from ..utils.validators import is_valid_date
 
 from tkinter import messagebox, simpledialog
+from datetime import datetime
 import os
 
 import customtkinter as ctk
@@ -67,6 +69,16 @@ class AltaPagoFrame(ctk.CTkScrollableFrame):
         self.entry_divisa = ctk.CTkOptionMenu(self, variable=self.divisa_var,values=['Peso','Real','Dolar'],width=300)
         self.entry_divisa.pack(pady=5)
 
+        # Label y Entry para fecha
+        self.label_fecha = ctk.CTkLabel(self, text="Fecha (AAAA-MM-DD):")
+        self.label_fecha.pack(pady=5)
+        self.fecha_var = ctk.StringVar()
+        self.entry_fecha = ctk.CTkEntry(self, textvariable=self.fecha_var, width=300)
+        self.entry_fecha.pack(pady=5)
+
+        hoy = datetime.now().strftime("%Y-%m-%d")
+        self.fecha_var.set(hoy)
+
         # Label y Entry para metodo de pago
         self.label_metodo = ctk.CTkLabel(self, text="Método de Pago")
         self.label_metodo.pack(pady=5)
@@ -88,12 +100,17 @@ class AltaPagoFrame(ctk.CTkScrollableFrame):
         self.label_correspondencia = ctk.CTkLabel(self, text="Cuenta:")
         self.label_correspondencia.pack(pady=5)
         self.correspondencia_var = ctk.StringVar()
-        self.correspondencia_var.set("")
         self.entry_correspondencia = ctk.CTkOptionMenu(self,
                                                        variable=self.correspondencia_var,
-                                                       values=["enyn", "Fernanda", "Felipe"],
+                                                       values=["enyn", "Fernanda", "Felipe", "Duanne", "Flávia"],
                                                        width=300)
         self.entry_correspondencia.pack(pady=5)
+
+        # Label y Entry para observacion
+        self.label_descripcion = ctk.CTkLabel(self, text="Observaciones")
+        self.label_descripcion.pack(pady = 5)
+        self.entry_descripcion = ctk.CTkTextbox(self, width=300, height=50)
+        self.entry_descripcion.pack(pady = 5)
 
     def create_save_button(self):
         # Botón para guardar el pago
@@ -105,6 +122,7 @@ class AltaPagoFrame(ctk.CTkScrollableFrame):
                                                                       self.metodo_var.get(),
                                                                       self.cuota_var.get(),
                                                                       self.correspondencia_var.get(),
+                                                                      self.fecha_var.get(),
                                                                       self))
         btn_guardar.pack(pady=20)
 
@@ -117,7 +135,7 @@ class AltaPagoFrame(ctk.CTkScrollableFrame):
         filtro = self.combobox_alumno.get()
         self.actualizar_combobox(filtro)
     
-    def save_pago(self, alumno_seleccionado, materia, monto, divisa, metodo, cuota, correspondencia, ventana):
+    def save_pago(self, alumno_seleccionado, materia, monto, divisa, metodo, cuota, correspondencia, fecha, ventana):
         if alumno_seleccionado and materia and monto and divisa and cuota:
             if metodo == "Transferencia" and correspondencia == "":
                 messagebox.showerror("Advertencia", "Debe elegir la cuenta para pagos realizados por transferencia")
@@ -129,14 +147,18 @@ class AltaPagoFrame(ctk.CTkScrollableFrame):
                     materia_id = int(materia.split(" - ")[0])
                     monto = float(monto)
 
+                    if not is_valid_date(fecha):
+                        messagebox.showerror("Error", "Debe proporcionar una fecha valida con el formato correcto (AAAA-MM-DD)")
+                        return
+
                     if divisa == "Real" or divisa == "Dolar": #caso moneda extranjera
                         monto_en_pesos = self.ask_exchange_rate(divisa)
-                        pago_id = insert_pago(self.conn, alumno_id, materia_id, monto_en_pesos, divisa, metodo, cuota, correspondencia, self.usuario_actual.id)
+                        pago_id = insert_pago(self.conn, alumno_id, materia_id, monto_en_pesos, divisa, metodo, cuota, correspondencia, fecha, self.entry_descripcion.get("1.0", "end-1c"), self.usuario_actual.id)
                         # guardamos ademas el registro en moneda extranjera
                         insert_pago_moneda_extranjera(self.conn, pago_id, divisa, monto)
 
                     elif divisa == "Peso":   #caso moneda local
-                        pago_id = insert_pago(self.conn, alumno_id, materia_id, monto, divisa, metodo, cuota, correspondencia, self.usuario_actual.id)
+                        pago_id = insert_pago(self.conn, alumno_id, materia_id, monto, divisa, metodo, cuota, correspondencia, fecha, self.entry_descripcion.get("1.0", "end-1c"),self.usuario_actual.id)
 
                     else: messagebox.showerror("Error", "Seleccione una divisa de la lista")
 
@@ -255,4 +277,6 @@ class AltaPagoFrame(ctk.CTkScrollableFrame):
         self.divisa_var.set("")
         self.correspondencia_var.set("")
         self.cuota_var.set("")
+        self.entry_descripcion.delete("1.0", "end-1c")
+        self.fecha_var.set(datetime.now().strftime("%Y-%m-%d"))
         self.metodo_var.set("")
