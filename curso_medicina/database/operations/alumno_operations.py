@@ -69,6 +69,36 @@ def get_alumnos(connection):
         return []
     finally: cursor.close()
 
+def get_unico_alumno(connection, id_alumno):
+    try:
+        cursor = connection.cursor()
+        sql_select_query = """
+        SELECT 
+            a.*,
+            CASE 
+                WHEN EXISTS (
+                    SELECT 1 
+                    FROM inscripcion i
+                    JOIN deuda d ON i.id = d.id_inscripcion
+                    WHERE i.id_alumno = a.id AND d.estado = 'pendiente'
+                ) THEN 'Si'
+                ELSE 'No'
+            END AS tiene_deuda_pendiente
+        FROM 
+            alumno a
+        WHERE a.id = %s;
+        """
+        cursor.execute(sql_select_query, (id_alumno,))
+        alumno = cursor.fetchone()
+        return alumno
+    except Exception as e:
+        messagebox.showerror(
+            title="Error",
+            message=f"Error al obtener alumnos: {e}"
+        )
+        return []
+    finally: cursor.close()
+
 def get_alumnos_por_materia(connection, materia):
     if materia == "Todas":
         return get_alumnos(connection)

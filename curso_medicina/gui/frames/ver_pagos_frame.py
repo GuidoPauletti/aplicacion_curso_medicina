@@ -20,8 +20,8 @@ class VerPagosFrame(ctk.CTkFrame):
         self.label_filtro_cuenta = ctk.CTkLabel(self.frame_filtros, text="Filtrar por Cuenta:")
         self.label_filtro_cuenta.grid(row=0, column=0, padx=5)
 
-        self.label_filtro_cuenta = ctk.CTkLabel(self.frame_filtros, text="Filtrar por Alumno:")
-        self.label_filtro_cuenta.grid(row=0, column=1, padx=5)
+        self.label_filtro_alumno = ctk.CTkLabel(self.frame_filtros, text="Filtrar por Alumno:")
+        self.label_filtro_alumno.grid(row=0, column=1, padx=5)
         
         self.optionmenu_correspondencia = ctk.CTkOptionMenu(
             self.frame_filtros,

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "curso_medicina"
-version = "0.5"
+version = "0.8"
 authors = [
     { name = "Guido Pauletti" }
 ]

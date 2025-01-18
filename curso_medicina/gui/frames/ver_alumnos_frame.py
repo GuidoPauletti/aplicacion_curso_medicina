@@ -1,4 +1,4 @@
-from curso_medicina.database.operations.alumno_operations import get_alumnos, editar_alumno, editar_dia_de_pago_alumno, get_inscripciones_alumno, get_alumnos_por_materia
+from curso_medicina.database.operations.alumno_operations import get_alumnos, editar_alumno, editar_dia_de_pago_alumno, get_inscripciones_alumno, get_alumnos_por_materia, get_unico_alumno
 from curso_medicina.database.operations.inscripcion_operations import editar_inscripcion, get_descripciones
 
 import tkinter as tk
@@ -14,15 +14,38 @@ class VerAlumnosFrame(ctk.CTkFrame):
         self.setup_ui()
 
     def setup_ui(self):
-        self.label_filtro = ctk.CTkLabel(self, text="Filtrar por Materia:")
-        self.label_filtro.pack(pady=5)
+        # Crear elementos de filtro
+        self.frame_filtros = ctk.CTkFrame(self, fg_color="transparent")
+        self.frame_filtros.pack(pady=5)
+
+        self.label_filtro = ctk.CTkLabel(self.frame_filtros, text="Filtrar por Materia:")
+        self.label_filtro.grid(row=0, column=0, padx=5)
         
         self.optionmenu_materia = ctk.CTkOptionMenu(
-            self, 
+            self.frame_filtros, 
             values=["Todas","Anatomia","Fisiologia","Bioquimica","Inmunologia","Microbiologia","Farmacologia","Patologia"],
             command= self.filtrar_alumnos_por_materia
         )
-        self.optionmenu_materia.pack(pady=5)
+        self.optionmenu_materia.grid(row=1, column=0, padx=5)
+
+        self.label_filtro_alumno = ctk.CTkLabel(self.frame_filtros, text="Buscar por nombre o apellido:")
+        self.label_filtro_alumno.grid(row=0, column=1, padx=5)
+
+        # Obtener lista de alumnos
+        self.alumnos = get_alumnos(self.conn)
+
+        self.alumno_var = ctk.StringVar()
+        self.optionmenu_alumno = ctk.CTkComboBox(
+            self.frame_filtros,
+            variable=self.alumno_var,
+            command=self.filtrar_por_alumno
+        )
+        self.optionmenu_alumno.grid(row=1, column=1, padx=5)
+
+        self.actualizar_combobox("")  # Inicializa la lista completa
+
+        # Evento para filtrar nombres mientras se escribe en el ComboBox
+        self.optionmenu_alumno.bind('<KeyRelease>', self.filtrar_alumnos)
 
         # Definir las columnas de la tabla
         columnas = ("ID","Nombre", "Apellido", "DNI", "Calle", "Numero", "Email", "Telefono")
@@ -113,6 +136,31 @@ class VerAlumnosFrame(ctk.CTkFrame):
             # Crear botón "Editar inscripcion"
             self.btn_editar_inscripcion_alumno = ctk.CTkButton(self.buttons_frame_inscripciones_alumno, text="Editar Inscripción", command= self.editar_inscripcion_alumno ,state="disabled")
             self.btn_editar_inscripcion_alumno.grid(row=0, column=1, padx=5)
+
+    def filtrar_por_alumno(self, alumno):
+        # Limpiar tabla existente
+        for item in self.tabla_alumno.get_children():
+            self.tabla_alumno.delete(item)
+
+        alumno = get_unico_alumno(self.conn, alumno[0])
+        if alumno:
+            if alumno[8] == "Si":
+                self.tabla_alumno.insert("", tk.END, values=(alumno[0], alumno[1], alumno[2], alumno[3], alumno[4], alumno[5], alumno[6], alumno[7]), tags='deudor')
+            else:
+                self.tabla_alumno.insert("", tk.END, values=(alumno[0], alumno[1], alumno[2], alumno[3], alumno[4], alumno[5], alumno[6], alumno[7]))
+
+
+    def actualizar_combobox(self, filtro):
+        # Filtra la lista de alumnos por el filtro (ignora mayúsculas/minúsculas)
+        alumnos_filtrados = [f"{alumno[0]} - {alumno[1]} {alumno[2]}"
+                             for alumno in self.alumnos
+                             if alumno[1].lower().startswith(filtro.lower())
+                             or alumno[2].lower().startswith(filtro.lower())]
+        self.optionmenu_alumno.configure(values=alumnos_filtrados)
+
+    def filtrar_alumnos(self, event):
+        filtro = self.optionmenu_alumno.get()
+        self.actualizar_combobox(filtro)
 
     def editar_alumno(self):
         # Obtener el item seleccionado
