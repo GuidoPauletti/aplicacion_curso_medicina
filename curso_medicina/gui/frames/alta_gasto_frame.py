@@ -32,13 +32,22 @@ class AltaGastoFrame(ctk.CTkScrollableFrame):
         self.entry_divisa = ctk.CTkOptionMenu(self, variable=self.divisa_var,values=['Peso','Real','Dolar'],width=300)
         self.entry_divisa.pack(pady=5)
 
+        # Label y Entry para metodo de pago
+        self.label_metodo = ctk.CTkLabel(self, text="Método de Gasto")
+        self.label_metodo.pack(pady=5)
+        self.metodo_var = ctk.StringVar()
+        self.entry_metodo = ctk.CTkOptionMenu(self,
+                                              variable=self.metodo_var,values=['Efectivo','Transferencia', 'Crédito', 'Debito'],
+                                              width=300)
+        self.entry_metodo.pack(pady=5)
+
         # Label y Entry para correspondencia
         self.label_correspondencia = ctk.CTkLabel(self, text="Cuenta:")
         self.label_correspondencia.pack(pady=5)
         self.correspondencia_var = ctk.StringVar()
         self.entry_correspondencia = ctk.CTkOptionMenu(self,
                                                        variable=self.correspondencia_var,
-                                                       values=["enyn", "Fernanda", "Felipe", "Duanne", "Flávia"],
+                                                       values=["enyn", "Fernanda", "Felipe", "Duanne", "Flávia", "Gabriel"],
                                                        width=300)
         self.entry_correspondencia.pack(pady=5)
 
@@ -63,7 +72,8 @@ class AltaGastoFrame(ctk.CTkScrollableFrame):
             'divisa': self.entry_divisa.get(),
             'correspondencia': self.correspondencia_var.get(),
             'descripcion': self.entry_descripcion.get("1.0", "end-1c"),
-            'id_usuario': self.usuario_actual.id
+            'id_usuario': self.usuario_actual.id,
+            'metodo': self.metodo_var.get()
         }
         
         if validate_gasto_input(data):

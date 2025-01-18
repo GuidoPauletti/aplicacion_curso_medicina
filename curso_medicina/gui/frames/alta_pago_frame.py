@@ -102,7 +102,7 @@ class AltaPagoFrame(ctk.CTkScrollableFrame):
         self.correspondencia_var = ctk.StringVar()
         self.entry_correspondencia = ctk.CTkOptionMenu(self,
                                                        variable=self.correspondencia_var,
-                                                       values=["enyn", "Fernanda", "Felipe", "Duanne", "Flávia"],
+                                                       values=["enyn", "Fernanda", "Felipe", "Duanne", "Flávia", "Gabriel"],
                                                        width=300)
         self.entry_correspondencia.pack(pady=5)
 

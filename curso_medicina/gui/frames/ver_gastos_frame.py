@@ -18,13 +18,13 @@ class VerGastosFrame(ctk.CTkFrame):
         
         self.optionmenu_correspondencia_gasto = ctk.CTkOptionMenu(
             self, 
-            values=["Todos", "enyn", "Fernanda", "Felipe", "Duanne", "Flávia"],
+            values=["Todos", "enyn", "Fernanda", "Felipe", "Duanne", "Flávia", "Gabriel"],
             command=self.filtrar_por_correspondencia_gasto  # Asocia el filtro con el método
         )
         self.optionmenu_correspondencia_gasto.pack(pady=5)
 
         # Definir las columnas de la tabla
-        columnas = ("ID","Monto", "Divisa", "Fecha", "Cuenta", "Descripcion", "Responsable")
+        columnas = ("ID","Monto", "Divisa", "Fecha", "Cuenta", "Metodo", "Descripcion", "Responsable")
 
         # Crear la tabla
         self.tabla_gasto = ttk.Treeview(self, columns=columnas, show="headings", selectmode="browse")
@@ -65,7 +65,7 @@ class VerGastosFrame(ctk.CTkFrame):
         gastos = get_gastos_con_detalles(self.conn, correspondencia)  # Actualizamos la consulta con el filtro de correspondencia
 
         for gasto in gastos:
-            self.tabla_gasto.insert("", tk.END, values=(gasto[0], gasto[1], gasto[2], gasto[3], gasto[4], gasto[5], gasto[6]))
+            self.tabla_gasto.insert("", tk.END, values=(gasto[0], gasto[1], gasto[2], gasto[3], gasto[4], gasto[5], gasto[6], gasto[7]))
 
     def filtrar_por_correspondencia_gasto(self, correspondencia):
         # Limpiar tabla
@@ -94,7 +94,7 @@ class VerGastosFrame(ctk.CTkFrame):
         # Crear una nueva ventana para editar
         self.edit_window_gasto = ctk.CTkToplevel(self)
         self.edit_window_gasto.title("Editar Gasto")
-        self.edit_window_gasto.geometry("400x300")
+        self.edit_window_gasto.geometry("400x550")
 
         label_monto = ctk.CTkLabel(self.edit_window_gasto, text="Monto")
         label_monto.pack(pady=5)
@@ -108,27 +108,36 @@ class VerGastosFrame(ctk.CTkFrame):
         correspondencia_var = ctk.StringVar()
         entry_correspondencia = ctk.CTkOptionMenu(self.edit_window_gasto,
                                                   variable=correspondencia_var,
-                                                  values=["Todos", "enyn", "Fernanda", "Felipe", "Duanne", "Flávia"],
+                                                  values=["Todos", "enyn", "Fernanda", "Felipe", "Duanne", "Flávia", "Gabriel"],
                                                   width=300)
         entry_correspondencia.pack(pady=5)
-        entry_correspondencia.insert(0,gasto_data[4])
+        correspondencia_var.set(gasto_data[4])
+
+        # Label y Entry para metodo de pago
+        label_metodo = ctk.CTkLabel(self.edit_window_gasto, text="Método de Gasto")
+        label_metodo.pack(pady=5)
+        metodo_var = ctk.StringVar()
+        entry_metodo = ctk.CTkOptionMenu(self.edit_window_gasto,
+                                              variable=metodo_var,values=['Efectivo','Transferencia', 'Crédito', 'Debito'],
+                                              width=300)
+        entry_metodo.pack(pady=5)
 
         # Label y Entry para descripcion
         label_descripcion = ctk.CTkLabel(self.edit_window_gasto, text="Descripción")
         label_descripcion.pack(pady = 5)
         entry_descripcion = ctk.CTkTextbox(self.edit_window_gasto, width=300, height=200)
         entry_descripcion.pack(pady = 5)
-        entry_descripcion.insert("1.0",gasto_data[5])
+        entry_descripcion.insert("1.0",gasto_data[6])
 
         # Botón para guardar los cambios
-        btn_guardar = ctk.CTkButton(self.edit_window_gasto, text="Guardar", command=lambda: self.guardar_cambios_gasto(selected_item, entry_monto.get(), correspondencia_var.get(), entry_descripcion.get("1.0", "end-1c"), gasto_data))
+        btn_guardar = ctk.CTkButton(self.edit_window_gasto, text="Guardar", command=lambda: self.guardar_cambios_gasto(selected_item, entry_monto.get(), correspondencia_var.get(), metodo_var.get(), entry_descripcion.get("1.0", "end-1c"), gasto_data))
         btn_guardar.pack(pady=10)
 
-    def guardar_cambios_gasto(self, selected_item, monto, correspondencia, descripcion, gasto_data):
-        editado = editar_gasto(self.conn, gasto_data[0], monto, correspondencia, descripcion, self.usuario_actual.id)
+    def guardar_cambios_gasto(self, selected_item, monto, correspondencia, metodo, descripcion, gasto_data):
+        editado = editar_gasto(self.conn, gasto_data[0], monto, correspondencia, metodo, descripcion, self.usuario_actual.id)
         if editado:
             # Actualizar el registro en la tabla con los nuevos datos
-            self.tabla_gasto.item(selected_item, values=(gasto_data[0], monto, gasto_data[2], gasto_data[3], correspondencia, descripcion, self.usuario_actual.nombre))
+            self.tabla_gasto.item(selected_item, values=(gasto_data[0], monto, gasto_data[2], gasto_data[3], correspondencia, metodo, descripcion, self.usuario_actual.nombre))
             messagebox.showinfo(
                 title="Exito",
                 message="Gasto editado correctamente"

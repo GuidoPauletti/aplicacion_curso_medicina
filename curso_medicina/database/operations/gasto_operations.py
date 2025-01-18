@@ -1,13 +1,13 @@
 from tkinter import messagebox
 
-def insert_gasto(connection, monto, divisa, correspondencia, descripcion, id_usuario):
+def insert_gasto(connection, monto, divisa, correspondencia, descripcion, id_usuario, metodo):
     try:
         cursor = connection.cursor()
         sql_insert_query = """
-        INSERT INTO gasto (monto, divisa, fecha, correspondencia, descripcion, id_usuario) 
-        VALUES (%s, %s, CURDATE(), %s, %s, %s)
+        INSERT INTO gasto (monto, divisa, fecha, correspondencia, descripcion, id_usuario, metodo) 
+        VALUES (%s, %s, CURDATE(), %s, %s, %s, %s)
         """
-        cursor.execute(sql_insert_query, (monto, divisa, correspondencia, descripcion, id_usuario))
+        cursor.execute(sql_insert_query, (monto, divisa, correspondencia, descripcion, id_usuario, metodo))
         connection.commit()
         return cursor.lastrowid
     except Exception as e:
@@ -29,7 +29,7 @@ def get_gastos_con_detalles(connection, correspondencia="%"):
         cursor = connection.cursor()
 
         sql_query = f"""
-            SELECT g.id, g.monto, g.divisa, g.fecha, g.correspondencia, g.descripcion, u.nombre responsable
+            SELECT g.id, g.monto, g.divisa, g.fecha, g.correspondencia, g.metodo, g.descripcion, u.nombre responsable
             FROM gasto g INNER JOIN usuario u
             ON g.id_usuario = u.id
             WHERE g.correspondencia LIKE '{correspondencia}'
@@ -67,15 +67,15 @@ def borrar_gasto(connection, id):
     finally:
         cursor.close()
 
-def editar_gasto(connection, id, monto, correspondencia, descripcion, usuario):
+def editar_gasto(connection, id, monto, correspondencia, metodo, descripcion, usuario):
     try:
         cursor = connection.cursor()
         sql_query = """
             UPDATE gasto
-            SET monto = %s, correspondencia = %s, descripcion = %s, id_usuario = %s
+            SET monto = %s, correspondencia = %s, metodo = %s, descripcion = %s, id_usuario = %s
             WHERE id = %s
         """
-        cursor.execute(sql_query, (monto, correspondencia, descripcion, usuario, id))
+        cursor.execute(sql_query, (monto, correspondencia, metodo, descripcion, usuario, id))
         connection.commit()
         return "Registro de gasto editado correctamente"
     except Exception as e:
