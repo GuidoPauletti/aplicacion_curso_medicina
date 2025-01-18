@@ -10,7 +10,7 @@ def get_pagos_con_detalles(connection, correspondencia="%", alumno = None):
 
         if alumno:
             sql_query = f"""
-                SELECT p.id, a.nombre, a.apellido, m.denominacion, p.monto, p.cuota, p.fecha, u.nombre, p.observaciones
+                SELECT p.id, a.nombre, a.apellido, m.denominacion, p.monto, p.metodo, p.correspondencia ,p.cuota, p.fecha, u.nombre, p.observaciones
                 FROM pago p
                 JOIN inscripcion ON p.id_inscripcion = inscripcion.id
                 JOIN alumno a ON inscripcion.id_alumno = a.id
@@ -22,7 +22,7 @@ def get_pagos_con_detalles(connection, correspondencia="%", alumno = None):
             """
         else:
             sql_query = f"""
-                SELECT p.id, a.nombre, a.apellido, m.denominacion, p.monto, p.cuota, p.fecha, u.nombre, p.observaciones
+                SELECT p.id, a.nombre, a.apellido, m.denominacion, p.monto, p.metodo, p.correspondencia , p.cuota, p.fecha, u.nombre, p.observaciones
                 FROM pago p
                 JOIN inscripcion ON p.id_inscripcion = inscripcion.id
                 JOIN alumno a ON inscripcion.id_alumno = a.id
@@ -87,12 +87,12 @@ def borrar_pago(connection, id):
         cursor.close()
         
 
-def editar_pago(connection, id, monto, cuota, id_usuario):
+def editar_pago(connection, id, monto, cuota, metodo, correspondencia, id_usuario):
     try:
         cursor = connection.cursor()
         sql_query = f"""
             UPDATE pago
-            SET monto = {monto}, cuota = {cuota}, id_usuario = {id_usuario}
+            SET monto = {monto}, cuota = {cuota}, id_usuario = {id_usuario}, metodo = '{metodo}', correspondencia = '{correspondencia}'
             WHERE id = {id}
         """
         cursor.execute(sql_query)

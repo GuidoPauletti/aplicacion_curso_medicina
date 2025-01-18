@@ -47,7 +47,7 @@ class VerPagosFrame(ctk.CTkFrame):
         self.optionmenu_alumno.bind('<KeyRelease>', self.filtrar_alumnos)
 
         # Crear tabla
-        columnas = ("ID", "Nombre", "Apellido", "Materia", "Monto (AR$)", "Cuota", "Fecha", "Responsable", "Observaciones")
+        columnas = ("ID", "Nombre", "Apellido", "Materia", "Monto (AR$)", "Metodo", "Cuenta", "Cuota", "Fecha", "Responsable", "Observaciones")
 
         self.scrollable_frame = ctk.CTkScrollableFrame(self, orientation="horizontal")
         self.scrollable_frame.pack(fill="both", expand=True)
@@ -140,7 +140,7 @@ class VerPagosFrame(ctk.CTkFrame):
         # Crear una nueva ventana para editar
         self.edit_window_pago = ctk.CTkToplevel(self)
         self.edit_window_pago.title("Editar Alumno")
-        self.edit_window_pago.geometry("400x300")
+        self.edit_window_pago.geometry("400x550")
 
         label_monto = ctk.CTkLabel(self.edit_window_pago, text="Monto")
         label_monto.pack(pady=5)
@@ -152,17 +152,44 @@ class VerPagosFrame(ctk.CTkFrame):
         label_cuota.pack(pady=5)
         entry_cuota = ctk.CTkEntry(self.edit_window_pago)
         entry_cuota.pack(pady=5)
-        entry_cuota.insert(0, pago_data[5])
+        entry_cuota.insert(0, pago_data[7])
+
+        # Label y Entry para metodo de pago
+        label_metodo = ctk.CTkLabel(self.edit_window_pago, text="Método de Pago")
+        label_metodo.pack(pady=5)
+        metodo_var = ctk.StringVar()
+        entry_metodo = ctk.CTkOptionMenu(self.edit_window_pago,
+                                              variable=metodo_var,values=['Efectivo','Transferencia'],
+                                              width=300)
+        entry_metodo.pack(pady=5)
+        metodo_var.set(pago_data[5])
+
+        # Label y Entry para correspondencia
+        label_correspondencia = ctk.CTkLabel(self.edit_window_pago, text="Cuenta:")
+        label_correspondencia.pack(pady=5)
+        correspondencia_var = ctk.StringVar()
+        entry_correspondencia = ctk.CTkOptionMenu(self.edit_window_pago,
+                                                       variable=correspondencia_var,
+                                                       values=["enyn", "Fernanda", "Felipe", "Duanne", "Flávia", "Gabriel"],
+                                                       width=300)
+        entry_correspondencia.pack(pady=5)
+        correspondencia_var.set(pago_data[6])
 
         # Botón para guardar los cambios
-        btn_guardar = ctk.CTkButton(self.edit_window_pago, text="Guardar", command=lambda: self.guardar_cambios_pago(selected_item, entry_monto.get(), entry_cuota.get(), pago_data))
+        btn_guardar = ctk.CTkButton(self.edit_window_pago, text="Guardar",
+                                    command=lambda:self.guardar_cambios_pago(selected_item,
+                                                                             entry_monto.get(),
+                                                                             entry_cuota.get(),
+                                                                             metodo_var.get(),
+                                                                             correspondencia_var.get(),
+                                                                             pago_data))
         btn_guardar.pack(pady=10)
 
-    def guardar_cambios_pago(self, selected_item, monto, cuota, pago_data):
-        editado = editar_pago(self.conn, pago_data[0], monto, cuota, self.usuario_actual.id)
+    def guardar_cambios_pago(self, selected_item, monto, cuota, metodo, correspondencia, pago_data):
+        editado = editar_pago(self.conn, pago_data[0], monto, cuota, metodo, correspondencia, self.usuario_actual.id)
         if editado:
             # Actualizar el registro en la tabla con los nuevos datos
-            self.tabla.item(selected_item, values=(pago_data[0], pago_data[1], pago_data[2], pago_data[3], monto, cuota, pago_data[6], self.usuario_actual.nombre))
+            self.tabla.item(selected_item, values=(pago_data[0], pago_data[1], pago_data[2], pago_data[3], monto, metodo, correspondencia, cuota, pago_data[8], self.usuario_actual.nombre))
             messagebox.showinfo(
                 title="Exito",
                 message="Información de pago editada correctamente"
