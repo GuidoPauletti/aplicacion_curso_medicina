@@ -17,11 +17,11 @@ class PDFGenerator:
         self.styles = getSampleStyleSheet()
         # Definir anchos fijos para las columnas (en puntos)
         self.col_widths = [
-            70,     # Monto
-            75,     # Divisa
-            240,    # Descripción
-            100,    # Cuenta
-            70      # Fecha
+            65,     # Monto
+            95,     # Divisa
+            270,    # Descripción
+            60,    # Cuenta
+            65      # Fecha
         ]
 
     @staticmethod
@@ -128,12 +128,12 @@ class PDFGenerator:
         table_style = TableStyle([
             # Encabezados
             ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 0), (-1, 0), 10),
+            ('FONTSIZE', (0, 0), (-1, 0), 8),
             ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
             ('TOPPADDING', (0, 0), (-1, 0), 12),
             # Cuerpo de la tabla
             ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-            ('FONTSIZE', (0, 1), (-1, -1), 10),
+            ('FONTSIZE', (0, 1), (-1, -1), 8),
             # Alineación
             ('ALIGN', (0, 0), (0, -1), 'CENTER'),  # ID centrado
             ('ALIGN', (2, 0), (2, -1), 'RIGHT'),   # Monto alineado a la derecha
