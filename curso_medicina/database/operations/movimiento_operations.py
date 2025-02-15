@@ -3,9 +3,9 @@ from tkinter import messagebox
 def get_movimientos_con_detalles(connection, ventana_temporal):
     """Obtiene informacion de movimientos dentro de la ventana temporal"""
     condicion = {
-        "Ultimo día" : "= CURDATE()",
-        "Ultima semana" : ">= DATE_SUB(CURDATE(), INTERVAL 7 DAY)",
-        "Ultimo mes": ">= DATE_SUB(CURDATE(), INTERVAL 1 MONTH)"
+        "Ultimo día" : "Fecha = CURDATE()",
+        "Ultima semana" : "Fecha >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)",
+        "Ultimo mes": "MONTH(Fecha) = MONTH(CURDATE())"
     }
     try:
         cursor = connection.cursor()
@@ -20,7 +20,7 @@ def get_movimientos_con_detalles(connection, ventana_temporal):
             g.fecha AS Fecha
         FROM 
             gasto g
-        WHERE Fecha {condicion[ventana_temporal]}
+        WHERE {condicion[ventana_temporal]}
 
         UNION
 
@@ -45,7 +45,7 @@ def get_movimientos_con_detalles(connection, ventana_temporal):
             materia m ON i.id_materia = m.id
         LEFT JOIN
             pago_divisa_extranjera pde ON p.id = pde.pago_id
-        WHERE Fecha {condicion[ventana_temporal]}
+        WHERE {condicion[ventana_temporal]}
 
         ORDER BY 
             Fecha DESC;
