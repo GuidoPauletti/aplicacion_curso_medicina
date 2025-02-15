@@ -103,14 +103,14 @@ class VerAlumnosFrame(ctk.CTkFrame):
         if alumno_id:
             # Crear una nueva ventana para ver alumno
             self.vista_alumno = ctk.CTkToplevel(self)
-            self.vista_alumno.title("Vista Alumno")
-            self.vista_alumno.geometry("750x400")
+            self.vista_alumno.title("Inscripciones de Alumno")
+            self.vista_alumno.geometry("1050x400")
 
             self.label_nombre_alumno = ctk.CTkLabel(self.vista_alumno, text=f"{datos_alumno[1]} {datos_alumno[2]}")
             self.label_nombre_alumno.pack(pady=5)
 
             # Definir las columnas de la tabla
-            columnas_va = ("ID", "Materia", "Tipo de inscripcion", "Dia limite para pagar cada mes", "Deuda")
+            columnas_va = ("ID", "Materia", "Tipo de inscripcion", "Dia limite para pagar cada mes", "Deuda", "Estado")
 
             self.frame_inscripciones_alumno = ctk.CTkFrame(self.vista_alumno)
             self.frame_inscripciones_alumno.pack(fill="both", expand=True)
@@ -275,7 +275,7 @@ class VerAlumnosFrame(ctk.CTkFrame):
 
         for inscripcion in inscripciones_alumno:
             deuda = inscripcion[4] - inscripcion[5]
-            self.tabla_inscripciones_alumno.insert("", tk.END, values=(inscripcion[0],inscripcion[1],inscripcion[2],inscripcion[3],deuda))
+            self.tabla_inscripciones_alumno.insert("", tk.END, values=(inscripcion[0],inscripcion[1],inscripcion[2],inscripcion[3],deuda,inscripcion[6]))
 
     def on_tree_select_incripcion_alumno(self, event):
         self.btn_editar_inscripcion_alumno.configure(state="normal")
@@ -310,6 +310,20 @@ class VerAlumnosFrame(ctk.CTkFrame):
                                                     )
         self.combobox_inscripcion.pack(pady=5)
 
+        # Estado Inscripcion
+        label_estado_inscripcion = ctk.CTkLabel(self.edit_window_inscripcion, text="Tipo Inscripción:")
+        label_estado_inscripcion.pack(pady=5)
+        estado_inscripcion_var = ctk.StringVar()
+        estado_inscripcion_var.set(inscripcion_data[5])
+
+        self.combobox_estado_inscripcion = ctk.CTkComboBox(self.edit_window_inscripcion,
+                                                    variable=estado_inscripcion_var,
+                                                    values=['curso','finalizado','baja'],
+                                                    width=300,
+                                                    )
+        self.combobox_estado_inscripcion.pack(pady=5)
+
+        # Dia limite de pago
         label_paga_el_incripcion = ctk.CTkLabel(self.edit_window_inscripcion, text="Dia limite de pago cada mes")
         label_paga_el_incripcion.pack(pady=5)
         entry_paga_el_incripcion = ctk.CTkEntry(self.edit_window_inscripcion)
@@ -323,14 +337,15 @@ class VerAlumnosFrame(ctk.CTkFrame):
                                                         selected_item,
                                                         tipo_inscripcion_var.get(),
                                                         entry_paga_el_incripcion.get(),
+                                                        estado_inscripcion_var.get(),
                                                         inscripcion_data))
         btn_guardar_inscripcion.pack(pady=10)
 
-    def guardar_cambios_inscripcion(self, selected_item, tipo, paga_el, inscripcion_data):
-        editado = editar_inscripcion(self.conn, inscripcion_data[0], tipo, paga_el)
+    def guardar_cambios_inscripcion(self, selected_item, tipo, paga_el, estado, inscripcion_data):
+        editado = editar_inscripcion(self.conn, inscripcion_data[0], tipo, paga_el, estado)
         if editado:
             # Actualizar el registro en la tabla con los nuevos datos
-            self.tabla_inscripciones_alumno.item(selected_item, values=(inscripcion_data[0], inscripcion_data[1], tipo, paga_el, inscripcion_data[4]))
+            self.tabla_inscripciones_alumno.item(selected_item, values=(inscripcion_data[0], inscripcion_data[1], tipo, paga_el, inscripcion_data[4], estado))
             messagebox.showinfo(
                 title="Exito",
                 message="Inscripción de alumno editada correctamente"
