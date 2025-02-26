@@ -5,6 +5,7 @@ from tkinter import ttk, messagebox
 from tkcalendar import DateEntry
 from datetime import datetime, timedelta
 import os
+import locale
 
 import customtkinter as ctk
 
@@ -28,7 +29,8 @@ class VerMovimientosFrame(ctk.CTkFrame):
         self.label_desde = ctk.CTkLabel(self.frame_desde, text="Desde:")
         self.label_desde.pack(side="left", padx=5)
         self.fecha_desde = DateEntry(self.frame_desde, width=12, background='darkblue',
-                                foreground='white', borderwidth=2, date_pattern='dd/mm/yyyy')
+                                foreground='white', borderwidth=2, date_pattern='dd/mm/yyyy',
+                                locale= 'es_ES')
         self.fecha_desde.pack(side="left")
         self.fecha_desde.set_date(datetime.now() - timedelta(days=7))
 
@@ -38,7 +40,8 @@ class VerMovimientosFrame(ctk.CTkFrame):
         self.label_hasta = ctk.CTkLabel(self.frame_hasta, text="Hasta:")
         self.label_hasta.pack(side="left", padx=5)
         self.fecha_hasta = DateEntry(self.frame_hasta, width=12, background='darkblue',
-                                foreground='white', borderwidth=2, date_pattern='dd/mm/yyyy')
+                                foreground='white', borderwidth=2, date_pattern='dd/mm/yyyy',
+                                locale='es_ES')
         self.fecha_hasta.pack(side="left")
         self.fecha_hasta.set_date(datetime.now())
 
