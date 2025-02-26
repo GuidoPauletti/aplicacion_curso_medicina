@@ -7,6 +7,7 @@ from ..utils.receipt_generator import generate_payment_receipt
 from ..utils.validators import is_valid_date
 
 from tkinter import messagebox, simpledialog
+from tkcalendar import DateEntry
 from datetime import datetime
 import os
 
@@ -70,14 +71,13 @@ class AltaPagoFrame(ctk.CTkScrollableFrame):
         self.entry_divisa.pack(pady=5)
 
         # Label y Entry para fecha
-        self.label_fecha = ctk.CTkLabel(self, text="Fecha (AAAA-MM-DD):")
+        self.label_fecha = ctk.CTkLabel(self, text="Fecha")
         self.label_fecha.pack(pady=5)
-        self.fecha_var = ctk.StringVar()
-        self.entry_fecha = ctk.CTkEntry(self, textvariable=self.fecha_var, width=300)
-        self.entry_fecha.pack(pady=5)
-
-        hoy = datetime.now().strftime("%Y-%m-%d")
-        self.fecha_var.set(hoy)
+        self.fecha_entry = DateEntry(self, width=12, background='darkblue',
+                                foreground='white', borderwidth=2, date_pattern='dd/mm/yyyy',
+                                locale= 'es_ES')
+        self.fecha_entry.pack(pady=5)
+        self.fecha_entry.set_date(datetime.now())
 
         # Label y Entry para metodo de pago
         self.label_metodo = ctk.CTkLabel(self, text="Método de Pago")
@@ -122,7 +122,7 @@ class AltaPagoFrame(ctk.CTkScrollableFrame):
                                                                       self.metodo_var.get(),
                                                                       self.cuota_var.get(),
                                                                       self.correspondencia_var.get(),
-                                                                      self.fecha_var.get(),
+                                                                      self.fecha_entry.get_date().strftime("%Y-%m-%d"),
                                                                       self))
         btn_guardar.pack(pady=20)
 
@@ -278,5 +278,5 @@ class AltaPagoFrame(ctk.CTkScrollableFrame):
         self.correspondencia_var.set("")
         self.cuota_var.set("")
         self.entry_descripcion.delete("1.0", "end-1c")
-        self.fecha_var.set(datetime.now().strftime("%Y-%m-%d"))
+        self.fecha_entry.set_date(datetime.now())
         self.metodo_var.set("")
