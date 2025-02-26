@@ -1,12 +1,10 @@
 from tkinter import messagebox
 
-def get_movimientos_con_detalles(connection, ventana_temporal):
+def get_movimientos_con_detalles(connection, desde, hasta):
     """Obtiene informacion de movimientos dentro de la ventana temporal"""
-    condicion = {
-        "Ultimo día" : "Fecha = CURDATE()",
-        "Ultima semana" : "Fecha >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)",
-        "Ultimo mes": "MONTH(Fecha) = MONTH(CURDATE())"
-    }
+    # Convertir las fechas a formato de cadena (YYYY-MM-DD) para SQL
+    fecha_desde_str = desde.strftime('%Y-%m-%d')
+    fecha_hasta_str = hasta.strftime('%Y-%m-%d')
     try:
         cursor = connection.cursor()
         sql_query = f"""
@@ -14,13 +12,13 @@ def get_movimientos_con_detalles(connection, ventana_temporal):
             g.id AS ID,
             'Salida' AS Tipo,
             g.monto AS Monto,
-            g.divisa AS Divisa,
+            CONCAT(g.divisa, ' (', g.metodo, ')') AS Divisa,
             g.descripcion AS Descripción,
             g.correspondencia AS Cuenta,
             g.fecha AS Fecha
         FROM 
             gasto g
-        WHERE {condicion[ventana_temporal]}
+        WHERE DATE(g.fecha) >= '{fecha_desde_str}' AND DATE(g.fecha) <= '{fecha_hasta_str}'
 
         UNION
 
@@ -45,7 +43,7 @@ def get_movimientos_con_detalles(connection, ventana_temporal):
             materia m ON i.id_materia = m.id
         LEFT JOIN
             pago_divisa_extranjera pde ON p.id = pde.pago_id
-        WHERE {condicion[ventana_temporal]}
+        WHERE DATE(p.fecha) >= '{fecha_desde_str}' AND DATE(p.fecha) <= '{fecha_hasta_str}'
 
         ORDER BY 
             Fecha DESC;
