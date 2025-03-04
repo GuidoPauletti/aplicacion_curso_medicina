@@ -7,5 +7,6 @@ setup(
     install_requires=[
         'customtkinter',
         'mysql-connector-python',
+        'tkcalendar'
     ],
 )
