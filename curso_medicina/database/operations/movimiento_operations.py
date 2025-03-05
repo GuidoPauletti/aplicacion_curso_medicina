@@ -2,9 +2,7 @@ from tkinter import messagebox
 
 def get_movimientos_con_detalles(connection, desde, hasta):
     """Obtiene informacion de movimientos dentro de la ventana temporal"""
-    # Convertir las fechas a formato de cadena (YYYY-MM-DD) para SQL
-    fecha_desde_str = desde.strftime('%Y-%m-%d')
-    fecha_hasta_str = hasta.strftime('%Y-%m-%d')
+
     try:
         cursor = connection.cursor()
         sql_query = f"""
@@ -18,7 +16,7 @@ def get_movimientos_con_detalles(connection, desde, hasta):
             g.fecha AS Fecha
         FROM 
             gasto g
-        WHERE DATE(g.fecha) >= '{fecha_desde_str}' AND DATE(g.fecha) <= '{fecha_hasta_str}'
+        WHERE DATE(g.fecha) >= '{desde}' AND DATE(g.fecha) <= '{hasta}'
 
         UNION
 
@@ -43,7 +41,7 @@ def get_movimientos_con_detalles(connection, desde, hasta):
             materia m ON i.id_materia = m.id
         LEFT JOIN
             pago_divisa_extranjera pde ON p.id = pde.pago_id
-        WHERE DATE(p.fecha) >= '{fecha_desde_str}' AND DATE(p.fecha) <= '{fecha_hasta_str}'
+        WHERE DATE(p.fecha) >= '{desde}' AND DATE(p.fecha) <= '{hasta}'
 
         ORDER BY 
             Fecha DESC;

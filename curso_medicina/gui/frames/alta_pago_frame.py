@@ -71,13 +71,12 @@ class AltaPagoFrame(ctk.CTkScrollableFrame):
         self.entry_divisa.pack(pady=5)
 
         # Label y Entry para fecha
-        self.label_fecha = ctk.CTkLabel(self, text="Fecha")
+        self.label_fecha = ctk.CTkLabel(self, text="Fecha (AAAA/MM/DD)")
         self.label_fecha.pack(pady=5)
-        self.fecha_entry = DateEntry(self, width=12, background='darkblue',
-                                foreground='white', borderwidth=2, date_pattern='dd/mm/yyyy',
-                                locale= 'es_ES')
+        self.fecha_entry_var = ctk.StringVar()
+        self.fecha_entry = ctk.CTkEntry(self, textvariable = self.fecha_entry_var, placeholder_text="AAAA/MM/DD")
         self.fecha_entry.pack(pady=5)
-        self.fecha_entry.set_date(datetime.now())
+        self.fecha_entry_var.set((datetime.now()).strftime("%Y-%m-%d"))
 
         # Label y Entry para metodo de pago
         self.label_metodo = ctk.CTkLabel(self, text="Método de Pago")
@@ -122,7 +121,7 @@ class AltaPagoFrame(ctk.CTkScrollableFrame):
                                                                       self.metodo_var.get(),
                                                                       self.cuota_var.get(),
                                                                       self.correspondencia_var.get(),
-                                                                      self.fecha_entry.get_date().strftime("%Y-%m-%d"),
+                                                                      self.fecha_entry_var.get(),
                                                                       self))
         btn_guardar.pack(pady=20)
 
@@ -136,6 +135,11 @@ class AltaPagoFrame(ctk.CTkScrollableFrame):
         self.actualizar_combobox(filtro)
     
     def save_pago(self, alumno_seleccionado, materia, monto, divisa, metodo, cuota, correspondencia, fecha, ventana):
+        try:
+            datetime.strptime(fecha, "%Y-%m-%d").date()
+        except:
+            messagebox.showerror("Error", "No ha seleccionado un formato correcto de fecha (AAAA/MM/DD)")
+            return
         if alumno_seleccionado and materia and monto and divisa and cuota:
             if metodo == "Transferencia" and correspondencia == "":
                 messagebox.showerror("Advertencia", "Debe elegir la cuenta para pagos realizados por transferencia")
@@ -278,5 +282,5 @@ class AltaPagoFrame(ctk.CTkScrollableFrame):
         self.correspondencia_var.set("")
         self.cuota_var.set("")
         self.entry_descripcion.delete("1.0", "end-1c")
-        self.fecha_entry.set_date(datetime.now())
+        self.fecha_entry_var.set((datetime.now()).strftime("%Y-%m-%d"))
         self.metodo_var.set("")

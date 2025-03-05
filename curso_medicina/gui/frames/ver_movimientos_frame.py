@@ -26,29 +26,27 @@ class VerMovimientosFrame(ctk.CTkFrame):
         # Frame para la fecha "desde"
         self.frame_desde = ctk.CTkFrame(self.frame_filtros, fg_color="transparent")
         self.frame_desde.pack(side="left", padx=10)
-        self.label_desde = ctk.CTkLabel(self.frame_desde, text="Desde:")
+        self.label_desde = ctk.CTkLabel(self.frame_desde, text="Desde (AAAA/MM/DD):")
         self.label_desde.pack(side="left", padx=5)
-        self.fecha_desde = DateEntry(self.frame_desde, width=12, background='darkblue',
-                                foreground='white', borderwidth=2, date_pattern='dd/mm/yyyy',
-                                locale= 'es_ES')
-        self.fecha_desde.pack(side="left")
-        self.fecha_desde.set_date(datetime.now() - timedelta(days=7))
+        self.fecha_desde_var = ctk.StringVar()
+        self.fecha_desde = ctk.CTkEntry(self.frame_desde, textvariable = self.fecha_desde_var, placeholder_text="AAAA/MM/DD")
+        self.fecha_desde.pack(pady=5)
+        self.fecha_desde_var.set((datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d"))
 
         # Frame para la fecha "hasta"
         self.frame_hasta = ctk.CTkFrame(self.frame_filtros, fg_color="transparent")
         self.frame_hasta.pack(side="left", padx=10)
-        self.label_hasta = ctk.CTkLabel(self.frame_hasta, text="Hasta:")
+        self.label_hasta = ctk.CTkLabel(self.frame_hasta, text="Hasta (AAAA/MM/DD):")
         self.label_hasta.pack(side="left", padx=5)
-        self.fecha_hasta = DateEntry(self.frame_hasta, width=12, background='darkblue',
-                                foreground='white', borderwidth=2, date_pattern='dd/mm/yyyy',
-                                locale='es_ES')
-        self.fecha_hasta.pack(side="left")
-        self.fecha_hasta.set_date(datetime.now())
+        self.fecha_hasta_var = ctk.StringVar()
+        self.fecha_hasta = ctk.CTkEntry(self.frame_hasta, textvariable = self.fecha_hasta_var, placeholder_text="AAAA/MM/DD")
+        self.fecha_hasta.pack(pady=5)
+        self.fecha_hasta_var.set((datetime.now()).strftime("%Y-%m-%d"))
 
         # Botón para aplicar el filtro
         self.boton_filtrar = ctk.CTkButton(self.frame_filtros, text="Filtrar",
-                                           command=lambda: self.filtrar_por_tiempo(self.fecha_desde.get_date(),
-                                                                                   self.fecha_hasta.get_date()))
+                                           command=lambda: self.filtrar_por_tiempo(self.fecha_desde_var.get(),
+                                                                                   self.fecha_hasta_var.get()))
         self.boton_filtrar.pack(side="left", padx=10)
 
         # Crear tabla
@@ -78,7 +76,7 @@ class VerMovimientosFrame(ctk.CTkFrame):
         self.btn_pesos.grid(row=0, column=1, padx=5)
 
         # Obtener los movimientos
-        self.cargar_movimientos(self.fecha_desde.get_date(), self.fecha_hasta.get_date())
+        self.cargar_movimientos(self.fecha_desde_var.get(), self.fecha_hasta_var.get())
 
     def cargar_movimientos(self, desde, hasta):
         # Limpiar tabla existente
@@ -91,9 +89,16 @@ class VerMovimientosFrame(ctk.CTkFrame):
 
     def filtrar_por_tiempo(self, desde, hasta):
     # Asegúrate de que la fecha "hasta" sea posterior a "desde"
-        if hasta < desde:
-            messagebox.showerror("Error", "La fecha 'hasta' debe ser posterior a la fecha 'desde'")
+        try:
+            desde_f = datetime.strptime(desde, "%Y-%m-%d").date()
+            hasta_f = datetime.strptime(hasta, "%Y-%m-%d").date()
+            if hasta_f < desde_f:
+                messagebox.showerror("Error", "La fecha 'hasta' debe ser posterior a la fecha 'desde'")
+                return
+        except:
+            messagebox.showerror("Error", "No ha seleccionado un formato correcto de fecha (AAAA/MM/DD)")
             return
+
         self.cargar_movimientos(desde, hasta)
 
     def generate_report(self):
