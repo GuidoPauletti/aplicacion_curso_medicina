@@ -11,7 +11,8 @@ def create_connection():
             user="miscellium",
             password="M&sc3LLium$",
             database="curso_medicina",
-            port=3306
+            port=3306,
+            connection_timeout=10
         )
         return connection
 

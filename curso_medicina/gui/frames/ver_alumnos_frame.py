@@ -142,7 +142,9 @@ class VerAlumnosFrame(ctk.CTkFrame):
         for item in self.tabla_alumno.get_children():
             self.tabla_alumno.delete(item)
 
-        alumno = get_unico_alumno(self.conn, alumno[0])
+        alumno_id = alumno.split(" - ")[0]
+
+        alumno = get_unico_alumno(self.conn, alumno_id)
         if alumno:
             if alumno[8] == "Si":
                 self.tabla_alumno.insert("", tk.END, values=(alumno[0], alumno[1], alumno[2], alumno[3], alumno[4], alumno[5], alumno[6], alumno[7]), tags='deudor')
