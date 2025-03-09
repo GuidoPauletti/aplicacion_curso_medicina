@@ -1,11 +1,14 @@
+from curso_medicina.database.connection import get_connection
+
 from tkinter import messagebox
 
-def get_pagos_con_detalles(connection, correspondencia="%", alumno = None):
+def get_pagos_con_detalles(correspondencia="%", alumno = None):
     if not isinstance(correspondencia,str):
         correspondencia="%"
     if correspondencia == "Todos":
         correspondencia = "%"
     try:
+        connection = get_connection()
         cursor = connection.cursor()
 
         if alumno:
@@ -44,9 +47,11 @@ def get_pagos_con_detalles(connection, correspondencia="%", alumno = None):
         return []
     finally:
         cursor.close()
+        connection.close()
 
-def get_info_ultimo_pago(connection, id, cuota):
+def get_info_ultimo_pago(id, cuota):
     try:
+        connection = get_connection()
         cursor = connection.cursor()
 
         sql_query = """
@@ -65,9 +70,11 @@ def get_info_ultimo_pago(connection, id, cuota):
         return
     finally:
         cursor.close()
+        connection.close()
     
-def borrar_pago(connection, id):
+def borrar_pago(id):
     try:
+        connection = get_connection()
         cursor = connection.cursor()
 
         sql_query = f"""
@@ -85,10 +92,12 @@ def borrar_pago(connection, id):
         return
     finally:
         cursor.close()
+        connection.close()
         
 
-def editar_pago(connection, id, monto, cuota, metodo, correspondencia, id_usuario):
+def editar_pago(id, monto, cuota, metodo, correspondencia, id_usuario):
     try:
+        connection = get_connection()
         cursor = connection.cursor()
         sql_query = f"""
             UPDATE pago
@@ -107,9 +116,11 @@ def editar_pago(connection, id, monto, cuota, metodo, correspondencia, id_usuari
         return
     finally:
         cursor.close()
+        connection.close()
     
-def insert_pago(connection, id_alumno, id_materia, monto, divisa, metodo, cuota, correspondencia, fecha, obs,id_usuario):
+def insert_pago(id_alumno, id_materia, monto, divisa, metodo, cuota, correspondencia, fecha, obs,id_usuario):
     try:
+        connection = get_connection()
         cursor = connection.cursor()
         sql_insert_query = f"""
         INSERT INTO pago (id_inscripcion, monto, divisa, metodo, cuota, correspondencia, fecha, observaciones, id_usuario, cuota_de_mes) 
@@ -138,9 +149,11 @@ def insert_pago(connection, id_alumno, id_materia, monto, divisa, metodo, cuota,
         return None
     finally:
         cursor.close()
+        connection.close()
 
-def insert_pago_moneda_extranjera(connection, id_pago, divisa, monto):
+def insert_pago_moneda_extranjera(id_pago, divisa, monto):
     try:
+        connection = get_connection()
         cursor = connection.cursor()
         sql_insert_query = """
         INSERT INTO pago_divisa_extranjera (pago_id, divisa, monto) 
@@ -157,3 +170,4 @@ def insert_pago_moneda_extranjera(connection, id_pago, divisa, monto):
         return None
     finally:
         cursor.close()
+        connection.close()

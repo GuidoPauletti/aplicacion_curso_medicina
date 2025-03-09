@@ -15,9 +15,8 @@ class UserData:
     rol: str
 
 class LoginFrame(ctk.CTkFrame):
-    def __init__(self, parent, conn, on_login_success: Callable[[UserData], None]):
+    def __init__(self, parent, on_login_success: Callable[[UserData], None]):
         super().__init__(parent, fg_color="transparent")
-        self.conn = conn
         self.on_login_success = on_login_success
         self.error_label: Optional[ctk.CTkLabel] = None
         self.setup_ui()
@@ -73,7 +72,7 @@ class LoginFrame(ctk.CTkFrame):
             return
             
         # Validar credenciales
-        user_data = validate_user_credentials(self.conn, **credentials)
+        user_data = validate_user_credentials(**credentials)
         
         if user_data:
             # Crear objeto UserData

@@ -2,17 +2,15 @@ from curso_medicina.database.operations.movimiento_operations import get_movimie
 from ..utils.report_generator import generate_movement_report
 
 from tkinter import ttk, messagebox
-from tkcalendar import DateEntry
 from datetime import datetime, timedelta
 import os
-import locale
+import threading
 
 import customtkinter as ctk
 
 class VerMovimientosFrame(ctk.CTkFrame):
-    def __init__(self, parent, conn):
+    def __init__(self, parent):
         super().__init__(parent)
-        self.conn = conn
         self.setup_ui()
 
     def setup_ui(self):
@@ -76,14 +74,15 @@ class VerMovimientosFrame(ctk.CTkFrame):
         self.btn_pesos.grid(row=0, column=1, padx=5)
 
         # Obtener los movimientos
-        self.cargar_movimientos(self.fecha_desde_var.get(), self.fecha_hasta_var.get())
+        threading.Thread(target= self.cargar_movimientos(self.fecha_desde_var.get(), self.fecha_hasta_var.get())
+                         , daemon=True).start()
 
     def cargar_movimientos(self, desde, hasta):
         # Limpiar tabla existente
         for item in self.tabla.get_children():
             self.tabla.delete(item)
 
-        movimientos = get_movimientos_con_detalles(self.conn, desde, hasta)
+        movimientos = get_movimientos_con_detalles(desde, hasta)
         for movimiento in movimientos:
             self.tabla.insert("", "end", values=movimiento)
 

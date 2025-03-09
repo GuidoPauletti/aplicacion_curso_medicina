@@ -1,7 +1,10 @@
+from curso_medicina.database.connection import get_connection
+
 from tkinter import messagebox
 
-def call_update_debts(connection):
+def call_update_debts():
     try:
+        connection = get_connection()
         cursor = connection.cursor()
         cursor.execute("CALL update_student_debts2()")
         connection.commit()
@@ -14,9 +17,11 @@ def call_update_debts(connection):
         return None
     finally:
         cursor.close()
+        connection.close()
 
-def sanear_deuda(connection, id_inscripcion, cuota):
+def sanear_deuda(id_inscripcion, cuota):
     try:
+        connection = get_connection()
         cursor = connection.cursor()
         sql_query = f"""
             UPDATE deuda
@@ -40,3 +45,4 @@ def sanear_deuda(connection, id_inscripcion, cuota):
         return
     finally:
         cursor.close()
+        connection.close()

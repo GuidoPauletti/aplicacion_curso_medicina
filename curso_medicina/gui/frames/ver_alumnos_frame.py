@@ -7,9 +7,8 @@ from tkinter import ttk, messagebox
 import customtkinter as ctk
 
 class VerAlumnosFrame(ctk.CTkFrame):
-    def __init__(self, parent, conn, usuario_actual):
+    def __init__(self, parent, usuario_actual):
         super().__init__(parent)
-        self.conn = conn
         self.usuario_actual = usuario_actual
         self.setup_ui()
 
@@ -32,7 +31,7 @@ class VerAlumnosFrame(ctk.CTkFrame):
         self.label_filtro_alumno.grid(row=0, column=1, padx=5)
 
         # Obtener lista de alumnos
-        self.alumnos = get_alumnos(self.conn)
+        self.alumnos = get_alumnos()
 
         self.alumno_var = ctk.StringVar()
         self.optionmenu_alumno = ctk.CTkComboBox(
@@ -82,7 +81,7 @@ class VerAlumnosFrame(ctk.CTkFrame):
 
     def cargar_alumnos(self):
         # Obtener alumnos
-        alumnos = get_alumnos(self.conn)
+        alumnos = get_alumnos()
 
         for alumno in alumnos:
             if alumno[8] == "Si":
@@ -144,7 +143,7 @@ class VerAlumnosFrame(ctk.CTkFrame):
 
         alumno_id = alumno.split(" - ")[0]
 
-        alumno = get_unico_alumno(self.conn, alumno_id)
+        alumno = get_unico_alumno(alumno_id)
         if alumno:
             if alumno[8] == "Si":
                 self.tabla_alumno.insert("", tk.END, values=(alumno[0], alumno[1], alumno[2], alumno[3], alumno[4], alumno[5], alumno[6], alumno[7]), tags='deudor')
@@ -242,7 +241,7 @@ class VerAlumnosFrame(ctk.CTkFrame):
 
     def filtrar_alumnos_por_materia(self, event):
         materia = self.optionmenu_materia.get()
-        alumnos = get_alumnos_por_materia(self.conn, materia)
+        alumnos = get_alumnos_por_materia(materia)
 
         # Limpiar tabla existente
         for item in self.tabla_alumno.get_children():
@@ -256,8 +255,8 @@ class VerAlumnosFrame(ctk.CTkFrame):
                     self.tabla_alumno.insert("", tk.END, values=(alumno[0], alumno[1], alumno[2], alumno[3], alumno[4], alumno[5], alumno[6], alumno[7]))
 
     def guardar_cambios_alumno(self, selected_item, nombre, apellido, dni, calle, numero, email, telefono, paga_el, alumno_data):
-        editado = editar_alumno(self.conn, alumno_data[0], nombre, apellido, dni, calle, numero, email, telefono)
-        editar_dia_de_pago_alumno(self.conn, alumno_data[0], paga_el)
+        editado = editar_alumno(alumno_data[0], nombre, apellido, dni, calle, numero, email, telefono)
+        editar_dia_de_pago_alumno(alumno_data[0], paga_el)
         if editado:
             # Actualizar el registro en la tabla con los nuevos datos
             self.tabla_alumno.item(selected_item, values=(alumno_data[0], nombre, apellido, dni, calle, numero, email, telefono))
@@ -273,7 +272,7 @@ class VerAlumnosFrame(ctk.CTkFrame):
         for item in self.tabla_inscripciones_alumno.get_children():
             self.tabla_inscripciones_alumno.delete(item)
 
-        inscripciones_alumno = get_inscripciones_alumno(self.conn, id_alumno)
+        inscripciones_alumno = get_inscripciones_alumno(id_alumno)
 
         for inscripcion in inscripciones_alumno:
             deuda = inscripcion[4] - inscripcion[5]
@@ -344,7 +343,7 @@ class VerAlumnosFrame(ctk.CTkFrame):
         btn_guardar_inscripcion.pack(pady=10)
 
     def guardar_cambios_inscripcion(self, selected_item, tipo, paga_el, estado, inscripcion_data):
-        editado = editar_inscripcion(self.conn, inscripcion_data[0], tipo, paga_el, estado)
+        editado = editar_inscripcion(inscripcion_data[0], tipo, paga_el, estado)
         if editado:
             # Actualizar el registro en la tabla con los nuevos datos
             self.tabla_inscripciones_alumno.item(selected_item, values=(inscripcion_data[0], inscripcion_data[1], tipo, paga_el, inscripcion_data[4], estado))
@@ -355,5 +354,5 @@ class VerAlumnosFrame(ctk.CTkFrame):
             self.edit_window_inscripcion.destroy()
 
     def get_tipo_inscripciones(self):
-        inscripciones = get_descripciones(self.conn)
+        inscripciones = get_descripciones()
         return inscripciones

@@ -2,16 +2,15 @@ from curso_medicina.database.operations.alumno_operations import insert_alumno, 
 from curso_medicina.database.operations.inscripcion_operations import get_descripciones, get_detalle_tipo_inscripcion, save_tipo_inscripcion
 from curso_medicina.gui.utils.validators import validate_alumno_input
 
-
+import threading
 from tkinter import messagebox
 
 import customtkinter as ctk
 
 
 class AltaAlumnoFrame(ctk.CTkScrollableFrame):
-    def __init__(self, parent, conn):
+    def __init__(self, parent):
         super().__init__(parent, width=400, height=500)
-        self.conn = conn
         self.setup_ui()
         
     def setup_ui(self):
@@ -160,7 +159,7 @@ class AltaAlumnoFrame(ctk.CTkScrollableFrame):
         }
         
         if validate_alumno_input(data):
-            alumno_id = insert_alumno(self.conn, **data)
+            alumno_id = insert_alumno(**data)
             if alumno_id:
                 messagebox.showinfo(
                     "Éxito",
@@ -170,22 +169,25 @@ class AltaAlumnoFrame(ctk.CTkScrollableFrame):
                 seleccion_materias = self.get_materias_seleccionadas()
                 tipo_inscripcion = self.inscripcion_var.get()
                 inscripcion_id = int(tipo_inscripcion.split(" - ")[0])
-                self.save_alumno_materia(alumno_id, seleccion_materias, inscripcion_id)
+                thread_save_alumno_materia = threading.Thread(target=self.save_alumno_materia,
+                                                              args=(alumno_id, seleccion_materias, inscripcion_id),
+                                                              daemon=True)
+                thread_save_alumno_materia.start()
                 self.clear_fields()
                 
     def save_alumno_materia(self, alumno_id, seleccion_materias, inscripcion_id):
         for materia_id in seleccion_materias:
-            insert_alumno_materia(self.conn, alumno_id, materia_id, inscripcion_id)
+            insert_alumno_materia(alumno_id, materia_id, inscripcion_id)
 
     def get_tipo_inscripciones(self):
-        inscripciones = get_descripciones(self.conn)
+        inscripciones = get_descripciones()
         return inscripciones
     
     def display_info_inscripcion(self, event):
         tipo_inscripcion = self.inscripcion_var.get()
         if tipo_inscripcion != "Otro":
             tipo_inscripcion_id = int(tipo_inscripcion.split(" - ")[0])
-            info_tipo_inscripcion = get_detalle_tipo_inscripcion(self.conn, tipo_inscripcion_id)
+            info_tipo_inscripcion = get_detalle_tipo_inscripcion(tipo_inscripcion_id)
             monto = info_tipo_inscripcion[2]
             monto_recargo = info_tipo_inscripcion[3]
             n_cuotas = info_tipo_inscripcion[4]
@@ -233,7 +235,7 @@ class AltaAlumnoFrame(ctk.CTkScrollableFrame):
         btn_guardar.pack(pady=10)
 
     def guardar_tipo_inscripcion(self, descripcion, cuota, cuota_recargo, n_cuotas):
-        nuevo_tipo_incripcion = save_tipo_inscripcion(self.conn, descripcion, cuota, cuota_recargo, n_cuotas)
+        nuevo_tipo_incripcion = save_tipo_inscripcion(descripcion, cuota, cuota_recargo, n_cuotas)
         if nuevo_tipo_incripcion:
             self.lista_inscripciones = self.lista_inscripciones[:-1] + [f"{nuevo_tipo_incripcion} - {descripcion}", "Otro"]
             self.combobox_inscripcion.configure(values=self.lista_inscripciones)

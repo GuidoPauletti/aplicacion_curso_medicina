@@ -7,9 +7,8 @@ import customtkinter as ctk
 
 
 class AltaGastoFrame(ctk.CTkScrollableFrame):
-    def __init__(self, parent, conn, usuario_actual):
+    def __init__(self, parent, usuario_actual):
         super().__init__(parent, width=400, height=500)
-        self.conn = conn
         self.usuario_actual = usuario_actual
         self.setup_ui()
 
@@ -77,7 +76,7 @@ class AltaGastoFrame(ctk.CTkScrollableFrame):
         }
         
         if validate_gasto_input(data):
-            gasto_id = insert_gasto(self.conn, **data)
+            gasto_id = insert_gasto(**data)
             if gasto_id:
                 messagebox.showinfo(
                     "Éxito",

@@ -8,9 +8,8 @@ import customtkinter as ctk
 
 
 class AltaInscripcionFrame(ctk.CTkScrollableFrame):
-    def __init__(self, parent, conn, usuario_actual):
+    def __init__(self, parent, usuario_actual):
         super().__init__(parent, width=400, height=500)
-        self.conn = conn
         self.usuario_actual = usuario_actual
         self.setup_ui()
 
@@ -20,7 +19,7 @@ class AltaInscripcionFrame(ctk.CTkScrollableFrame):
 
     def create_input_fields(self):
         # Obtener lista de alumnos
-        self.alumnos = get_alumnos(self.conn)
+        self.alumnos = get_alumnos()
 
         # Label y Combobox para seleccionar alumno
         label_alumno = ctk.CTkLabel(self, text="Seleccionar Alumno:")
@@ -153,14 +152,14 @@ class AltaInscripcionFrame(ctk.CTkScrollableFrame):
             self.clear_fields()
 
     def get_tipo_inscripciones(self):
-        inscripciones = get_descripciones(self.conn)
+        inscripciones = get_descripciones()
         return inscripciones
     
     def display_info_inscripcion(self, event):
         tipo_inscripcion = self.inscripcion_var.get()
         if tipo_inscripcion != "Otro":
             tipo_inscripcion_id = int(tipo_inscripcion.split(" - ")[0])
-            info_tipo_inscripcion = get_detalle_tipo_inscripcion(self.conn, tipo_inscripcion_id)
+            info_tipo_inscripcion = get_detalle_tipo_inscripcion(tipo_inscripcion_id)
             monto = info_tipo_inscripcion[2]
             monto_recargo = info_tipo_inscripcion[3]
             n_cuotas = info_tipo_inscripcion[4]
@@ -209,7 +208,7 @@ class AltaInscripcionFrame(ctk.CTkScrollableFrame):
         btn_guardar.pack(pady=10)
 
     def guardar_tipo_inscripcion(self, descripcion, cuota, cuota_recargo, n_cuotas):
-        nuevo_tipo_incripcion = save_tipo_inscripcion(self.conn, descripcion, cuota, cuota_recargo, n_cuotas)
+        nuevo_tipo_incripcion = save_tipo_inscripcion(descripcion, cuota, cuota_recargo, n_cuotas)
         if nuevo_tipo_incripcion:
             self.lista_inscripciones = self.lista_inscripciones[:-1] + [f"{nuevo_tipo_incripcion} - {descripcion}", "Otro"]
             self.combobox_inscripcion.configure(values=self.lista_inscripciones)
@@ -220,7 +219,7 @@ class AltaInscripcionFrame(ctk.CTkScrollableFrame):
             return
         
     def save_alumno_materia(self, alumno_id, seleccion_materias, inscripcion_id):
-        materias_ya_inscripto = get_materias_por_alumno(self.conn, alumno_id)
+        materias_ya_inscripto = get_materias_por_alumno(alumno_id)
         materias_ya_inscripto_id = [materia[0] for materia in materias_ya_inscripto]
         for materia_id in seleccion_materias:
             if materia_id in materias_ya_inscripto_id:
@@ -229,7 +228,7 @@ class AltaInscripcionFrame(ctk.CTkScrollableFrame):
                     f"El alumno ID {alumno_id} ya está inscripto a la materia ID {materia_id}"
                 )
             else:
-                insert_alumno_materia(self.conn, alumno_id, materia_id, inscripcion_id)
+                insert_alumno_materia(alumno_id, materia_id, inscripcion_id)
                 messagebox.showinfo(
                     "Éxito",
                     f"Alumno ID {alumno_id} inscripto correctamente a la materia de ID {materia_id}"

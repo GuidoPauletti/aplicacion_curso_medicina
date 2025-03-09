@@ -1,7 +1,10 @@
+from curso_medicina.database.connection import get_connection
+
 from tkinter import messagebox
 
-def insert_alumno(connection, nombre, apellido, dni, email, telefono, dir_calle, dir_numero):
+def insert_alumno(nombre, apellido, dni, email, telefono, dir_calle, dir_numero):
     try:
+        connection = get_connection()
         cursor = connection.cursor()
         sql_insert_query = """
         INSERT INTO alumno (nombre, apellido, dni, email, telefono, dir_calle, dir_numero) 
@@ -19,9 +22,11 @@ def insert_alumno(connection, nombre, apellido, dni, email, telefono, dir_calle,
         return None
     finally:
         cursor.close()
+        connection.close()
 
-def insert_alumno_materia(connection, alumno_id, materia_id, tipo_inscripcion_id):
+def insert_alumno_materia(alumno_id, materia_id, tipo_inscripcion_id):
     try:
+        connection = get_connection()
         cursor = connection.cursor()
         sql_insert_query = """
         INSERT INTO inscripcion (id_alumno, id_materia, id_info_inscripcion, paga_el, estado, mes, año)
@@ -39,9 +44,11 @@ def insert_alumno_materia(connection, alumno_id, materia_id, tipo_inscripcion_id
         return None
     finally:
         cursor.close()
+        connection.close()
 
-def get_alumnos(connection):
+def get_alumnos():
     try:
+        connection = get_connection()
         cursor = connection.cursor()
         sql_select_query = """
         SELECT 
@@ -67,10 +74,13 @@ def get_alumnos(connection):
             message=f"Error al obtener alumnos: {e}"
         )
         return []
-    finally: cursor.close()
+    finally:
+        cursor.close()
+        connection.close()
 
-def get_unico_alumno(connection, id_alumno):
+def get_unico_alumno(id_alumno):
     try:
+        connection = get_connection()
         cursor = connection.cursor()
         sql_select_query = """
         SELECT 
@@ -97,12 +107,15 @@ def get_unico_alumno(connection, id_alumno):
             message=f"Error al obtener alumnos: {e}"
         )
         return []
-    finally: cursor.close()
+    finally:
+        cursor.close()
+        connection.close()
 
-def get_alumnos_por_materia(connection, materia):
+def get_alumnos_por_materia(materia):
     if materia == "Todas":
-        return get_alumnos(connection)
+        return get_alumnos()
     try:
+        connection = get_connection()
         cursor = connection.cursor()
         sql_select_query = """
         SELECT 
@@ -132,10 +145,13 @@ def get_alumnos_por_materia(connection, materia):
             message=f"Error al obtener alumnos por materia: {e}"
         )
         return []
-    finally: cursor.close()
+    finally:
+        cursor.close()
+        connection.close()
     
-def get_cuotas_por_alumno_materia(connection, alumno = "NULL", materia = "NULL"):
+def get_cuotas_por_alumno_materia(alumno = "NULL", materia = "NULL"):
     try:
+        connection = get_connection()
         cursor = connection.cursor()
 
         sql_query = """
@@ -167,10 +183,13 @@ def get_cuotas_por_alumno_materia(connection, alumno = "NULL", materia = "NULL")
             message=f"Error al obtener cuotas de alumno: {e}"
         )
         return []
-    finally: cursor.close()
+    finally:
+        cursor.close()
+        connection.close()
     
-def editar_alumno(connection, id, nombre, apellido, dni, calle, numero, email, telefono):
+def editar_alumno(id, nombre, apellido, dni, calle, numero, email, telefono):
     try:
+        connection = get_connection()
         cursor = connection.cursor()
         sql_query = """
             UPDATE alumno
@@ -190,9 +209,11 @@ def editar_alumno(connection, id, nombre, apellido, dni, calle, numero, email, t
         return
     finally:
         cursor.close()
+        connection.close()
 
-def editar_dia_de_pago_alumno(connection, id, paga_el):
+def editar_dia_de_pago_alumno(id, paga_el):
     try:
+        connection = get_connection()
         cursor = connection.cursor()
         sql_query = """
             UPDATE inscripcion
@@ -210,9 +231,11 @@ def editar_dia_de_pago_alumno(connection, id, paga_el):
         return
     finally:
         cursor.close()
+        connection.close()
 
-def get_inscripciones_alumno(connection, id_alumno):
+def get_inscripciones_alumno(id_alumno):
     try:
+        connection = get_connection()
         cursor = connection.cursor()
         sql_select_query = """
         SELECT i.id, m.denominacion, ii.descripcion, i.paga_el, COALESCE(d.monto, 0) deuda, SUM(COALESCE(p.monto,0)) AS pagado, i.estado estado
@@ -234,4 +257,6 @@ def get_inscripciones_alumno(connection, id_alumno):
             message=f"Error al obtener inscripciones de alumno: {e}"
         )
         return []
-    finally: cursor.close()
+    finally:
+        cursor.close()
+        connection.close()

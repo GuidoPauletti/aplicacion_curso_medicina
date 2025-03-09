@@ -6,9 +6,8 @@ from tkinter import ttk, messagebox
 import customtkinter as ctk
 
 class VerGastosFrame(ctk.CTkFrame):
-    def __init__(self, parent, conn, usuario_actual):
+    def __init__(self, parent, usuario_actual):
         super().__init__(parent)
-        self.conn = conn
         self.usuario_actual = usuario_actual
         self.setup_ui()
 
@@ -62,7 +61,7 @@ class VerGastosFrame(ctk.CTkFrame):
 
     def cargar_gastos(self, correspondencia="Todos"):
         # Obtener pagos de la base de datos
-        gastos = get_gastos_con_detalles(self.conn, correspondencia)  # Actualizamos la consulta con el filtro de correspondencia
+        gastos = get_gastos_con_detalles(correspondencia)  # Actualizamos la consulta con el filtro de correspondencia
 
         for gasto in gastos:
             self.tabla_gasto.insert("", tk.END, values=(gasto[0], gasto[1], gasto[2], gasto[3], gasto[4], gasto[5], gasto[6], gasto[7]))
@@ -79,7 +78,7 @@ class VerGastosFrame(ctk.CTkFrame):
         selected_item = self.tabla_gasto.selection()[0]
         gasto_id = self.tabla_gasto.item(selected_item, "values")[0]
         if gasto_id:
-            borrado = borrar_gasto(self.conn, gasto_id)
+            borrado = borrar_gasto(gasto_id)
             if borrado:
                 self.tabla_gasto.delete(selected_item)
 
@@ -134,7 +133,7 @@ class VerGastosFrame(ctk.CTkFrame):
         btn_guardar.pack(pady=10)
 
     def guardar_cambios_gasto(self, selected_item, monto, correspondencia, metodo, descripcion, gasto_data):
-        editado = editar_gasto(self.conn, gasto_data[0], monto, correspondencia, metodo, descripcion, self.usuario_actual.id)
+        editado = editar_gasto(gasto_data[0], monto, correspondencia, metodo, descripcion, self.usuario_actual.id)
         if editado:
             # Actualizar el registro en la tabla con los nuevos datos
             self.tabla_gasto.item(selected_item, values=(gasto_data[0], monto, gasto_data[2], gasto_data[3], correspondencia, metodo, descripcion, self.usuario_actual.nombre))

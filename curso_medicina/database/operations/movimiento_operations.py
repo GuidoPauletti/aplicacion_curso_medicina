@@ -1,9 +1,12 @@
+from curso_medicina.database.connection import get_connection
+
 from tkinter import messagebox
 
-def get_movimientos_con_detalles(connection, desde, hasta):
+def get_movimientos_con_detalles(desde, hasta):
     """Obtiene informacion de movimientos dentro de la ventana temporal"""
 
     try:
+        connection = get_connection()
         cursor = connection.cursor()
         sql_query = f"""
         SELECT 
@@ -58,3 +61,4 @@ def get_movimientos_con_detalles(connection, desde, hasta):
         return []
     finally:
         cursor.close()
+        connection.close()

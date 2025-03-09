@@ -2,13 +2,13 @@ from curso_medicina.database.operations.pagos_operations import get_pagos_con_de
 from curso_medicina.database.operations.alumno_operations import get_alumnos
 
 from tkinter import ttk, messagebox
+import threading
 
 import customtkinter as ctk
 
 class VerPagosFrame(ctk.CTkFrame):
-    def __init__(self, parent, conn, usuario_actual):
+    def __init__(self, parent, usuario_actual):
         super().__init__(parent)
-        self.conn = conn
         self.usuario_actual = usuario_actual
         self.setup_ui()
 
@@ -31,7 +31,7 @@ class VerPagosFrame(ctk.CTkFrame):
         self.optionmenu_correspondencia.grid(row=1, column=0, padx=5)
 
         # Obtener lista de alumnos
-        self.alumnos = get_alumnos(self.conn)
+        self.alumnos = get_alumnos()
 
         self.alumno_var = ctk.StringVar()
         self.optionmenu_alumno = ctk.CTkComboBox(
@@ -86,7 +86,7 @@ class VerPagosFrame(ctk.CTkFrame):
         self.btn_editar.grid(row=0, column=1, padx=5)
 
         # Cargar datos iniciales
-        self.cargar_pagos()
+        threading.Thread(target=self.cargar_pagos,daemon=True).start()
 
     def cargar_pagos(self, correspondencia="Todos", alumno = None):
         # Limpiar tabla existente
@@ -94,19 +94,21 @@ class VerPagosFrame(ctk.CTkFrame):
             self.tabla.delete(item)
             
         # Traer info de pagos desde base de datos
-        pagos = get_pagos_con_detalles(self.conn, correspondencia, alumno)
+        pagos = get_pagos_con_detalles(correspondencia, alumno)
         for pago in pagos:
             self.tabla.insert("", "end", values=pago)
 
     def filtrar_por_correspondencia(self, correspondencia):
         alumno = self.alumno_var.get()
         if alumno == "":
-            self.cargar_pagos(correspondencia)
+            threading.Thread(target=self.cargar_pagos, args=[correspondencia], daemon=True).start()
         else:
-            self.cargar_pagos(correspondencia, alumno[0])
+            threading.Thread(target=self.cargar_pagos, args=(correspondencia, alumno.split(" - ")[0]), daemon=True).start()
 
     def filtrar_por_alumno(self, alumno):
-        self.cargar_pagos(self.optionmenu_correspondencia.get(), alumno[0])
+        threading.Thread(target=self.cargar_pagos,
+                         args=(self.optionmenu_correspondencia.get(), alumno.split(" - ")[0])
+                         , daemon=True)
 
     def actualizar_combobox(self, filtro):
         # Filtra la lista de alumnos por el filtro (ignora mayúsculas/minúsculas)
@@ -125,7 +127,7 @@ class VerPagosFrame(ctk.CTkFrame):
         selected_item = self.tabla.selection()[0]
         pago_id = self.tabla.item(selected_item, "values")[0]
         if pago_id:
-            borrado = borrar_pago(self.conn, pago_id)
+            borrado = borrar_pago(pago_id)
             if borrado:
                 self.tabla.delete(selected_item)
 
@@ -186,7 +188,7 @@ class VerPagosFrame(ctk.CTkFrame):
         btn_guardar.pack(pady=10)
 
     def guardar_cambios_pago(self, selected_item, monto, cuota, metodo, correspondencia, pago_data):
-        editado = editar_pago(self.conn, pago_data[0], monto, cuota, metodo, correspondencia, self.usuario_actual.id)
+        editado = editar_pago(pago_data[0], monto, cuota, metodo, correspondencia, self.usuario_actual.id)
         if editado:
             # Actualizar el registro en la tabla con los nuevos datos
             self.tabla.item(selected_item, values=(pago_data[0], pago_data[1], pago_data[2], pago_data[3], monto, metodo, correspondencia, cuota, pago_data[8], self.usuario_actual.nombre))

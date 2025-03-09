@@ -1,7 +1,10 @@
+from curso_medicina.database.connection import get_connection
+
 from tkinter import messagebox
 
-def insert_gasto(connection, monto, divisa, correspondencia, descripcion, id_usuario, metodo):
+def insert_gasto(monto, divisa, correspondencia, descripcion, id_usuario, metodo):
     try:
+        connection = get_connection()
         cursor = connection.cursor()
         sql_insert_query = """
         INSERT INTO gasto (monto, divisa, fecha, correspondencia, descripcion, id_usuario, metodo) 
@@ -19,13 +22,15 @@ def insert_gasto(connection, monto, divisa, correspondencia, descripcion, id_usu
         return None
     finally:
         cursor.close()
+        connection.close()
 
-def get_gastos_con_detalles(connection, correspondencia="%"):
+def get_gastos_con_detalles(correspondencia="%"):
     if not isinstance(correspondencia,str):
         correspondencia="%"
     if correspondencia == "Todos":
         correspondencia = "%"
     try:
+        connection = get_connection()
         cursor = connection.cursor()
 
         sql_query = f"""
@@ -45,10 +50,13 @@ def get_gastos_con_detalles(connection, correspondencia="%"):
             message=f"Error al obtener gastos: {e}"
         )
         return []
-    finally: cursor.close()
+    finally:
+        cursor.close()
+        connection.close()
 
-def borrar_gasto(connection, id):
+def borrar_gasto(id):
     try:
+        connection = get_connection()
         cursor = connection.cursor()
 
         sql_query = """
@@ -66,9 +74,11 @@ def borrar_gasto(connection, id):
         return
     finally:
         cursor.close()
+        connection.close()
 
-def editar_gasto(connection, id, monto, correspondencia, metodo, descripcion, usuario):
+def editar_gasto(id, monto, correspondencia, metodo, descripcion, usuario):
     try:
+        connection = get_connection()
         cursor = connection.cursor()
         sql_query = """
             UPDATE gasto
@@ -86,3 +96,4 @@ def editar_gasto(connection, id, monto, correspondencia, metodo, descripcion, us
         return
     finally:
         cursor.close()
+        connection.close()

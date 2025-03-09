@@ -9,9 +9,8 @@ import customtkinter as ctk
 
 
 class AjustesFrame(ctk.CTkTabview):
-    def __init__(self, parent, conn, usuario_actual):
+    def __init__(self, parent, usuario_actual):
         super().__init__(parent, width=400, height=500)
-        self.conn = conn
         self.usuario_actual = usuario_actual
         self.add("Inscripciones")
         self.setup_ui()
@@ -61,7 +60,7 @@ class AjustesFrame(ctk.CTkTabview):
             self.tabla.delete(item)
 
         # Traer info de pagos desde base de datos
-        tipos_inscripcion = get_info_inscripciones(self.conn)
+        tipos_inscripcion = get_info_inscripciones()
         for tipo in tipos_inscripcion:
             self.tabla.insert("", "end", values=tipo)
 
@@ -118,7 +117,7 @@ class AjustesFrame(ctk.CTkTabview):
         btn_guardar.pack(pady=10)
 
     def guardar_cambios_inscripcion(self, selected_item, descripcion, monto, monto_recargo, n_cuotas, info_inscripcion):
-        editado = editar_tipo_inscripcion(self.conn, info_inscripcion[0], descripcion, monto, monto_recargo, n_cuotas)
+        editado = editar_tipo_inscripcion(info_inscripcion[0], descripcion, monto, monto_recargo, n_cuotas)
         if editado:
             # Actualizar el registro en la tabla con los nuevos datos
             self.tabla.item(selected_item, values=(info_inscripcion[0], descripcion, monto, monto_recargo, n_cuotas))
@@ -166,7 +165,7 @@ class AjustesFrame(ctk.CTkTabview):
         btn_guardar.pack(pady=10)
 
     def guardar_tipo_inscripcion(self, descripcion, cuota, cuota_recargo, n_cuotas):
-        nuevo_tipo_incripcion = save_tipo_inscripcion(self.conn, descripcion, cuota, cuota_recargo, n_cuotas)
+        nuevo_tipo_incripcion = save_tipo_inscripcion(descripcion, cuota, cuota_recargo, n_cuotas)
         if nuevo_tipo_incripcion:
             self.tabla.insert("", "end", values=(nuevo_tipo_incripcion, descripcion, cuota, cuota_recargo, n_cuotas))
             self.create_window_inscripcion.destroy()

@@ -17,9 +17,8 @@ ctk.set_appearance_mode("light")
 ctk.set_default_color_theme("blue")
 
 class Aplicacion:
-    def __init__(self, root, conn):
+    def __init__(self, root):
         self.root = root
-        self.conn = conn
         self.setup_main_window()
         self.show_login()
         self.update_debts_on_startup()
@@ -34,7 +33,7 @@ class Aplicacion:
             widget.destroy()
             
         # Mostrar frame de login
-        LoginFrame(self.root, self.conn, self.on_login_success)
+        LoginFrame(self.root, self.on_login_success)
         
     def on_login_success(self, user: UserData):
         self.usuario_actual = user
@@ -70,15 +69,15 @@ class Aplicacion:
             
         # Diccionario de frames disponibles
         frames = {
-            "alta_alumno": lambda: AltaAlumnoFrame(self.content_frame, self.conn),
-            "alta_gasto": lambda: AltaGastoFrame(self.content_frame, self.conn, self.usuario_actual),
-            "alta_pago": lambda: AltaPagoFrame(self.content_frame, self.conn, self.usuario_actual),
-            "alta_inscripcion": lambda: AltaInscripcionFrame(self.content_frame, self.conn, self.usuario_actual),
-            "ver_pagos": lambda: VerPagosFrame(self.content_frame, self.conn, self.usuario_actual),
-            "ver_gastos": lambda: VerGastosFrame(self.content_frame, self.conn, self.usuario_actual),
-            "ver_alumnos": lambda: VerAlumnosFrame(self.content_frame, self.conn, self.usuario_actual),
-            "ver_movimientos": lambda: VerMovimientosFrame(self.content_frame, self.conn),
-            "ajustes": lambda: AjustesFrame(self.content_frame, self.conn, self.usuario_actual)
+            "alta_alumno": lambda: AltaAlumnoFrame(self.content_frame),
+            "alta_gasto": lambda: AltaGastoFrame(self.content_frame, self.usuario_actual),
+            "alta_pago": lambda: AltaPagoFrame(self.content_frame, self.usuario_actual),
+            "alta_inscripcion": lambda: AltaInscripcionFrame(self.content_frame, self.usuario_actual),
+            "ver_pagos": lambda: VerPagosFrame(self.content_frame, self.usuario_actual),
+            "ver_gastos": lambda: VerGastosFrame(self.content_frame, self.usuario_actual),
+            "ver_alumnos": lambda: VerAlumnosFrame(self.content_frame, self.usuario_actual),
+            "ver_movimientos": lambda: VerMovimientosFrame(self.content_frame),
+            "ajustes": lambda: AjustesFrame(self.content_frame, self.usuario_actual)
         }
         
         # Crear y mostrar el frame correspondiente
@@ -87,4 +86,4 @@ class Aplicacion:
             frame.pack(fill="both", expand=True)
 
     def update_debts_on_startup(self):
-        call_update_debts(self.conn)
+        call_update_debts()

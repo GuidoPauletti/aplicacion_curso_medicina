@@ -1,7 +1,10 @@
+from curso_medicina.database.connection import get_connection
+
 from tkinter import messagebox
 
-def get_info_inscripciones(connection):
+def get_info_inscripciones():
     try:
+        connection = get_connection()
         cursor = connection.cursor()
 
         sql_query = f"SELECT * FROM info_inscripcion"
@@ -18,9 +21,11 @@ def get_info_inscripciones(connection):
         return None
     finally:
         cursor.close()
+        connection.close()
 
-def get_info_inscripcion(connection, id_inscripcion):
+def get_info_inscripcion(id_inscripcion):
     try:
+        connection = get_connection()
         cursor = connection.cursor()
 
         sql_query = """
@@ -43,9 +48,11 @@ def get_info_inscripcion(connection, id_inscripcion):
         return None
     finally:
         cursor.close()
+        connection.close()
 
-def get_descripciones(connection):
+def get_descripciones():
     try:
+        connection = get_connection()
         cursor = connection.cursor()
         sql_insert_query = """
         SELECT id, descripcion
@@ -62,9 +69,11 @@ def get_descripciones(connection):
         return None
     finally:
         cursor.close()
+        connection.close()
 
-def get_detalle_tipo_inscripcion(connection, id):
+def get_detalle_tipo_inscripcion(id):
     try:
+        connection = get_connection()
         cursor = connection.cursor()
         sql_insert_query = """
         SELECT *
@@ -82,9 +91,11 @@ def get_detalle_tipo_inscripcion(connection, id):
         return None
     finally:
         cursor.close()
+        connection.close()
 
-def get_inscripcion_alumno_materia(connection, id_alumno, id_materia):
+def get_inscripcion_alumno_materia(id_alumno, id_materia):
     try:
+        connection = get_connection()
         cursor = connection.cursor()
         sql_insert_query = """
         SELECT DISTINCT i.id, ii.n_cuotas
@@ -103,10 +114,12 @@ def get_inscripcion_alumno_materia(connection, id_alumno, id_materia):
         return None
     finally:
         cursor.close()
+        connection.close()
 
 
-def save_tipo_inscripcion(connection, descripcion, cuota, cuota_recargo, n_cuotas):
+def save_tipo_inscripcion(descripcion, cuota, cuota_recargo, n_cuotas):
     try:
+        connection = get_connection()
         cursor = connection.cursor()
         sql_insert_query = """
         INSERT INTO info_inscripcion(descripcion, monto_cuota, monto_cuota_recargo, n_cuotas)
@@ -124,9 +137,11 @@ def save_tipo_inscripcion(connection, descripcion, cuota, cuota_recargo, n_cuota
         return None
     finally:
         cursor.close()
+        connection.close()
 
-def editar_tipo_inscripcion(connection, id, descripcion, cuota, cuota_recargo, n_cuotas):
+def editar_tipo_inscripcion(id, descripcion, cuota, cuota_recargo, n_cuotas):
     try:
+        connection = get_connection()
         cursor = connection.cursor()
         sql_query = """
             UPDATE info_inscripcion
@@ -145,9 +160,11 @@ def editar_tipo_inscripcion(connection, id, descripcion, cuota, cuota_recargo, n
         return
     finally:
         cursor.close()
+        connection.close()
 
-def finalizar_inscripcion(connection, id):
+def finalizar_inscripcion(id):
     try:
+        connection = get_connection()
         cursor = connection.cursor()
         sql_query = """
             UPDATE inscripcion
@@ -166,9 +183,11 @@ def finalizar_inscripcion(connection, id):
         return
     finally:
         cursor.close()
+        connection.close()
     
-def editar_inscripcion(connection, id_inscripcion, tipo, paga_el, estado):
+def editar_inscripcion(id_inscripcion, tipo, paga_el, estado):
     try:
+        connection = get_connection()
         cursor = connection.cursor()
         sql_query = """
             UPDATE inscripcion
@@ -187,3 +206,4 @@ def editar_inscripcion(connection, id_inscripcion, tipo, paga_el, estado):
         return
     finally:
         cursor.close()
+        connection.close()

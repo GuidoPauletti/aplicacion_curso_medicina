@@ -1,3 +1,5 @@
+from curso_medicina.database.connection import get_connection
+
 from typing import Optional, Tuple
 from tkinter import messagebox
 
@@ -5,12 +7,12 @@ import mysql.connector
 from mysql.connector.cursor import MySQLCursor
 
 def validate_user_credentials(
-    connection: mysql.connector.MySQLConnection,
     nombre: str,
     apellido: str,
     password: str
 ) -> Optional[Tuple]:
     try:
+        connection = get_connection()
         cursor: MySQLCursor = connection.cursor()
         
         sql_query = """
@@ -32,3 +34,4 @@ def validate_user_credentials(
         return None
     finally:
         cursor.close()
+        connection.close()

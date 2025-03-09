@@ -7,7 +7,6 @@ from ..utils.receipt_generator import generate_payment_receipt
 from ..utils.validators import is_valid_date
 
 from tkinter import messagebox, simpledialog
-from tkcalendar import DateEntry
 from datetime import datetime
 import os
 
@@ -15,9 +14,8 @@ import customtkinter as ctk
 
 
 class AltaPagoFrame(ctk.CTkScrollableFrame):
-    def __init__(self, parent, conn, usuario_actual):
+    def __init__(self, parent, usuario_actual):
         super().__init__(parent, width=400, height=500)
-        self.conn = conn
         self.usuario_actual = usuario_actual
         self.setup_ui()
 
@@ -27,7 +25,7 @@ class AltaPagoFrame(ctk.CTkScrollableFrame):
 
     def create_input_fields(self):
         # Obtener lista de alumnos
-        self.alumnos = get_alumnos(self.conn)
+        self.alumnos = get_alumnos()
 
         # Label y Combobox para seleccionar alumno
         label_alumno = ctk.CTkLabel(self, text="Seleccionar Alumno:")
@@ -43,7 +41,7 @@ class AltaPagoFrame(ctk.CTkScrollableFrame):
         self.combobox_alumno.bind('<KeyRelease>', self.filtrar_alumnos)
 
         # Obtener lista de materias
-        self.materias = get_materias(self.conn)
+        self.materias = get_materias()
 
         # Materia
         self.label_materia = ctk.CTkLabel(self, text="Materia:")
@@ -157,12 +155,12 @@ class AltaPagoFrame(ctk.CTkScrollableFrame):
 
                     if divisa == "Real" or divisa == "Dolar": #caso moneda extranjera
                         monto_en_pesos = self.ask_exchange_rate(divisa)
-                        pago_id = insert_pago(self.conn, alumno_id, materia_id, monto_en_pesos, divisa, metodo, cuota, correspondencia, fecha, self.entry_descripcion.get("1.0", "end-1c"), self.usuario_actual.id)
+                        pago_id = insert_pago(alumno_id, materia_id, monto_en_pesos, divisa, metodo, cuota, correspondencia, fecha, self.entry_descripcion.get("1.0", "end-1c"), self.usuario_actual.id)
                         # guardamos ademas el registro en moneda extranjera
-                        insert_pago_moneda_extranjera(self.conn, pago_id, divisa, monto)
+                        insert_pago_moneda_extranjera(pago_id, divisa, monto)
 
                     elif divisa == "Peso":   #caso moneda local
-                        pago_id = insert_pago(self.conn, alumno_id, materia_id, monto, divisa, metodo, cuota, correspondencia, fecha, self.entry_descripcion.get("1.0", "end-1c"),self.usuario_actual.id)
+                        pago_id = insert_pago(alumno_id, materia_id, monto, divisa, metodo, cuota, correspondencia, fecha, self.entry_descripcion.get("1.0", "end-1c"),self.usuario_actual.id)
 
                     else: messagebox.showerror("Error", "Seleccione una divisa de la lista")
 
@@ -186,7 +184,7 @@ class AltaPagoFrame(ctk.CTkScrollableFrame):
         alumno_seleccionado = self.combobox_alumno.get()
         if alumno_seleccionado:
             id_alumno = int(alumno_seleccionado.split(" - ")[0])  # Extraer el ID del alumno
-            materias = get_materias_por_alumno(self.conn, id_alumno)
+            materias = get_materias_por_alumno(id_alumno)
             materias_nombres = [f"{materia[0]} - {materia[1]}" for materia in materias]  # Obtenemos solo el nombre de las materias
             self.combobox_materia.configure(values=materias_nombres)
 
@@ -200,33 +198,33 @@ class AltaPagoFrame(ctk.CTkScrollableFrame):
             self.label_info_inscripcion.configure(text="")
             return
         materia_id = int(materia_seleccionada.split(" - ")[0])
-        inscripcion_alumno_materia = get_inscripcion_alumno_materia(self.conn, alumno_id, materia_id)
+        inscripcion_alumno_materia = get_inscripcion_alumno_materia(alumno_id, materia_id)
         n_cuotas = inscripcion_alumno_materia[-1]
         if alumno_seleccionado and materia_seleccionada:
-            cuotas = get_cuotas_por_alumno_materia(self.conn, alumno_id, materia_id)
+            cuotas = get_cuotas_por_alumno_materia(alumno_id, materia_id)
             valores_cuotas = [f"{i}" for i in range(cuotas[-1] + 1, n_cuotas + 1)]
             self.combobox_cuota.configure(values=valores_cuotas)
             self.display_info_inscripcion(inscripcion_alumno_materia[0])
 
     def chequear_fin_inscripcion(self, pago_id, cuota):
-        info_pago = get_info_ultimo_pago(self.conn, pago_id, cuota)
+        info_pago = get_info_ultimo_pago(pago_id, cuota)
         monto_pagado = sum([pago[2] for pago in info_pago])
         deuda = info_pago[-1][-1]
         id_inscripcion = info_pago[0][1]
         if monto_pagado >= deuda:
-            finalizar_inscripcion(self.conn, id_inscripcion)
+            finalizar_inscripcion(id_inscripcion)
             messagebox.showinfo(
                 title="Pago de curso completado",
                 message="El alumno terminó de pagar todas las cuotas para esta materia"
             )
 
     def chequear_deuda(self, pago_id, cuota):
-        info_pago = get_info_ultimo_pago(self.conn, pago_id, cuota)
+        info_pago = get_info_ultimo_pago(pago_id, cuota)
         monto_pagado = sum([pago[2] for pago in info_pago])
         deuda = info_pago[-1][-1]
         id_inscripcion = info_pago[0][1]
         if monto_pagado >= deuda:
-            sanear_deuda(self.conn, id_inscripcion, cuota)
+            sanear_deuda(id_inscripcion, cuota)
 
     def on_metodo_seleccionado(self, event):
         if self.metodo_var.get() == "Transferencia":
@@ -236,7 +234,7 @@ class AltaPagoFrame(ctk.CTkScrollableFrame):
             self.entry_correspondencia.configure(state="disabled")
 
     def display_info_inscripcion(self, id_inscripcion):
-        info_inscripcion = get_info_inscripcion(self.conn, id_inscripcion)
+        info_inscripcion = get_info_inscripcion(id_inscripcion)
         self.label_info_inscripcion.configure(text=f"Inscripción {info_inscripcion[3]}: {info_inscripcion[2]} cuotas de {info_inscripcion[0]} o {info_inscripcion[1]} con recargo")
 
     def generate_receipt(self, pago_id, alumno_seleccionado, materia, monto, divisa, metodo, cuota, correspondencia):

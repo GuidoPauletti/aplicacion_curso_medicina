@@ -1,7 +1,10 @@
+from curso_medicina.database.connection import get_connection
+
 from tkinter import messagebox
 
-def get_materias(connection):
+def get_materias():
     try:
+        connection = get_connection()
         cursor = connection.cursor()
         sql_select_query = "SELECT id, denominacion FROM materia"
         cursor.execute(sql_select_query)
@@ -13,10 +16,14 @@ def get_materias(connection):
             message=f"Error al obtener materias: {e}"
         )
         return []
+    finally:
+        cursor.close()
+        connection.close()
 
-def get_materias_por_alumno(connection, id_alumno):
+def get_materias_por_alumno(id_alumno):
     """Obtiene las materias en las que está inscrito un alumno dado su ID."""
     try:
+        connection = get_connection()
         cursor = connection.cursor()
         sql_select_query = """
         SELECT m.id, m.denominacion 
@@ -33,3 +40,6 @@ def get_materias_por_alumno(connection, id_alumno):
             message=f"Error al obtener materias para el alumno {id_alumno}: {e}"
         )
         return []
+    finally:
+        cursor.close()
+        connection.close()
