@@ -1,8 +1,10 @@
-from curso_medicina.database.connection import init_connection_pool
+from curso_medicina.database.connection import init_connection_pool, close_all_connections
 from curso_medicina.gui.app import Aplicacion
 
 import time
 import tkinter as tk
+import atexit
+
 import mysql.connector
 
 
@@ -17,6 +19,10 @@ def mantener_conexion_activa(conexion):
 
 def main():
     init_connection_pool()
+
+    # Registrar la función para cerrar el pool al salir
+    atexit.register(close_all_connections)
+
     root = tk.Tk()
     app = Aplicacion(root)
     root.mainloop()

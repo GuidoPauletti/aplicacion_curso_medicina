@@ -3,6 +3,7 @@ from curso_medicina.database.operations.alumno_operations import get_alumnos
 
 from tkinter import ttk, messagebox
 import threading
+import queue
 
 import customtkinter as ctk
 
@@ -10,6 +11,17 @@ class VerPagosFrame(ctk.CTkFrame):
     def __init__(self, parent, usuario_actual):
         super().__init__(parent)
         self.usuario_actual = usuario_actual
+
+        # Variables de paginación
+        self.pagina_actual = 1
+        self.registros_por_pagina = 20
+        self.total_registros = 0
+        self.total_paginas = 0
+        
+        # Variables para manejo de hilos
+        self.loading = False
+        self.carga_cancelada = False
+
         self.setup_ui()
 
     def setup_ui(self):
@@ -65,6 +77,32 @@ class VerPagosFrame(ctk.CTkFrame):
         self.tabla.bind("<<TreeviewSelect>>", self.on_tree_select)
         self.tabla.pack(fill="both", expand=True)
 
+        # Frame para paginación
+        self.paginacion_frame = ctk.CTkFrame(self, fg_color="transparent")
+        self.paginacion_frame.pack(fill="x", padx=10, pady=5)
+        
+        # Botones de paginación
+        self.btn_anterior = ctk.CTkButton(self.paginacion_frame, text="Anterior", command=self.pagina_anterior)
+        self.btn_anterior.pack(side="left", padx=5)
+        
+        self.lbl_pagina = ctk.CTkLabel(self.paginacion_frame, text="Página 0 de 0")
+        self.lbl_pagina.pack(side="left", padx=10)
+        
+        self.btn_siguiente = ctk.CTkButton(self.paginacion_frame, text="Siguiente", command=self.pagina_siguiente)
+        self.btn_siguiente.pack(side="left", padx=5)
+        
+        # Selector de registros por página
+        self.lbl_por_pagina = ctk.CTkLabel(self.paginacion_frame, text="Registros por página: 20")
+        self.lbl_por_pagina.pack(side="left", padx=10)
+        
+        # Botón de actualizar
+        self.btn_actualizar = ctk.CTkButton(self.paginacion_frame, text="Actualizar", command=self.cargar_pagos)
+        self.btn_actualizar.pack(side="right", padx=10)
+        
+        # Indicador de carga
+        self.lbl_cargando = ctk.CTkLabel(self, text="")
+        self.lbl_cargando.pack(pady=5)
+
         # Frame de botones
         self.buttons_frame = ctk.CTkFrame(self, fg_color="transparent")
         self.buttons_frame.pack(padx=10, pady=10)
@@ -86,29 +124,100 @@ class VerPagosFrame(ctk.CTkFrame):
         self.btn_editar.grid(row=0, column=1, padx=5)
 
         # Cargar datos iniciales
-        threading.Thread(target=self.cargar_pagos,daemon=True).start()
+        self.cargar_pagos()
 
     def cargar_pagos(self, correspondencia="Todos", alumno = None):
+        """Carga los datos de la página actual"""
+        if self.loading:
+            self.carga_cancelada = True
+            self.lbl_cargando.configure(text="Cancelando carga anterior...")
+            return
+        
+        self.carga_cancelada = False
+        self.loading = True
+        self.lbl_cargando.configure(text=f"Cargando datos...")
+
         # Limpiar tabla existente
         for item in self.tabla.get_children():
             self.tabla.delete(item)
+
+        # Deshabilitar controles durante la carga
+        self.btn_anterior.configure(state="disabled")
+        self.btn_siguiente.configure(state="disabled")
+        self.btn_actualizar.configure(state="disabled")
+
+        # Iniciar hilo de carga
+        thread = threading.Thread(target=self.cargar_pagos_thread, args=(correspondencia, alumno), daemon=True)
+        thread.start()
+
+
+    def cargar_pagos_thread(self, correspondencia, alumno):
+        try:
+            pagos, total = get_pagos_con_detalles(correspondencia, alumno, self.pagina_actual, self.registros_por_pagina)
+
+            if self.carga_cancelada:
+                return
             
-        # Traer info de pagos desde base de datos
-        pagos = get_pagos_con_detalles(correspondencia, alumno)
+            # Actualizar información de paginación
+            self.total_registros = total
+            self.total_paginas = (total + self.registros_por_pagina - 1) // self.registros_por_pagina
+
+            # Actualizar interfaz en el hilo principal
+            self.after(0, lambda: self.mostrar_pagos(pagos))
+            self.after(0, self.actualizar_controles_paginacion)
+
+        except Exception as e:
+            self.after(0, lambda: messagebox.showerror("Error", f"Error al cargar pagos: {e}"))
+        
+        finally:
+            self.after(0, lambda: self.lbl_cargando.configure(text="Datos cargados"))
+            self.after(0, lambda: setattr(self, 'loading', False))
+            self.after(0, lambda: self.btn_actualizar.configure(state="normal"))
+
+    def mostrar_pagos(self, pagos):
         for pago in pagos:
             self.tabla.insert("", "end", values=pago)
 
+    def actualizar_controles_paginacion(self):
+        """Actualiza los controles de paginación"""
+        # Actualizar etiqueta de página
+        self.lbl_pagina.configure(text=f"Página {self.pagina_actual} de {self.total_paginas} ({self.total_registros} registros)")
+        
+        # Habilitar/deshabilitar botones según corresponda
+        self.btn_anterior.configure(state="normal" if self.pagina_actual > 1 else "disabled")
+        self.btn_siguiente.configure(state="normal" if self.pagina_actual < self.total_paginas else "disabled")
+
+    def pagina_anterior(self):
+        """Navega a la página anterior"""
+        if self.pagina_actual > 1:
+            self.pagina_actual -= 1
+            alumno = self.alumno_var.get()
+            if alumno == "":
+                self.cargar_pagos(self.optionmenu_correspondencia.get())
+            else:
+                self.cargar_pagos(self.optionmenu_correspondencia.get(), alumno.split(" - ")[0])
+    
+    def pagina_siguiente(self):
+        """Navega a la página siguiente"""
+        if self.pagina_actual < self.total_paginas:
+            self.pagina_actual += 1
+            alumno = self.alumno_var.get()
+            if alumno == "":
+                self.cargar_pagos(self.optionmenu_correspondencia.get())
+            else:
+                self.cargar_pagos(self.optionmenu_correspondencia.get(), alumno.split(" - ")[0])
+
     def filtrar_por_correspondencia(self, correspondencia):
+        self.pagina_actual = 1
         alumno = self.alumno_var.get()
         if alumno == "":
-            threading.Thread(target=self.cargar_pagos, args=[correspondencia], daemon=True).start()
+            self.cargar_pagos(correspondencia)
         else:
-            threading.Thread(target=self.cargar_pagos, args=(correspondencia, alumno.split(" - ")[0]), daemon=True).start()
+            self.cargar_pagos(correspondencia, alumno.split(" - ")[0])
 
     def filtrar_por_alumno(self, alumno):
-        threading.Thread(target=self.cargar_pagos,
-                         args=(self.optionmenu_correspondencia.get(), alumno.split(" - ")[0])
-                         , daemon=True)
+        self.pagina_actual = 1
+        self.cargar_pagos(self.optionmenu_correspondencia.get(), alumno.split(" - ")[0])
 
     def actualizar_combobox(self, filtro):
         # Filtra la lista de alumnos por el filtro (ignora mayúsculas/minúsculas)

@@ -2,7 +2,7 @@ from curso_medicina.database.connection import get_connection
 
 from tkinter import messagebox
 
-def get_pagos_con_detalles(correspondencia="%", alumno = None):
+def get_pagos_con_detalles(correspondencia="%", alumno = None, page = 1, per_page = 20):
     if not isinstance(correspondencia,str):
         correspondencia="%"
     if correspondencia == "Todos":
@@ -10,6 +10,9 @@ def get_pagos_con_detalles(correspondencia="%", alumno = None):
     try:
         connection = get_connection()
         cursor = connection.cursor()
+
+        # Calcular offset
+        offset = (page - 1) * per_page
 
         if alumno:
             sql_query = f"""
@@ -21,8 +24,19 @@ def get_pagos_con_detalles(correspondencia="%", alumno = None):
                 JOIN usuario u ON p.id_usuario = u.id
                 WHERE p.correspondencia LIKE '{correspondencia}'
                 AND inscripcion.id_alumno = {alumno}
-                ORDER BY fecha DESC
+                ORDER BY fecha DESC, id DESC
+                LIMIT {per_page} OFFSET {offset}
             """
+
+            # Consulta para obtener el total de registros
+            count_query = f"""
+                SELECT COUNT(*)
+                FROM pago p
+                JOIN inscripcion ON p.id_inscripcion = inscripcion.id
+                WHERE p.correspondencia LIKE '{correspondencia}'
+                AND inscripcion.id_alumno = {alumno}
+            """
+
         else:
             sql_query = f"""
                 SELECT p.id, a.nombre, a.apellido, m.denominacion, p.monto, p.metodo, p.correspondencia , p.cuota, p.fecha, u.nombre, p.observaciones
@@ -32,12 +46,19 @@ def get_pagos_con_detalles(correspondencia="%", alumno = None):
                 JOIN materia m ON inscripcion.id_materia = m.id
                 JOIN usuario u ON p.id_usuario = u.id 
                 WHERE p.correspondencia LIKE '{correspondencia}'
-                ORDER BY fecha DESC
+                ORDER BY fecha DESC, id DESC
+                LIMIT {per_page} OFFSET {offset}
             """
+
+            count_query = f"SELECT COUNT(*) FROM pago p WHERE p.correspondencia LIKE '{correspondencia}'"
+
         cursor.execute(sql_query)
-        
         pagos = cursor.fetchall()
-        return pagos
+
+        cursor.execute(count_query)
+        total = cursor.fetchall()[0][0]
+
+        return pagos, total
     except Exception as e:
         messagebox.showerror(
             title="Error",

@@ -1,6 +1,5 @@
 from tkinter import messagebox
 import threading
-import logging
 import time
 
 import mysql.connector
@@ -8,7 +7,7 @@ from mysql.connector import Error
 
 connection_pool = None
 pool_lock = threading.Lock()
-logger = logging.getLogger('database')
+
 
 def init_connection_pool():
     """Crear una conexión a la base de datos MySQL"""
@@ -27,7 +26,7 @@ def init_connection_pool():
                     port=3306,
                     connection_timeout=10
                 )
-                logger.info("Pool de conexiones inicializado correctamente")
+                print("Pool de conexiones inicializado correctamente")
             
                 # Iniciar hilo de mantenimiento del pool
                 maintenance_thread = threading.Thread(
@@ -56,14 +55,14 @@ def get_connection():
         if connection_pool is None:
             success = init_connection_pool()
             if not success:
-                logger.error("No se pudo obtener conexión - pool no inicializado")
+                print("No se pudo obtener conexión - pool no inicializado")
                 return None
     
     try:
         connection = connection_pool.get_connection()
         return connection
     except Exception as e:
-        logger.error(f"Error al obtener conexión del pool: {e}")
+        print(f"Error al obtener conexión del pool: {e}")
         return None
     
     
@@ -83,6 +82,17 @@ def _maintain_pool(connection_pool):
                 conn = connection_pool.get_connection()
                 conn.ping(reconnect=True)
                 conn.close()
-                logger.debug("Pool de conexiones verificado - OK")
+                print("Pool de conexiones verificado - OK")
             except Exception as e:
-                logger.error(f"Error en el mantenimiento del pool: {e}")
+                print(f"Error en el mantenimiento del pool: {e}")
+
+def close_all_connections():
+    """
+    Cierra el pool de conexiones completo
+    """
+    global connection_pool
+    
+    with pool_lock:
+        if connection_pool is not None:
+            print("Cerrando el pool de conexiones")
+            connection_pool = None
