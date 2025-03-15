@@ -1,8 +1,9 @@
-from curso_medicina.database.operations.alumno_operations import get_alumnos, editar_alumno, editar_dia_de_pago_alumno, get_inscripciones_alumno, get_alumnos_por_materia, get_unico_alumno
+from curso_medicina.database.operations.alumno_operations import get_alumnos, editar_alumno, editar_dia_de_pago_alumno, get_inscripciones_alumno, get_alumnos_por_materia, get_unico_alumno, get_alumnos_filtrados
 from curso_medicina.database.operations.inscripcion_operations import editar_inscripcion, get_descripciones
 
 import tkinter as tk
 from tkinter import ttk, messagebox
+import threading
 
 import customtkinter as ctk
 
@@ -10,6 +11,17 @@ class VerAlumnosFrame(ctk.CTkFrame):
     def __init__(self, parent, usuario_actual):
         super().__init__(parent)
         self.usuario_actual = usuario_actual
+
+        # Variables de paginación
+        self.pagina_actual = 1
+        self.registros_por_pagina = 20
+        self.total_registros = 0
+        self.total_paginas = 0
+        
+        # Variables para manejo de hilos
+        self.loading = False
+        self.carga_cancelada = False
+
         self.setup_ui()
 
     def setup_ui(self):
@@ -32,6 +44,7 @@ class VerAlumnosFrame(ctk.CTkFrame):
 
         # Obtener lista de alumnos
         self.alumnos = get_alumnos()
+        self.alumnos = self.alumnos[0]
 
         self.alumno_var = ctk.StringVar()
         self.optionmenu_alumno = ctk.CTkComboBox(
@@ -41,7 +54,7 @@ class VerAlumnosFrame(ctk.CTkFrame):
         )
         self.optionmenu_alumno.grid(row=1, column=1, padx=5)
 
-        self.actualizar_combobox("")  # Inicializa la lista completa
+        self.actualizar_combobox(self.alumnos[:10])  # Inicializa la lista completa
 
         # Evento para filtrar nombres mientras se escribe en el ComboBox
         self.optionmenu_alumno.bind('<KeyRelease>', self.filtrar_alumnos)
@@ -64,8 +77,31 @@ class VerAlumnosFrame(ctk.CTkFrame):
 
         self.tabla_alumno.pack(fill="both", expand=True)
 
-        # Obtener los pagos desde la base de datos
-        self.cargar_alumnos()
+        # Frame para paginación
+        self.paginacion_frame = ctk.CTkFrame(self, fg_color="transparent")
+        self.paginacion_frame.pack(fill="x", padx=10, pady=5)
+        
+        # Botones de paginación
+        self.btn_anterior = ctk.CTkButton(self.paginacion_frame, text="Anterior", command=self.pagina_anterior)
+        self.btn_anterior.pack(side="left", padx=5)
+        
+        self.lbl_pagina = ctk.CTkLabel(self.paginacion_frame, text="Página 0 de 0")
+        self.lbl_pagina.pack(side="left", padx=10)
+        
+        self.btn_siguiente = ctk.CTkButton(self.paginacion_frame, text="Siguiente", command=self.pagina_siguiente)
+        self.btn_siguiente.pack(side="left", padx=5)
+        
+        # Selector de registros por página
+        self.lbl_por_pagina = ctk.CTkLabel(self.paginacion_frame, text="Registros por página: 20")
+        self.lbl_por_pagina.pack(side="left", padx=10)
+        
+        # Botón de actualizar
+        self.btn_actualizar = ctk.CTkButton(self.paginacion_frame, text="Actualizar", command=self.cargar_alumnos)
+        self.btn_actualizar.pack(side="right", padx=10)
+        
+        # Indicador de carga
+        self.lbl_cargando = ctk.CTkLabel(self, text="")
+        self.lbl_cargando.pack(pady=5)
 
         # Crear frame para los botones debajo de la tabla
         self.buttons_frame_alumno = ctk.CTkFrame(self, fg_color="transparent")
@@ -79,16 +115,83 @@ class VerAlumnosFrame(ctk.CTkFrame):
         self.btn_editar_alumno = ctk.CTkButton(self.buttons_frame_alumno, text="Editar Alumno", command=self.editar_alumno,state="disabled")
         self.btn_editar_alumno.grid(row=0, column=1, padx=5)
 
-    def cargar_alumnos(self):
-        # Obtener alumnos
-        alumnos = get_alumnos()
+        # Obtener los alumnos desde la base de datos
+        self.cargar_alumnos()
 
+    def cargar_alumnos(self):
+        """Carga los datos de la página actual"""
+        if self.loading:
+            self.carga_cancelada = True
+            self.lbl_cargando.configure(text="Cancelando carga anterior...")
+            return
+        
+        self.carga_cancelada = False
+        self.loading = True
+        self.lbl_cargando.configure(text=f"Cargando datos...")
+
+        # Limpiar tabla existente
+        for item in self.tabla_alumno.get_children():
+            self.tabla_alumno.delete(item)        
+
+        # Deshabilitar controles durante la carga
+        self.btn_anterior.configure(state="disabled")
+        self.btn_siguiente.configure(state="disabled")
+        self.btn_actualizar.configure(state="disabled")
+
+        # Iniciar hilo de carga
+        thread = threading.Thread(target=self.cargar_alumnos_thread, daemon=True)
+        thread.start()
+
+    def cargar_alumnos_thread(self):
+        materia = self.optionmenu_materia.get()
+        try:
+            alumnos, total = get_alumnos_por_materia(materia, self.pagina_actual, self.registros_por_pagina)
+            if self.carga_cancelada:
+                return
+            
+            # Actualizar información de paginación
+            self.total_registros = total
+            self.total_paginas = (total + self.registros_por_pagina - 1) // self.registros_por_pagina
+
+            # Actualizar interfaz en el hilo principal
+            self.after(0, lambda: self.mostrar_alumnos(alumnos))
+            self.after(0, self.actualizar_controles_paginacion)
+        except Exception as e:
+            self.after(0, lambda: messagebox.showerror("Error", f"Error al cargar alumnos: {e}"))
+        
+        finally:
+            self.after(0, lambda: self.lbl_cargando.configure(text="Datos cargados"))
+            self.after(0, lambda: setattr(self, 'loading', False))
+            self.after(0, lambda: self.btn_actualizar.configure(state="normal"))
+
+    def mostrar_alumnos(self, alumnos):
         for alumno in alumnos:
             if alumno[8] == "Si":
                 self.tabla_alumno.insert("", tk.END, values=(alumno[0], alumno[1], alumno[2], alumno[3], alumno[4], alumno[5], alumno[6], alumno[7]), tags='deudor')
             else:
                 self.tabla_alumno.insert("", tk.END, values=(alumno[0], alumno[1], alumno[2], alumno[3], alumno[4], alumno[5], alumno[6], alumno[7]))
 
+    def actualizar_controles_paginacion(self):
+        """Actualiza los controles de paginación"""
+        # Actualizar etiqueta de página
+        self.lbl_pagina.configure(text=f"Página {self.pagina_actual} de {self.total_paginas} ({self.total_registros} registros)")
+        
+        # Habilitar/deshabilitar botones según corresponda
+        self.btn_anterior.configure(state="normal" if self.pagina_actual > 1 else "disabled")
+        self.btn_siguiente.configure(state="normal" if self.pagina_actual < self.total_paginas else "disabled")
+
+    def pagina_anterior(self):
+        """Navega a la página anterior"""
+        if self.pagina_actual > 1:
+            self.pagina_actual -= 1
+            self.cargar_alumnos()
+    
+    def pagina_siguiente(self):
+        """Navega a la página siguiente"""
+        if self.pagina_actual < self.total_paginas:
+            self.pagina_actual += 1
+            self.cargar_alumnos()
+    
     def on_tree_select_alumno(self, event):
         # Habilitar botones
         self.btn_ver_detalle_alumno.configure(state="normal")
@@ -151,17 +254,16 @@ class VerAlumnosFrame(ctk.CTkFrame):
                 self.tabla_alumno.insert("", tk.END, values=(alumno[0], alumno[1], alumno[2], alumno[3], alumno[4], alumno[5], alumno[6], alumno[7]))
 
 
-    def actualizar_combobox(self, filtro):
+    def actualizar_combobox(self, alumnos):
         # Filtra la lista de alumnos por el filtro (ignora mayúsculas/minúsculas)
-        alumnos_filtrados = [f"{alumno[0]} - {alumno[1]} {alumno[2]}"
-                             for alumno in self.alumnos
-                             if alumno[1].lower().startswith(filtro.lower())
-                             or alumno[2].lower().startswith(filtro.lower())]
-        self.optionmenu_alumno.configure(values=alumnos_filtrados)
+        alumnos = [f"{alumno[0]} - {alumno[1]} {alumno[2]}"
+                             for alumno in alumnos]
+        self.optionmenu_alumno.configure(values=alumnos)
 
     def filtrar_alumnos(self, event):
         filtro = self.optionmenu_alumno.get()
-        self.actualizar_combobox(filtro)
+        alumnos = get_alumnos_filtrados(filtro.lower())
+        self.actualizar_combobox(alumnos)
 
     def editar_alumno(self):
         # Obtener el item seleccionado
@@ -240,19 +342,8 @@ class VerAlumnosFrame(ctk.CTkFrame):
         btn_guardar.pack(pady=10)
 
     def filtrar_alumnos_por_materia(self, event):
-        materia = self.optionmenu_materia.get()
-        alumnos = get_alumnos_por_materia(materia)
-
-        # Limpiar tabla existente
-        for item in self.tabla_alumno.get_children():
-            self.tabla_alumno.delete(item)
-
-        if alumnos:
-            for alumno in alumnos:
-                if alumno[8] == "Si":
-                    self.tabla_alumno.insert("", tk.END, values=(alumno[0], alumno[1], alumno[2], alumno[3], alumno[4], alumno[5], alumno[6], alumno[7]), tags='deudor')
-                else:
-                    self.tabla_alumno.insert("", tk.END, values=(alumno[0], alumno[1], alumno[2], alumno[3], alumno[4], alumno[5], alumno[6], alumno[7]))
+        self.pagina_actual = 1
+        self.cargar_alumnos()
 
     def guardar_cambios_alumno(self, selected_item, nombre, apellido, dni, calle, numero, email, telefono, paga_el, alumno_data):
         editado = editar_alumno(alumno_data[0], nombre, apellido, dni, calle, numero, email, telefono)

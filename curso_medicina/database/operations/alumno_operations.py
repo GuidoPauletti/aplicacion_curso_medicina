@@ -46,10 +46,14 @@ def insert_alumno_materia(alumno_id, materia_id, tipo_inscripcion_id):
         cursor.close()
         connection.close()
 
-def get_alumnos():
+def get_alumnos(page = 1, per_page = 20):
     try:
         connection = get_connection()
         cursor = connection.cursor()
+
+        # Calcular offset
+        offset = (page - 1) * per_page
+
         sql_select_query = """
         SELECT 
             a.*,
@@ -63,11 +67,17 @@ def get_alumnos():
                 ELSE 'No'
             END AS tiene_deuda_pendiente
         FROM 
-            alumno a;
+            alumno a
+        LIMIT %s OFFSET %s;
         """
-        cursor.execute(sql_select_query)
+        cursor.execute(sql_select_query, (per_page, offset))
         alumnos = cursor.fetchall()
-        return alumnos
+
+        count_query = "SELECT COUNT(*) FROM alumno"
+        cursor.execute(count_query)
+        total = cursor.fetchall()[0][0]
+
+        return alumnos, total
     except Exception as e:
         messagebox.showerror(
             title="Error",
@@ -77,6 +87,33 @@ def get_alumnos():
     finally:
         cursor.close()
         connection.close()
+
+def get_alumnos_filtrados(filtro):
+    try:
+        connection = get_connection()
+        cursor = connection.cursor()
+        qry = f"""
+        SELECT id, nombre, apellido
+        FROM alumno
+        WHERE
+        LOWER(nombre) LIKE '{filtro}%'
+        OR LOWER(apellido) LIKE '{filtro}%'
+        LIMIT 10
+        """
+
+        cursor.execute(qry)
+        alumnos = cursor.fetchall()
+
+        return alumnos
+    except Exception as e:
+        messagebox.showerror(
+            title="Error",
+            message=f"Error al obtener alumnos filtrados: {e}"
+        )
+    finally:
+        cursor.close()
+        connection.close()
+
 
 def get_unico_alumno(id_alumno):
     try:
@@ -111,12 +148,16 @@ def get_unico_alumno(id_alumno):
         cursor.close()
         connection.close()
 
-def get_alumnos_por_materia(materia):
+def get_alumnos_por_materia(materia, page = 1, per_page = 20):
     if materia == "Todas":
-        return get_alumnos()
+        return get_alumnos(page, per_page)
     try:
         connection = get_connection()
         cursor = connection.cursor()
+
+        # Calcular offset
+        offset = (page - 1) * per_page
+
         sql_select_query = """
         SELECT 
             a.*,
@@ -134,11 +175,22 @@ def get_alumnos_por_materia(materia):
             alumno a
         LEFT JOIN inscripcion i ON a.id = i.id_alumno
         LEFT JOIN materia m ON i.id_materia = m.id
-        WHERE m.denominacion LIKE %s;
+        WHERE m.denominacion LIKE %s
+        LIMIT %s OFFSET %s;
         """
-        cursor.execute(sql_select_query, (materia,))
+        cursor.execute(sql_select_query, (materia, per_page, offset))
         alumnos = cursor.fetchall()
-        return alumnos
+
+        qry_total = """
+        SELECT COUNT(*) FROM alumno a
+        LEFT JOIN inscripcion i ON a.id = i.id_alumno
+        LEFT JOIN materia m ON i.id_materia = m.id
+        WHERE m.denominacion LIKE %s
+        """
+        cursor.execute(qry_total, (materia,))
+        total = cursor.fetchall()[0][0]
+
+        return alumnos, total
     except Exception as e:
         messagebox.showerror(
             title="Error",
