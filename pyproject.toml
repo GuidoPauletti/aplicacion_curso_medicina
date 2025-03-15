@@ -12,6 +12,5 @@ description = "Sistema de Gestión de Cursos de Medicina"
 requires-python = ">=3.8"
 dependencies = [
     "customtkinter",
-    "mysql-connector-python",
-    "tkcalendar"
+    "mysql-connector-python"
 ]

@@ -3,7 +3,6 @@ from curso_medicina.database.operations.alumno_operations import get_alumnos, ge
 
 from tkinter import ttk, messagebox
 import threading
-import queue
 
 import customtkinter as ctk
 
