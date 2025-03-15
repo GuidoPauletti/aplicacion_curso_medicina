@@ -1,5 +1,5 @@
 from curso_medicina.database.operations.pagos_operations import get_pagos_con_detalles, borrar_pago, editar_pago
-from curso_medicina.database.operations.alumno_operations import get_alumnos
+from curso_medicina.database.operations.alumno_operations import get_alumnos, get_alumnos_filtrados
 
 from tkinter import ttk, messagebox
 import threading
@@ -44,6 +44,7 @@ class VerPagosFrame(ctk.CTkFrame):
 
         # Obtener lista de alumnos
         self.alumnos = get_alumnos()
+        self.alumnos = self.alumnos[0]
 
         self.alumno_var = ctk.StringVar()
         self.optionmenu_alumno = ctk.CTkComboBox(
@@ -53,7 +54,7 @@ class VerPagosFrame(ctk.CTkFrame):
         )
         self.optionmenu_alumno.grid(row=1, column=1, padx=5)
 
-        self.actualizar_combobox("")  # Inicializa la lista completa
+        self.actualizar_combobox(self.alumnos[:10])  # Inicializa la lista completa
 
         # Evento para filtrar nombres mientras se escribe en el ComboBox
         self.optionmenu_alumno.bind('<KeyRelease>', self.filtrar_alumnos)
@@ -219,17 +220,16 @@ class VerPagosFrame(ctk.CTkFrame):
         self.pagina_actual = 1
         self.cargar_pagos(self.optionmenu_correspondencia.get(), alumno.split(" - ")[0])
 
-    def actualizar_combobox(self, filtro):
+    def actualizar_combobox(self, alumnos):
         # Filtra la lista de alumnos por el filtro (ignora mayúsculas/minúsculas)
-        alumnos_filtrados = [f"{alumno[0]} - {alumno[1]} {alumno[2]}"
-                             for alumno in self.alumnos
-                             if alumno[1].lower().startswith(filtro.lower())
-                             or alumno[2].lower().startswith(filtro.lower())]
-        self.optionmenu_alumno.configure(values=alumnos_filtrados)
+        alumnos = [f"{alumno[0]} - {alumno[1]} {alumno[2]}"
+                             for alumno in alumnos]
+        self.optionmenu_alumno.configure(values=alumnos)
 
     def filtrar_alumnos(self, event):
         filtro = self.optionmenu_alumno.get()
-        self.actualizar_combobox(filtro)
+        alumnos = get_alumnos_filtrados(filtro.lower())
+        self.actualizar_combobox(alumnos)
 
     def borrar_registro_pago(self):
         # Obtener el item seleccionado

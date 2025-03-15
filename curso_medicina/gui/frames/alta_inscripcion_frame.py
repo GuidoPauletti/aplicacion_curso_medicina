@@ -1,4 +1,4 @@
-from curso_medicina.database.operations.alumno_operations import get_alumnos, insert_alumno_materia
+from curso_medicina.database.operations.alumno_operations import get_alumnos, get_alumnos_filtrados, insert_alumno_materia
 from curso_medicina.database.operations.materia_operations import get_materias_por_alumno
 from curso_medicina.database.operations.inscripcion_operations import get_descripciones, get_detalle_tipo_inscripcion, save_tipo_inscripcion
 
@@ -20,6 +20,7 @@ class AltaInscripcionFrame(ctk.CTkScrollableFrame):
     def create_input_fields(self):
         # Obtener lista de alumnos
         self.alumnos = get_alumnos()
+        self.alumnos = self.alumnos[0]
 
         # Label y Combobox para seleccionar alumno
         label_alumno = ctk.CTkLabel(self, text="Seleccionar Alumno:")
@@ -29,7 +30,7 @@ class AltaInscripcionFrame(ctk.CTkScrollableFrame):
         self.combobox_alumno = ctk.CTkComboBox(self, variable=self.alumno_var, width=300)
 
         self.combobox_alumno.pack(pady=5)
-        self.actualizar_combobox("")  # Inicializa la lista completa
+        self.actualizar_combobox(self.alumnos[:10])  # Inicializa la lista completa
 
         # Evento para filtrar nombres mientras se escribe en el ComboBox
         self.combobox_alumno.bind('<KeyRelease>', self.filtrar_alumnos)
@@ -59,14 +60,17 @@ class AltaInscripcionFrame(ctk.CTkScrollableFrame):
         self.label_info_inscripcion.pack(pady=3)
         self.display_info_inscripcion(event=None)
 
-    def actualizar_combobox(self, filtro):
+    def actualizar_combobox(self, alumnos):
         # Filtra la lista de alumnos por el filtro (ignora mayúsculas/minúsculas)
-        alumnos_filtrados = [f"{alumno[0]} - {alumno[1]} {alumno[2]}" for alumno in self.alumnos if alumno[1].lower().startswith(filtro.lower())]
-        self.combobox_alumno.configure(values=alumnos_filtrados)
+        alumnos = [f"{alumno[0]} - {alumno[1]} {alumno[2]}"
+                             for alumno in alumnos]
+        
+        self.combobox_alumno.configure(values=alumnos)
 
     def filtrar_alumnos(self, event):
         filtro = self.combobox_alumno.get()
-        self.actualizar_combobox(filtro)
+        alumnos = get_alumnos_filtrados(filtro.lower())
+        self.actualizar_combobox(alumnos)
 
     def create_checkboxes_materias(self):
         """

@@ -1,4 +1,4 @@
-from curso_medicina.database.operations.alumno_operations import get_alumnos, get_cuotas_por_alumno_materia
+from curso_medicina.database.operations.alumno_operations import get_alumnos, get_alumnos_filtrados, get_cuotas_por_alumno_materia
 from curso_medicina.database.operations.materia_operations import get_materias, get_materias_por_alumno
 from curso_medicina.database.operations.pagos_operations import insert_pago, get_info_ultimo_pago, insert_pago_moneda_extranjera
 from curso_medicina.database.operations.inscripcion_operations import finalizar_inscripcion, get_inscripcion_alumno_materia, get_info_inscripcion
@@ -26,6 +26,7 @@ class AltaPagoFrame(ctk.CTkScrollableFrame):
     def create_input_fields(self):
         # Obtener lista de alumnos
         self.alumnos = get_alumnos()
+        self.alumnos = self.alumnos[0]
 
         # Label y Combobox para seleccionar alumno
         label_alumno = ctk.CTkLabel(self, text="Seleccionar Alumno:")
@@ -35,7 +36,7 @@ class AltaPagoFrame(ctk.CTkScrollableFrame):
         self.combobox_alumno = ctk.CTkComboBox(self, variable=self.alumno_var, width=300, command=self.actualizar_materias)
 
         self.combobox_alumno.pack(pady=5)
-        self.actualizar_combobox("")  # Inicializa la lista completa
+        self.actualizar_combobox(self.alumnos[:10])  # Inicializa la lista completa
 
         # Evento para filtrar nombres mientras se escribe en el ComboBox
         self.combobox_alumno.bind('<KeyRelease>', self.filtrar_alumnos)
@@ -123,14 +124,17 @@ class AltaPagoFrame(ctk.CTkScrollableFrame):
                                                                       self))
         btn_guardar.pack(pady=20)
 
-    def actualizar_combobox(self, filtro):
+    def actualizar_combobox(self, alumnos):
         # Filtra la lista de alumnos por el filtro (ignora mayúsculas/minúsculas)
-        alumnos_filtrados = [f"{alumno[0]} - {alumno[1]} {alumno[2]}" for alumno in self.alumnos if alumno[1].lower().startswith(filtro.lower())]
-        self.combobox_alumno.configure(values=alumnos_filtrados)
+        alumnos = [f"{alumno[0]} - {alumno[1]} {alumno[2]}"
+                             for alumno in alumnos]
+        
+        self.combobox_alumno.configure(values=alumnos)
 
     def filtrar_alumnos(self, event):
         filtro = self.combobox_alumno.get()
-        self.actualizar_combobox(filtro)
+        alumnos = get_alumnos_filtrados(filtro.lower())
+        self.actualizar_combobox(alumnos)
     
     def save_pago(self, alumno_seleccionado, materia, monto, divisa, metodo, cuota, correspondencia, fecha, ventana):
         try:
