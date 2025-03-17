@@ -270,7 +270,7 @@ class VerAlumnosFrame(ctk.CTkFrame):
         selected_item = self.tabla_alumno.selection()[0]
         if selected_item:
             alumno_data = self.tabla_alumno.item(selected_item, "values")
-            self.ventana_editar_alumno(alumno_data, selected_item)
+            threading.Thread(target=self.ventana_editar_alumno, args=(alumno_data, selected_item), daemon=True).start()
 
     def ventana_editar_alumno(self, alumno_data, selected_item):
         self.edit_window_alumno_frame = ctk.CTkToplevel(self)
@@ -403,7 +403,7 @@ class VerAlumnosFrame(ctk.CTkFrame):
         self.combobox_inscripcion.pack(pady=5)
 
         # Estado Inscripcion
-        label_estado_inscripcion = ctk.CTkLabel(self.edit_window_inscripcion, text="Tipo Inscripción:")
+        label_estado_inscripcion = ctk.CTkLabel(self.edit_window_inscripcion, text="Estado de Inscripción:")
         label_estado_inscripcion.pack(pady=5)
         estado_inscripcion_var = ctk.StringVar()
         estado_inscripcion_var.set(inscripcion_data[5])
