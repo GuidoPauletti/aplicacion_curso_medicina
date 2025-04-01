@@ -1,0 +1,38 @@
+name: Build macOS App
+
+on:
+  push:
+    branches:
+      - main  # Se ejecuta cuando haces push a la rama main
+  pull_request:
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: 🛒 Checkout del repositorio
+        uses: actions/checkout@v4
+
+      - name: 🐍 Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'  # Ajusta según la versión que uses
+
+      - name: 📦 Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt  # Asegúrate de tener este archivo
+
+      - name: 🔨 Compilar con PyInstaller
+        run: |
+          pyinstaller --onedir --noconsole --name=MiApp main.py
+
+      - name: 🗜️ Crear ZIP del ejecutable
+        run: zip -r MiApp-macOS.zip dist/MiApp
+
+      - name: 📤 Subir ZIP como artefacto
+        uses: actions/upload-artifact@v4
+        with:
+          name: MiApp-macOS
+          path: MiApp-macOS.zip
