@@ -2,7 +2,7 @@ from curso_medicina.database.operations.alumno_operations import get_alumnos, ed
 from curso_medicina.database.operations.inscripcion_operations import editar_inscripcion, get_descripciones
 
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, Toplevel
 import threading
 
 import customtkinter as ctk
@@ -204,9 +204,12 @@ class VerAlumnosFrame(ctk.CTkFrame):
         alumno_id = datos_alumno[0]
         if alumno_id:
             # Crear una nueva ventana para ver alumno
-            self.vista_alumno = ctk.CTkToplevel(self)
+            self.vista_alumno = Toplevel(self)
             self.vista_alumno.title("Inscripciones de Alumno")
             self.vista_alumno.geometry("1050x400")
+
+            self.vista_alumno.transient()
+            self.vista_alumno.grab_set()
 
             self.label_nombre_alumno = ctk.CTkLabel(self.vista_alumno, text=f"{datos_alumno[1]} {datos_alumno[2]}")
             self.label_nombre_alumno.pack(pady=5)
@@ -273,11 +276,14 @@ class VerAlumnosFrame(ctk.CTkFrame):
             threading.Thread(target=self.ventana_editar_alumno, args=(alumno_data, selected_item), daemon=True).start()
 
     def ventana_editar_alumno(self, alumno_data, selected_item):
-        self.edit_window_alumno_frame = ctk.CTkToplevel(self)
+        self.edit_window_alumno_frame = Toplevel(self)
         self.edit_window_alumno_frame.title("Editar Alumno")
         self.edit_window_alumno_frame.geometry("400x600")
         self.edit_window_alumno = ctk.CTkScrollableFrame(self.edit_window_alumno_frame)
         self.edit_window_alumno.pack(fill="both", expand=True)
+
+        self.edit_window_alumno_frame.transient()
+        self.edit_window_alumno_frame.grab_set()
 
         label_nombre = ctk.CTkLabel(self.edit_window_alumno, text="Nombre")
         label_nombre.pack(pady=5)
@@ -381,9 +387,12 @@ class VerAlumnosFrame(ctk.CTkFrame):
 
     def ventana_editar_inscripcion_alumno(self, inscripcion_data, selected_item):
         # Crear una nueva ventana para editar
-        self.edit_window_inscripcion = ctk.CTkToplevel(self)
+        self.edit_window_inscripcion = Toplevel(self)
         self.edit_window_inscripcion.title("Editar Inscripciones de Alumno")
         self.edit_window_inscripcion.geometry("400x300")
+
+        self.edit_window_inscripcion.transient()
+        self.edit_window_inscripcion.grab_set()
 
         # Tipo Inscripcion
         label_tipo_inscripcion = ctk.CTkLabel(self.edit_window_inscripcion, text="Tipo Inscripción:")

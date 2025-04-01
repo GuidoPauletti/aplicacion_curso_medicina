@@ -3,7 +3,7 @@ from curso_medicina.database.operations.inscripcion_operations import (get_info_
                                                                        save_tipo_inscripcion)
 
 from tkinter import messagebox
-from tkinter import ttk
+from tkinter import ttk, Toplevel
 
 import customtkinter as ctk
 
@@ -77,9 +77,12 @@ class AjustesFrame(ctk.CTkTabview):
 
     def ventana_editar_pago(self, info_inscripcion, selected_item):
         # Crear una nueva ventana para editar
-        self.edit_window_pago = ctk.CTkToplevel(self)
+        self.edit_window_pago = Toplevel(self)
         self.edit_window_pago.title("Editar Tipo de Inscripción")
         self.edit_window_pago.geometry("500x500")
+
+        self.edit_window_pago.transient()
+        self.edit_window_pago.grab_set()
 
         label_descripcion = ctk.CTkLabel(self.edit_window_pago, text="Descripción")
         label_descripcion.pack(pady=5)
@@ -129,9 +132,12 @@ class AjustesFrame(ctk.CTkTabview):
 
     def ventana_crear_tipo_inscripcion(self):
         # Crear una nueva ventana para crear tipo de inscripcion
-        self.create_window_inscripcion = ctk.CTkToplevel(self)
+        self.create_window_inscripcion = Toplevel(self)
         self.create_window_inscripcion.title("Crear tipo de inscripción")
         self.create_window_inscripcion.geometry("500x500")
+
+        self.create_window_inscripcion.transient()
+        self.create_window_inscripcion.grab_set()
 
         label_descripcion = ctk.CTkLabel(self.create_window_inscripcion, text="Descripción")
         label_descripcion.pack(pady=5)

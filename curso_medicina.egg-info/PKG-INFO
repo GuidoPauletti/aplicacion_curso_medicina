@@ -1,8 +1,6 @@
 Metadata-Version: 2.1
-Name: curso_medicina
-Version: 0.1
+Name: curso-medicina
+Version: 0.8
 Summary: Sistema de Gestión de Cursos de Medicina
 Author: Guido Pauletti
 Requires-Python: >=3.8
-Requires-Dist: customtkinter
-Requires-Dist: mysql-connector-python

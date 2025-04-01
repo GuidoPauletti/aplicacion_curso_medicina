@@ -1,7 +1,7 @@
 from curso_medicina.database.operations.pagos_operations import get_pagos_con_detalles, borrar_pago, editar_pago
 from curso_medicina.database.operations.alumno_operations import get_alumnos, get_alumnos_filtrados
 
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, Toplevel
 import threading
 
 import customtkinter as ctk
@@ -248,9 +248,12 @@ class VerPagosFrame(ctk.CTkFrame):
 
     def ventana_editar_pago(self, pago_data, selected_item):
         # Crear una nueva ventana para editar
-        self.edit_window_pago = ctk.CTkToplevel(self)
-        self.edit_window_pago.title("Editar Alumno")
+        self.edit_window_pago = Toplevel(self)
+        self.edit_window_pago.title("Editar información de pago")
         self.edit_window_pago.geometry("400x550")
+
+        self.edit_window_pago.transient()
+        self.edit_window_pago.grab_set()
 
         label_monto = ctk.CTkLabel(self.edit_window_pago, text="Monto")
         label_monto.pack(pady=5)

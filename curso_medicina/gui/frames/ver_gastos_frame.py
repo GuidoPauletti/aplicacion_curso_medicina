@@ -1,7 +1,7 @@
 from curso_medicina.database.operations.gasto_operations import get_gastos_con_detalles, borrar_gasto, editar_gasto
 
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, Toplevel
 
 import customtkinter as ctk
 
@@ -91,9 +91,12 @@ class VerGastosFrame(ctk.CTkFrame):
 
     def ventana_editar_gasto(self, gasto_data, selected_item):
         # Crear una nueva ventana para editar
-        self.edit_window_gasto = ctk.CTkToplevel(self)
+        self.edit_window_gasto = Toplevel(self)
         self.edit_window_gasto.title("Editar Gasto")
         self.edit_window_gasto.geometry("400x550")
+
+        self.edit_window_gasto.transient()
+        self.edit_window_gasto.grab_set()
 
         label_monto = ctk.CTkLabel(self.edit_window_gasto, text="Monto")
         label_monto.pack(pady=5)
