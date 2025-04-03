@@ -1,0 +1,38 @@
+name: Build Windows App
+
+on:
+  push:
+    branches:
+      - main  # Se ejecuta en cada push a la rama main
+  pull_request:
+
+jobs:
+  build:
+    runs-on: windows-latest  # Usa un runner con Windows
+
+    steps:
+      - name: 🛒 Checkout del repositorio
+        uses: actions/checkout@v4
+
+      - name: 🐍 Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'  # Ajusta según la versión que uses
+
+      - name: 📦 Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt  # Asegúrate de tener este archivo
+
+      - name: 🔨 Compilar con PyInstaller
+        run: |
+          pyinstaller --onedir --noconsole --icon=icon.ico --name=MiApp --add-data "icon.ico;." main.py
+
+      - name: 🗜️ Crear ZIP del ejecutable
+        run: Compress-Archive -Path dist/MiApp -DestinationPath MiApp-Windows.zip
+
+      - name: 📤 Subir ZIP como artefacto
+        uses: actions/upload-artifact@v4
+        with:
+          name: MiApp-Windows
+          path: MiApp-Windows.zip
