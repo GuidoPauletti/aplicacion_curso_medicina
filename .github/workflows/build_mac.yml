@@ -26,6 +26,7 @@ jobs:
 
       - name: 🔨 Compilar con PyInstaller
         run: |
+          export NUITKA_CACHE_DIR="$HOME/.cache/Nuitka"
           nuitka --onefile --macos-app-mode=gui --clang --enable-plugin=tk-inter --output-dir=build --output-file=MiApp curso_medicina/main.py
 
       - name: 🗜️ Crear ZIP del ejecutable
