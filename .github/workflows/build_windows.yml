@@ -29,7 +29,7 @@ jobs:
           pyinstaller --onefile --noconsole --icon=icon.ico --name=MiApp --add-data "icon.ico;." curso_medicina/main.py
 
       - name: 🗜️ Crear ZIP del ejecutable
-        run: Compress-Archive -Path dist/MiApp -DestinationPath MiApp-Windows.zip
+        run: Compress-Archive -Path dist -DestinationPath MiApp-Windows.zip
 
       - name: 📤 Subir ZIP como artefacto
         uses: actions/upload-artifact@v4
