@@ -26,7 +26,7 @@ jobs:
 
       - name: 🔨 Compilar con PyInstaller
         run: |
-          pyinstaller --onedir --noconsole --icon=icon.icns --name=MiApp --add-data="icon.icns:." curso_medicina/main.py
+          pyinstaller --onefile --noconsole --icon=icon.icns --name=MiApp --add-data="icon.icns:." curso_medicina/main.py
 
       - name: 🗜️ Crear ZIP del ejecutable
         run: zip -r MiApp-macOS.zip dist/MiApp
