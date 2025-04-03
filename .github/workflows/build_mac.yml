@@ -26,7 +26,7 @@ jobs:
 
       - name: 🔨 Compilar con PyInstaller
         run: |
-          nuitka --onefile --macos-app-mode=GUI --clang --enable-plugin=tk-inter --output-dir=build --output-file=MiApp curso_medicina/main.py
+          nuitka --onefile --macos-app-mode=gui --clang --enable-plugin=tk-inter --output-dir=build --output-file=MiApp curso_medicina/main.py
 
       - name: 🗜️ Crear ZIP del ejecutable
         run: zip -r MiApp-macOS.zip dist
