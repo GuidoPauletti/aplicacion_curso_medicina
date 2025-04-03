@@ -23,11 +23,9 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt  # Asegúrate de tener este archivo
-
       - name: 🔨 Compilar con PyInstaller
         run: |
-          yes | nuitka --onefile --macos-app-mode=gui --macos-create-app-bundle --clang --enable-plugin=tk-inter --output-dir=build --output-file=MiApp curso_medicina/main.py
-
+          pyinstaller --onefile --noconsole --icon=icon.icns --name=MiApp --add-data="icon.icns:." curso_medicina/main.py
       - name: 🗜️ Crear ZIP del ejecutable
         run: zip -r MiApp-macOS.zip dist
 
