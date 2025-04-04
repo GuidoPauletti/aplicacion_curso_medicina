@@ -2,6 +2,7 @@ from curso_medicina.database.operations.gasto_operations import get_gastos_con_d
 
 import tkinter as tk
 from tkinter import ttk, messagebox, Toplevel
+from datetime import datetime
 
 import customtkinter as ctk
 
@@ -104,6 +105,14 @@ class VerGastosFrame(ctk.CTkFrame):
         entry_monto.pack(pady=5)
         entry_monto.insert(0, gasto_data[1])
 
+        # Label y Entry para fecha
+        label_fecha = ctk.CTkLabel(self.edit_window_gasto, text="Fecha (AAAA/MM/DD)")
+        label_fecha.pack(pady=5)
+        fecha_entry_var = ctk.StringVar()
+        fecha_entry = ctk.CTkEntry(self.edit_window_gasto, textvariable = fecha_entry_var, placeholder_text="AAAA/MM/DD")
+        fecha_entry.pack(pady=5)
+        fecha_entry_var.set(gasto_data[3])
+
         # Label y Entry para correspondencia
         label_correspondencia = ctk.CTkLabel(self.edit_window_gasto, text="Cuenta:")
         label_correspondencia.pack(pady=5)
@@ -132,14 +141,14 @@ class VerGastosFrame(ctk.CTkFrame):
         entry_descripcion.insert("1.0",gasto_data[6])
 
         # Botón para guardar los cambios
-        btn_guardar = ctk.CTkButton(self.edit_window_gasto, text="Guardar", command=lambda: self.guardar_cambios_gasto(selected_item, entry_monto.get(), correspondencia_var.get(), metodo_var.get(), entry_descripcion.get("1.0", "end-1c"), gasto_data))
+        btn_guardar = ctk.CTkButton(self.edit_window_gasto, text="Guardar", command=lambda: self.guardar_cambios_gasto(selected_item, entry_monto.get(), correspondencia_var.get(), metodo_var.get(), entry_descripcion.get("1.0", "end-1c"), gasto_data, fecha_entry_var.get()))
         btn_guardar.pack(pady=10)
 
-    def guardar_cambios_gasto(self, selected_item, monto, correspondencia, metodo, descripcion, gasto_data):
-        editado = editar_gasto(gasto_data[0], monto, correspondencia, metodo, descripcion, self.usuario_actual.id)
+    def guardar_cambios_gasto(self, selected_item, monto, correspondencia, metodo, descripcion, gasto_data, fecha):
+        editado = editar_gasto(gasto_data[0], monto, correspondencia, metodo, descripcion, self.usuario_actual.id, fecha)
         if editado:
             # Actualizar el registro en la tabla con los nuevos datos
-            self.tabla_gasto.item(selected_item, values=(gasto_data[0], monto, gasto_data[2], gasto_data[3], correspondencia, metodo, descripcion, self.usuario_actual.nombre))
+            self.tabla_gasto.item(selected_item, values=(gasto_data[0], monto, gasto_data[2], fecha, correspondencia, metodo, descripcion, self.usuario_actual.nombre))
             messagebox.showinfo(
                 title="Exito",
                 message="Gasto editado correctamente"

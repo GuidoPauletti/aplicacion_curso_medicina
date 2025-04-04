@@ -2,15 +2,15 @@ from curso_medicina.database.connection import get_connection
 
 from tkinter import messagebox
 
-def insert_gasto(monto, divisa, correspondencia, descripcion, id_usuario, metodo):
+def insert_gasto(monto, divisa, correspondencia, descripcion, id_usuario, metodo, fecha):
     try:
         connection = get_connection()
         cursor = connection.cursor()
         sql_insert_query = """
         INSERT INTO gasto (monto, divisa, fecha, correspondencia, descripcion, id_usuario, metodo) 
-        VALUES (%s, %s, CURDATE(), %s, %s, %s, %s)
+        VALUES (%s, %s, %s, %s, %s, %s, %s)
         """
-        cursor.execute(sql_insert_query, (monto, divisa, correspondencia, descripcion, id_usuario, metodo))
+        cursor.execute(sql_insert_query, (monto, divisa, fecha, correspondencia, descripcion, id_usuario, metodo))
         connection.commit()
         return cursor.lastrowid
     except Exception as e:
@@ -76,16 +76,16 @@ def borrar_gasto(id):
         cursor.close()
         connection.close()
 
-def editar_gasto(id, monto, correspondencia, metodo, descripcion, usuario):
+def editar_gasto(id, monto, correspondencia, metodo, descripcion, usuario, fecha):
     try:
         connection = get_connection()
         cursor = connection.cursor()
         sql_query = """
             UPDATE gasto
-            SET monto = %s, correspondencia = %s, metodo = %s, descripcion = %s, id_usuario = %s
+            SET monto = %s, correspondencia = %s, metodo = %s, descripcion = %s, id_usuario = %s, fecha = %s
             WHERE id = %s
         """
-        cursor.execute(sql_query, (monto, correspondencia, metodo, descripcion, usuario, id))
+        cursor.execute(sql_query, (monto, correspondencia, metodo, descripcion, usuario, fecha, id))
         connection.commit()
         return "Registro de gasto editado correctamente"
     except Exception as e:

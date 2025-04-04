@@ -2,6 +2,7 @@ from curso_medicina.database.operations.gasto_operations import insert_gasto
 from curso_medicina.gui.utils.validators import validate_gasto_input
 
 from tkinter import messagebox
+from datetime import datetime
 
 import customtkinter as ctk
 
@@ -30,6 +31,14 @@ class AltaGastoFrame(ctk.CTkScrollableFrame):
         self.divisa_var.set("Peso")
         self.entry_divisa = ctk.CTkOptionMenu(self, variable=self.divisa_var,values=['Peso','Real','Dolar'],width=300)
         self.entry_divisa.pack(pady=5)
+
+        # Label y Entry para fecha
+        self.label_fecha = ctk.CTkLabel(self, text="Fecha (AAAA/MM/DD)")
+        self.label_fecha.pack(pady=5)
+        self.fecha_entry_var = ctk.StringVar()
+        self.fecha_entry = ctk.CTkEntry(self, textvariable = self.fecha_entry_var, placeholder_text="AAAA/MM/DD")
+        self.fecha_entry.pack(pady=5)
+        self.fecha_entry_var.set((datetime.now()).strftime("%Y-%m-%d"))
 
         # Label y Entry para metodo de pago
         self.label_metodo = ctk.CTkLabel(self, text="Método de Gasto")
@@ -72,7 +81,8 @@ class AltaGastoFrame(ctk.CTkScrollableFrame):
             'correspondencia': self.correspondencia_var.get(),
             'descripcion': self.entry_descripcion.get("1.0", "end-1c"),
             'id_usuario': self.usuario_actual.id,
-            'metodo': self.metodo_var.get()
+            'metodo': self.metodo_var.get(),
+            'fecha': self.fecha_entry_var.get()
         }
         
         if validate_gasto_input(data):
