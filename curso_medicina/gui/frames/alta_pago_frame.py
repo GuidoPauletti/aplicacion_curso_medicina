@@ -83,7 +83,6 @@ class AltaPagoFrame(ctk.CTkScrollableFrame):
         self.metodo_var = ctk.StringVar()
         self.entry_metodo = ctk.CTkOptionMenu(self,
                                               variable=self.metodo_var,values=['Efectivo','Transferencia'],
-                                              command=self.on_metodo_seleccionado,
                                               width=300)
         self.entry_metodo.pack(pady=5)
         
@@ -145,8 +144,6 @@ class AltaPagoFrame(ctk.CTkScrollableFrame):
         if alumno_seleccionado and materia and monto and divisa and cuota:
             if metodo == "Transferencia" and correspondencia == "":
                 messagebox.showerror("Advertencia", "Debe elegir la cuenta para pagos realizados por transferencia")
-            elif metodo == "Efectivo" and correspondencia != "":
-                messagebox.showerror("Advertencia", "Para pagos en efectivo debe seleccionar 'No aplica' en el campo de cuenta")
             else:
                 try:
                     alumno_id = int(alumno_seleccionado.split(" - ")[0])
@@ -229,13 +226,6 @@ class AltaPagoFrame(ctk.CTkScrollableFrame):
         id_inscripcion = info_pago[0][1]
         if monto_pagado >= deuda:
             sanear_deuda(id_inscripcion, cuota)
-
-    def on_metodo_seleccionado(self, event):
-        if self.metodo_var.get() == "Transferencia":
-            self.entry_correspondencia.configure(state="normal")
-        else:
-            self.correspondencia_var.set("")
-            self.entry_correspondencia.configure(state="disabled")
 
     def display_info_inscripcion(self, id_inscripcion):
         info_inscripcion = get_info_inscripcion(id_inscripcion)
