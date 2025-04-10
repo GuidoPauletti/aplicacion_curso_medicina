@@ -42,7 +42,8 @@ class PDFGenerator:
         total_salidas_dolares = 0
 
         # resumen por metodo de pago - gasto
-        saldo_efectivo = 0
+        entrada_efectivo = 0
+        salida_efectivo = 0
         saldo_transferencia = 0
         saldo_debito = 0
         saldo_credito = 0
@@ -70,7 +71,7 @@ class PDFGenerator:
                     total_entradas += float(monto)
                     # resumen metodo de pago
                     if row[3].endswith('Efectivo)'):
-                        saldo_efectivo += monto
+                        entrada_efectivo += monto
                     elif row[3].endswith('Transferencia)'):
                         saldo_transferencia += monto
                 elif row[3].startswith("Real"):
@@ -92,7 +93,7 @@ class PDFGenerator:
                     total_salidas += float(monto)
                     # resumen metodo de pago
                     if row[3].endswith('Efectivo)'):
-                        saldo_efectivo -= monto
+                        salida_efectivo -= monto
                     elif row[3].endswith('Transferencia)'):
                         saldo_transferencia -= monto
                     elif row[3].endswith('Crédito)'):
@@ -124,7 +125,8 @@ class PDFGenerator:
             'balance': total_entradas - total_salidas,
             'balance_reales': total_entradas_reales - total_salidas_reales,
             'balance_dolares': total_entradas_dolares - total_salidas_dolares,
-            'balance_efectivo': saldo_efectivo,
+            'entrada_efectivo': entrada_efectivo,
+            'salida_efectivo': salida_efectivo,
             'balance_transferencia': saldo_transferencia,
             'balance_debito': saldo_debito,
             'balance_credito': saldo_credito,
@@ -339,7 +341,7 @@ class PDFGenerator:
         elements.append(Spacer(1, 5))
 
         elements.append(Paragraph(
-            f"Saldo Efectivo: ARS {self.format_number(data['balance_efectivo'])}",
+            f"Entradas Efectivo: ARS {self.format_number(data['entrada_efectivo'])}",
             ParagraphStyle(
             'SaldoStyle',
             parent=self.styles['Normal'],
@@ -348,6 +350,29 @@ class PDFGenerator:
             alignment=0  # 0 = Izquierda
         )
         ))
+
+        elements.append(Paragraph(
+            f"Salidas Efectivo: ARS {self.format_number(data['salida_efectivo'])}",
+            ParagraphStyle(
+            'SaldoStyle',
+            parent=self.styles['Normal'],
+            fontSize=10,
+            spaceAfter=5,
+            alignment=0  # 0 = Izquierda
+        )
+        ))
+
+        elements.append(Paragraph(
+            f"Saldo Efectivo Total: ARS {self.format_number(data['entrada_efectivo'] + data['salida_efectivo'])}",
+            ParagraphStyle(
+            'SaldoStyle',
+            parent=self.styles['Normal'],
+            fontSize=10,
+            spaceAfter=5,
+            alignment=0  # 0 = Izquierda
+        )
+        ))
+        elements.append(Spacer(1, 5))
 
         elements.append(Paragraph(
             f"Saldo Transferencia: ARS {self.format_number(data['balance_transferencia'])}",
@@ -414,7 +439,6 @@ class PDFGenerator:
             alignment=0  # 0 = Izquierda
         )
         ))
-        elements.append(Spacer(1, 5))
 
         elements.append(Paragraph(
             f"Entradas Duanne: ARS {self.format_number(data['entrada_duanne'])}",
