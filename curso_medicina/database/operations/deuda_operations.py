@@ -46,3 +46,26 @@ def sanear_deuda(id_inscripcion, cuota):
     finally:
         cursor.close()
         connection.close()
+
+def perdonar_deuda_inscripcion(id_inscripcion):
+    try:
+        connection = get_connection()
+        cursor = connection.cursor()
+        sql_query = f"""
+            UPDATE deuda
+            SET estado = 'saneada'
+            WHERE id_inscripcion = {id_inscripcion}
+        """
+        cursor.execute(sql_query)
+        connection.commit()
+        return "Exito"
+    except Exception as e:
+        messagebox.showerror(
+            title="Error",
+            message=f"Error al sanear la cuenta: {e}"
+        )
+        connection.rollback()
+        return
+    finally:
+        cursor.close()
+        connection.close()

@@ -1,4 +1,5 @@
 from curso_medicina.database.operations.alumno_operations import get_alumnos, editar_alumno, editar_dia_de_pago_alumno, get_inscripciones_alumno, get_alumnos_por_materia, get_unico_alumno, get_alumnos_filtrados
+from curso_medicina.database.operations.deuda_operations import perdonar_deuda_inscripcion
 from curso_medicina.database.operations.inscripcion_operations import editar_inscripcion, get_descripciones
 
 import tkinter as tk
@@ -230,6 +231,7 @@ class VerAlumnosFrame(ctk.CTkFrame):
             self.tabla_inscripciones_alumno.bind("<<TreeviewSelect>>", self.on_tree_select_incripcion_alumno) # accion al seleccionar un registro
 
             self.tabla_inscripciones_alumno.pack(fill="both", expand=True)
+            self.tabla_inscripciones_alumno.tag_configure('deudor', background='red')
 
             # Obtener datos de inscripciones del alumno
             self.cargar_inscripcion_alumno(alumno_id)
@@ -241,6 +243,10 @@ class VerAlumnosFrame(ctk.CTkFrame):
             # Crear botón "Editar inscripcion"
             self.btn_editar_inscripcion_alumno = ctk.CTkButton(self.buttons_frame_inscripciones_alumno, text="Editar Inscripción", command= self.editar_inscripcion_alumno ,state="disabled")
             self.btn_editar_inscripcion_alumno.grid(row=0, column=1, padx=5)
+
+            # Crear botón "Editar inscripcion"
+            self.btn_perdonar_deuda_alumno = ctk.CTkButton(self.buttons_frame_inscripciones_alumno, text="Perdonar deuda", command= lambda: self.perdonar_deuda_alumno(datos_alumno[1], datos_alumno[2]) ,state="disabled")
+            self.btn_perdonar_deuda_alumno.grid(row=0, column=2, padx=5)
 
     def filtrar_por_alumno(self, alumno):
         # Limpiar tabla existente
@@ -373,10 +379,14 @@ class VerAlumnosFrame(ctk.CTkFrame):
 
         for inscripcion in inscripciones_alumno:
             deuda = inscripcion[4] - inscripcion[5]
-            self.tabla_inscripciones_alumno.insert("", tk.END, values=(inscripcion[0],inscripcion[1],inscripcion[2],inscripcion[3],deuda,inscripcion[6]))
+            if inscripcion[7] == 'No':
+                self.tabla_inscripciones_alumno.insert("", tk.END, values=(inscripcion[0],inscripcion[1],inscripcion[2],inscripcion[3],deuda,inscripcion[6]))
+            elif inscripcion[7] == 'Si':
+                self.tabla_inscripciones_alumno.insert("", tk.END, values=(inscripcion[0],inscripcion[1],inscripcion[2],inscripcion[3],deuda,inscripcion[6]), tags="deudor")
 
     def on_tree_select_incripcion_alumno(self, event):
         self.btn_editar_inscripcion_alumno.configure(state="normal")
+        self.btn_perdonar_deuda_alumno.configure(state="normal")
 
     def editar_inscripcion_alumno(self):
         # Obtener el item seleccionado
@@ -384,6 +394,33 @@ class VerAlumnosFrame(ctk.CTkFrame):
         if selected_item:
             inscripcion_alumno_data = self.tabla_inscripciones_alumno.item(selected_item, "values")
             self.ventana_editar_inscripcion_alumno(inscripcion_alumno_data, selected_item)
+
+    def perdonar_deuda_alumno(self, nombre, apellido):
+        # Obtener el item seleccionado
+        selected_item = self.tabla_inscripciones_alumno.selection()[0]
+        if selected_item:
+            inscripcion_alumno_data = self.tabla_inscripciones_alumno.item(selected_item, "values")
+            inscripcion_id = inscripcion_alumno_data[0]
+            self.ventana_perdonar_deuda_alumno(nombre, apellido, inscripcion_id)
+    
+    def ventana_perdonar_deuda_alumno(self, nombre, apellido, id_inscripcion):
+        nombre_alumno = nombre + ' ' + apellido  # Ajustá el índice según tu estructura de datos
+
+        respuesta = messagebox.askyesno(
+            "Confirmar acción",
+            f"¿Estás seguro de que querés perdonar la deuda del alumno {nombre_alumno}?"
+        )
+
+        if respuesta:
+            # Lógica para perdonar la deuda
+            exito = perdonar_deuda_inscripcion(id_inscripcion)
+            if exito:
+                messagebox.showinfo("Éxito", f"La deuda del alumno {nombre_alumno} ha sido perdonada.")
+            else:
+                messagebox.showerror("Error", f"No se pudo sanear la deuda de {nombre_alumno}")
+        else:
+            messagebox.showinfo("Cancelado", "La acción fue cancelada.")
+        
 
     def ventana_editar_inscripcion_alumno(self, inscripcion_data, selected_item):
         # Crear una nueva ventana para editar

@@ -1,3 +1,4 @@
+import os
 from curso_medicina.database.operations.pagos_operations import get_pagos_con_detalles, borrar_pago, editar_pago
 from curso_medicina.database.operations.alumno_operations import get_alumnos, get_alumnos_filtrados
 
@@ -5,6 +6,8 @@ from tkinter import ttk, messagebox, Toplevel
 import threading
 
 import customtkinter as ctk
+
+from curso_medicina.gui.utils.receipt_generator import generate_payment_receipt
 
 class VerPagosFrame(ctk.CTkFrame):
     def __init__(self, parent, usuario_actual):
@@ -122,6 +125,14 @@ class VerPagosFrame(ctk.CTkFrame):
             state="disabled"
         )
         self.btn_editar.grid(row=0, column=1, padx=5)
+
+        self.btn_generar_recibo = ctk.CTkButton(
+            self.buttons_frame, 
+            text="Generar Recibo", 
+            command=self.generate_receipt,
+            state="disabled"
+        )
+        self.btn_generar_recibo.grid(row=0, column=2, padx=5)
 
         # Cargar datos iniciales
         self.cargar_pagos()
@@ -313,4 +324,37 @@ class VerPagosFrame(ctk.CTkFrame):
         selected_items = self.tabla.selection()
         self.btn_borrar.configure(state="normal" if selected_items else "disabled")
         self.btn_editar.configure(state="normal" if selected_items else "disabled")
+        self.btn_generar_recibo.configure(state="normal" if selected_items else "disabled")
 
+    def generate_receipt(self):
+
+        # "ID", "Nombre", "Apellido", "Materia", "Monto (AR$)", "Metodo", "Cuenta", "Cuota", "Fecha", "Responsable", "Observaciones")
+        selected_item = self.tabla.selection()[0]
+        payment_info = self.tabla.item(selected_item, "values")
+        pago_id = payment_info[0]
+        alumno_seleccionado = f" - {payment_info[1]} {payment_info[2]}"
+        materia = payment_info[3]
+        monto = payment_info[4]
+        metodo = payment_info[5]
+        cuota = payment_info[7]
+        correspondencia = payment_info[6]
+
+        try:  
+            # Generar el reporte
+            output_path = generate_payment_receipt(pago_id, alumno_seleccionado, materia, monto, 'Peso', metodo, cuota, correspondencia)
+
+            # Verificar si el usuario seleccionó una ubicación
+            if not output_path:
+                return None  # El usuario canceló la selección
+            
+            # Mostrar mensaje de éxito
+            messagebox.showinfo(
+                "Éxito", 
+                f"Recibo generado exitosamente en:\n{output_path}"
+            )
+            
+            # Abrir el archivo con el visor de PDF predeterminado
+            os.startfile(output_path) if os.name == 'nt' else os.system(f'xdg-open "{output_path}"')
+            
+        except Exception as e:
+            messagebox.showerror("Error", f"Error al generar el reporte: {str(e)}")
