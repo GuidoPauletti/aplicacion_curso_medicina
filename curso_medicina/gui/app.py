@@ -21,7 +21,7 @@ class Aplicacion:
         self.root = root
         self.setup_main_window()
         self.show_login()
-        self.update_debts_on_startup()
+        # self.update_debts_on_startup()
         
     def setup_main_window(self):
         self.root.title("Sistema de Gestión de Cursos de Medicina")
@@ -86,4 +86,5 @@ class Aplicacion:
             frame.pack(fill="both", expand=True)
 
     def update_debts_on_startup(self):
-        call_update_debts()
+        #call_update_debts()
+        return
