@@ -8,7 +8,7 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, Tabl
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 
-def generate_payment_receipt(pago_id, alumno_seleccionado, materia, monto, divisa, metodo, cuota, correspondencia):
+def generate_payment_receipt(pago_id, alumno_seleccionado, materia, monto, divisa, metodo, cuota, correspondencia, observaciones):
     """
     Genera un recibo de pago en PDF y permite al usuario elegir dónde guardarlo.
     
@@ -97,6 +97,18 @@ def generate_payment_receipt(pago_id, alumno_seleccionado, materia, monto, divis
         ]))
         
         elementos.append(tabla)
+        elementos.append(Spacer(1, 40))
+
+        elementos.append(Paragraph(
+            f"Observaciones:\n{observaciones}",
+            ParagraphStyle(
+            'ObservacionesStyle',
+            fontSize=10,
+            spaceAfter=5,
+            alignment=0  # 0 = Izquierda
+        )
+        ))
+
         elementos.append(Spacer(1, 40))
         
         # Pie del recibo

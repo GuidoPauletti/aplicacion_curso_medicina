@@ -338,10 +338,11 @@ class VerPagosFrame(ctk.CTkFrame):
         metodo = payment_info[5]
         cuota = payment_info[7]
         correspondencia = payment_info[6]
+        observaciones = payment_info[10]
 
         try:  
             # Generar el reporte
-            output_path = generate_payment_receipt(pago_id, alumno_seleccionado, materia, monto, 'Peso', metodo, cuota, correspondencia)
+            output_path = generate_payment_receipt(pago_id, alumno_seleccionado, materia, monto, 'Peso', metodo, cuota, correspondencia, observaciones)
 
             # Verificar si el usuario seleccionó una ubicación
             if not output_path:
