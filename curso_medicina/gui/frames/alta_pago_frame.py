@@ -172,7 +172,7 @@ class AltaPagoFrame(ctk.CTkScrollableFrame):
                         if len(cuotas_restantes) <= 1:
                             self.chequear_fin_inscripcion(pago_id, cuota)
                         self.clear_fields()
-                        self.generate_receipt(pago_id, alumno_seleccionado, materia, monto, divisa, metodo, cuota, correspondencia)
+                        self.generate_receipt(pago_id, alumno_seleccionado, materia, monto, divisa, metodo, cuota, correspondencia, self.entry_descripcion.get("1.0", "end-1c"))
                     else:
                         messagebox.showerror("Error", "No se pudo guardar el pago")
                 except ValueError:
@@ -231,11 +231,11 @@ class AltaPagoFrame(ctk.CTkScrollableFrame):
         info_inscripcion = get_info_inscripcion(id_inscripcion)
         self.label_info_inscripcion.configure(text=f"Inscripción {info_inscripcion[3]}: {info_inscripcion[2]} cuotas de {info_inscripcion[0]} o {info_inscripcion[1]} con recargo")
 
-    def generate_receipt(self, pago_id, alumno_seleccionado, materia, monto, divisa, metodo, cuota, correspondencia):
+    def generate_receipt(self, pago_id, alumno_seleccionado, materia, monto, divisa, metodo, cuota, correspondencia, observacion):
         try:
             
             # Generar el reporte
-            output_path = generate_payment_receipt(pago_id, alumno_seleccionado, materia, monto, divisa, metodo, cuota, correspondencia)
+            output_path = generate_payment_receipt(pago_id, alumno_seleccionado, materia, monto, divisa, metodo, cuota, correspondencia, observacion)
 
             # Verificar si el usuario seleccionó una ubicación
             if not output_path:
@@ -244,14 +244,14 @@ class AltaPagoFrame(ctk.CTkScrollableFrame):
             # Mostrar mensaje de éxito
             messagebox.showinfo(
                 "Éxito", 
-                f"Reporte generado exitosamente en:\n{output_path}"
+                f"Recibo generado exitosamente en:\n{output_path}"
             )
             
             # Abrir el archivo con el visor de PDF predeterminado
             os.startfile(output_path) if os.name == 'nt' else os.system(f'xdg-open "{output_path}"')
             
         except Exception as e:
-            messagebox.showerror("Error", f"Error al generar el reporte: {str(e)}")
+            messagebox.showerror("Error", f"Error al generar el recibo: {str(e)}")
 
     @staticmethod
     def ask_exchange_rate(divisa):
