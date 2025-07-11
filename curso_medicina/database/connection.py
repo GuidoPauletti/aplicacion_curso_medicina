@@ -21,7 +21,7 @@ def init_connection_pool():
                     pool_size=5,
                     host="149.50.133.127",
                     user="miscellium",
-                    password="M&sc3LLium$",
+                    password="g7u5i3d4o4",
                     database="curso_medicina",
                     port=3306,
                     connection_timeout=10
