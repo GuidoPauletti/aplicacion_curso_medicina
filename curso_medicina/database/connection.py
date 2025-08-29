@@ -19,11 +19,11 @@ def init_connection_pool():
                 connection_pool = mysql.connector.pooling.MySQLConnectionPool(
                     pool_name="enyn_pool",
                     pool_size=5,
-                    host="149.50.133.127",
-                    user="miscellium",
-                    password="g7u5i3d4o4",
-                    database="curso_medicina",
-                    port=3306,
+                    host="",
+                    user="",
+                    password="",
+                    database="",
+                    port=,
                     connection_timeout=10
                 )
                 print("Pool de conexiones inicializado correctamente")
